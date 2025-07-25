@@ -34,3 +34,10 @@ export type PriceData = Record<string, {
   usd: number; 
   usd_24h_change?: number; 
 }>;
+
+// Represents data for the top performing asset
+export interface PerformerData {
+  name: string;
+  symbol: string;
+  change: number;
+}

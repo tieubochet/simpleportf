@@ -64,3 +64,14 @@ export const ReceiptIcon: React.FC<IconProps> = (props) => (
         <path d="M12 14v-4" />
     </svg>
 );
+
+export const TrophyIcon: React.FC<IconProps> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
+        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+        <path d="M4 22h16"/>
+        <path d="M10 14.66V22"/>
+        <path d="M14 14.66V22"/>
+        <path d="M8 2h8v12.66a1 1 0 0 1-.33.74l-2.67 2.67a1 1 0 0 1-1.41 0l-2.67-2.67A1 1 0 0 1 8 12.66V2z"/>
+    </svg>
+);

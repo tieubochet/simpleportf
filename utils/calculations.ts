@@ -1,5 +1,5 @@
 
-import { Wallet, PriceData, Transaction, PortfolioAsset } from '../types';
+import { Wallet, PriceData, Transaction, PortfolioAsset, PerformerData } from '../types';
 
 /**
  * Calculates key metrics for a single asset based on its transaction history and current price.
@@ -181,4 +181,37 @@ export const getAssetIds = (wallets: Wallet[]): string[] => {
     const ids = new Set<string>();
     wallets.forEach(w => w.assets.forEach(a => ids.add(a.id)));
     return Array.from(ids);
+};
+
+/**
+ * Finds the asset with the best performance in the last 24 hours.
+ * @param wallets An array of wallets.
+ * @param prices An object with current prices and 24h change data.
+ * @returns The top performing asset's data, or null if none have positive performance.
+ */
+export const findTopPerformer = (wallets: Wallet[], prices: PriceData): PerformerData | null => {
+  let topPerformer: PerformerData | null = null;
+  let maxChange = 0;
+
+  wallets.forEach(wallet => {
+    wallet.assets.forEach(asset => {
+      const priceInfo = prices[asset.id];
+      const { currentQuantity } = getAssetMetrics(asset.transactions, priceInfo?.usd ?? 0);
+
+      // Only consider assets currently held and with valid price change data
+      if (currentQuantity > 0 && priceInfo && typeof priceInfo.usd_24h_change === 'number') {
+        const change = priceInfo.usd_24h_change;
+        if (change > maxChange) {
+          maxChange = change;
+          topPerformer = {
+            name: asset.name,
+            symbol: asset.symbol,
+            change: change,
+          };
+        }
+      }
+    });
+  });
+
+  return topPerformer;
 };
