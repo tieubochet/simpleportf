@@ -118,6 +118,61 @@ export const calculatePortfolio24hChange = (wallets: Wallet[], prices: PriceData
 };
 
 /**
+ * Calculates the total profit/loss for the entire portfolio.
+ * @param wallets - An array of wallets.
+ * @param prices - An object mapping asset IDs to their current prices.
+ * @returns An object with the total P/L value and percentage.
+ */
+export const calculateTotalPL = (wallets: Wallet[], prices: PriceData): { plValue: number; plPercentage: number } => {
+  let totalMarketValue = 0;
+  let totalCostOfPurchases = 0;
+  let totalValueFromSales = 0;
+
+  wallets.forEach(wallet => {
+    wallet.assets.forEach(asset => {
+      const currentPrice = prices[asset.id]?.usd ?? 0;
+      
+      let currentQuantity = 0;
+      
+      asset.transactions.forEach(tx => {
+        switch (tx.type) {
+          case 'buy':
+            currentQuantity += tx.quantity;
+            totalCostOfPurchases += tx.quantity * tx.pricePerUnit;
+            break;
+          case 'sell':
+            currentQuantity -= tx.quantity;
+            totalValueFromSales += tx.quantity * tx.pricePerUnit;
+            break;
+          case 'transfer_in':
+            currentQuantity += tx.quantity;
+            break;
+          case 'transfer_out':
+            currentQuantity -= tx.quantity;
+            break;
+        }
+      });
+
+      if (currentQuantity > 0) {
+        totalMarketValue += currentQuantity * currentPrice;
+      }
+    });
+  });
+
+  if (totalCostOfPurchases === 0) {
+    // If nothing was ever bought, P/L is 0. Avoid division by zero.
+    // This handles portfolios that only have transferred-in assets.
+    return { plValue: 0, plPercentage: 0 };
+  }
+
+  const plValue = totalMarketValue + totalValueFromSales - totalCostOfPurchases;
+  const plPercentage = (plValue / totalCostOfPurchases) * 100;
+
+  return { plValue, plPercentage };
+};
+
+
+/**
  * Extracts a flat, unique list of all asset IDs from all wallets.
  * @param wallets - An array of wallets.
  * @returns A string array of unique asset IDs.
