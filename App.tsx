@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { PortfolioAsset, PriceData, Wallet, Transaction } from './types';
 import { usePortfolio } from './hooks/usePortfolio';
 import { fetchPrices } from './services/coingecko';
-import { calculateTotalValue, getAssetIds, getAssetMetrics } from './utils/calculations';
+import { calculateTotalValue, getAssetIds, getAssetMetrics, calculatePortfolio24hChange } from './utils/calculations';
 
 import PortfolioHeader from './components/PortfolioHeader';
 import PortfolioSummary from './components/PortfolioSummary';
@@ -37,6 +37,10 @@ export default function App() {
 
   const totalValue = useMemo(() => {
     return calculateTotalValue(wallets, prices);
+  }, [wallets, prices]);
+  
+  const portfolio24hChange = useMemo(() => {
+    return calculatePortfolio24hChange(wallets, prices);
   }, [wallets, prices]);
 
   const updatePrices = useCallback(async () => {
@@ -102,7 +106,11 @@ export default function App() {
           onExport={exportWallets}
         />
 
-        <PortfolioSummary totalValue={totalValue} isLoading={isLoading && wallets.length > 0} />
+        <PortfolioSummary 
+          totalValue={totalValue} 
+          changeData={portfolio24hChange}
+          isLoading={isLoading && wallets.length > 0} 
+        />
 
         {error && <div className="text-center text-red-400 bg-red-900/50 p-3 rounded-lg my-4">{error}</div>}
 

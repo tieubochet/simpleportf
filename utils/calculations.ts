@@ -71,6 +71,53 @@ export const calculateTotalValue = (wallets: Wallet[], prices: PriceData): numbe
 };
 
 /**
+ * Calculates the portfolio's change in value over the last 24 hours.
+ * @param wallets An array of wallets.
+ * @param prices An object with current prices and 24h change data.
+ * @returns An object with the change in value and percentage.
+ */
+export const calculatePortfolio24hChange = (wallets: Wallet[], prices: PriceData): { changeValue: number; changePercentage: number } => {
+  let totalValueNow = 0;
+  let totalValue24hAgo = 0;
+
+  wallets.forEach(wallet => {
+    wallet.assets.forEach(asset => {
+      const priceInfo = prices[asset.id];
+      if (!priceInfo) return; // Skip if no price data
+
+      const { usd: currentPrice, usd_24h_change: changePercent } = priceInfo;
+      const { currentQuantity } = getAssetMetrics(asset.transactions, currentPrice);
+
+      if (currentQuantity > 0) {
+        const marketValueNow = currentQuantity * currentPrice;
+        totalValueNow += marketValueNow;
+        
+        // Only calculate 24h ago value if change data is available
+        if (typeof changePercent === 'number') {
+          // Formula: price_24h_ago = currentPrice / (1 + (changePercent / 100))
+          const price24hAgo = currentPrice / (1 + (changePercent / 100));
+          const marketValue24hAgo = currentQuantity * price24hAgo;
+          totalValue24hAgo += marketValue24hAgo;
+        } else {
+          // If no 24h change data, assume its value 24h ago was the same as now.
+          // This prevents new assets from skewing the percentage change downwards.
+          totalValue24hAgo += marketValueNow;
+        }
+      }
+    });
+  });
+
+  if (totalValue24hAgo === 0) {
+    return { changeValue: 0, changePercentage: 0 };
+  }
+
+  const changeValue = totalValueNow - totalValue24hAgo;
+  const changePercentage = (changeValue / totalValue24hAgo) * 100;
+  
+  return { changeValue, changePercentage };
+};
+
+/**
  * Extracts a flat, unique list of all asset IDs from all wallets.
  * @param wallets - An array of wallets.
  * @returns A string array of unique asset IDs.

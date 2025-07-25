@@ -26,7 +26,7 @@ export async function fetchPrices(coinIds: string[]): Promise<PriceData> {
   if (coinIds.length === 0) return {};
   try {
     const ids = coinIds.join(',');
-    const response = await fetch(`${API_BASE_URL}/simple/price?ids=${ids}&vs_currencies=usd`);
+    const response = await fetch(`${API_BASE_URL}/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`);
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }

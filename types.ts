@@ -30,4 +30,7 @@ export interface Coin {
 }
 
 // A dictionary to store prices, mapping a coin's ID to its price data
-export type PriceData = Record<string, { usd: number }>;
+export type PriceData = Record<string, { 
+  usd: number; 
+  usd_24h_change?: number; 
+}>;
