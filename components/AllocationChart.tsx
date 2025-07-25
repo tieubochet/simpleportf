@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Wallet, PriceData } from '../types';
+import { Wallet, PriceData, PortfolioAsset } from '../types';
+import { getAssetMetrics } from '../utils/calculations';
 
 interface AllocationChartProps {
   wallets: Wallet[];
@@ -25,32 +26,48 @@ const CustomTooltip = ({ active, payload }: any) => {
 
 const AllocationChart: React.FC<AllocationChartProps> = ({ wallets, prices }) => {
   const chartData = useMemo(() => {
-    // First, flatten and aggregate all assets from all wallets
-    const allAssets = new Map<string, { id: string; name: string; symbol: string; amount: number }>();
+    const allAssets = new Map<string, { name: string; symbol: string; transactions: any[] }>();
+    
+    // Aggregate transactions for each unique asset across all wallets
     wallets.forEach(wallet => {
         wallet.assets.forEach(asset => {
             const existing = allAssets.get(asset.id);
             if (existing) {
-                allAssets.set(asset.id, { ...existing, amount: existing.amount + asset.amount });
+                existing.transactions.push(...asset.transactions);
             } else {
-                allAssets.set(asset.id, { id: asset.id, name: asset.name, symbol: asset.symbol, amount: asset.amount });
+                allAssets.set(asset.id, { 
+                    name: asset.name, 
+                    symbol: asset.symbol, 
+                    transactions: [...asset.transactions] 
+                });
             }
         });
     });
-    
-    const aggregatedAssets = Array.from(allAssets.values());
 
-    const totalValue = aggregatedAssets.reduce((acc, asset) => acc + asset.amount * (prices[asset.id]?.usd ?? 0), 0);
-    if (totalValue === 0) return [];
+    const aggregatedAssets = Array.from(allAssets.entries()).map(([id, data]) => ({
+      id,
+      ...data
+    }));
     
-    return aggregatedAssets
+    const assetValues = aggregatedAssets.map(asset => {
+        const { marketValue } = getAssetMetrics(asset.transactions, prices[asset.id]?.usd ?? 0);
+        return {
+            name: asset.symbol.toUpperCase(),
+            value: marketValue
+        };
+    });
+
+    const totalValue = assetValues.reduce((acc, asset) => acc + asset.value, 0);
+    if (totalValue === 0) return [];
+
+    return assetValues
       .map(asset => ({
-        name: asset.symbol.toUpperCase(),
-        value: asset.amount * (prices[asset.id]?.usd ?? 0),
-        percent: (asset.amount * (prices[asset.id]?.usd ?? 0) / totalValue) * 100,
+        ...asset,
+        percent: (asset.value / totalValue) * 100,
       }))
       .filter(item => item.value > 0)
       .sort((a, b) => b.value - a.value);
+      
   }, [wallets, prices]);
 
   if (chartData.length === 0) {

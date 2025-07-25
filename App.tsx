@@ -1,43 +1,42 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { PortfolioAsset, PriceData, Wallet } from './types';
+import { PortfolioAsset, PriceData, Wallet, Transaction } from './types';
 import { usePortfolio } from './hooks/usePortfolio';
 import { fetchPrices } from './services/coingecko';
+import { calculateTotalValue, getAssetIds, getAssetMetrics } from './utils/calculations';
 
 import PortfolioHeader from './components/PortfolioHeader';
 import PortfolioSummary from './components/PortfolioSummary';
 import AllocationChart from './components/AllocationChart';
 import AddAssetModal from './components/AddAssetModal';
 import AddWalletModal from './components/AddWalletModal';
+import AddTransactionModal from './components/AddTransactionModal';
 import WalletCard from './components/WalletCard';
 import { WalletIcon } from './components/icons';
 
+type AssetForTransaction = {
+  walletId: string;
+  asset: PortfolioAsset;
+  currentQuantity: number;
+}
+
 export default function App() {
-  const { wallets, addWallet, removeWallet, addAssetToWallet, removeAssetFromWallet, importWallets, exportWallets } = usePortfolio();
+  const { wallets, addWallet, removeWallet, addAssetToWallet, removeAssetFromWallet, addTransactionToAsset, importWallets, exportWallets } = usePortfolio();
   
   const [prices, setPrices] = useState<PriceData>({});
   
   // Modal states
   const [addingAssetToWalletId, setAddingAssetToWalletId] = useState<string | null>(null);
   const [isAddWalletModalOpen, setIsAddWalletModalOpen] = useState(false);
+  const [assetForTransaction, setAssetForTransaction] = useState<AssetForTransaction | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Get a flat list of all unique asset IDs from all wallets
-  const allAssetIds = useMemo(() => {
-    const ids = new Set<string>();
-    wallets.forEach(w => w.assets.forEach(a => ids.add(a.id)));
-    return Array.from(ids);
-  }, [wallets]);
+  const allAssetIds = useMemo(() => getAssetIds(wallets), [wallets]);
 
   const totalValue = useMemo(() => {
-    return wallets.reduce((total, wallet) => {
-      return total + wallet.assets.reduce((walletTotal, asset) => {
-        const price = prices[asset.id]?.usd ?? 0;
-        return walletTotal + asset.amount * price;
-      }, 0);
-    }, 0);
+    return calculateTotalValue(wallets, prices);
   }, [wallets, prices]);
 
   const updatePrices = useCallback(async () => {
@@ -47,7 +46,7 @@ export default function App() {
       return;
     }
     setError(null);
-    !isLoading && setIsLoading(true);
+    if (!isLoading) setIsLoading(true);
     try {
       const fetchedPrices = await fetchPrices(allAssetIds);
       setPrices(fetchedPrices);
@@ -64,17 +63,29 @@ export default function App() {
     const interval = setInterval(updatePrices, 60000); // Update every 60 seconds
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allAssetIds]); // Rerun when allAssetIds change
-  
+  }, [allAssetIds.join(',')]); // Rerun when the list of assets changes
+
   const handleAddAsset = (asset: PortfolioAsset) => {
     if (addingAssetToWalletId) {
       addAssetToWallet(addingAssetToWalletId, asset);
       setAddingAssetToWalletId(null);
     }
   };
+  
+  const handleAddTransaction = (transaction: Transaction) => {
+    if (assetForTransaction) {
+      addTransactionToAsset(assetForTransaction.walletId, assetForTransaction.asset.id, transaction);
+      setAssetForTransaction(null);
+    }
+  };
 
   const handleOpenAddAssetModal = (walletId: string) => {
     setAddingAssetToWalletId(walletId);
+  };
+  
+  const handleOpenAddTransactionModal = (walletId: string, asset: PortfolioAsset) => {
+    const { currentQuantity } = getAssetMetrics(asset.transactions, 0); // Price is not needed for quantity
+    setAssetForTransaction({ walletId, asset, currentQuantity });
   };
 
   const walletToAddAssetTo = useMemo(() => {
@@ -106,6 +117,7 @@ export default function App() {
                       onAddAsset={handleOpenAddAssetModal}
                       onRemoveAsset={removeAssetFromWallet}
                       onRemoveWallet={removeWallet}
+                      onAddTransaction={handleOpenAddTransactionModal}
                   />
               ))}
             </div>
@@ -143,6 +155,15 @@ export default function App() {
           onClose={() => setAddingAssetToWalletId(null)}
           onAddAsset={handleAddAsset}
           existingAssetIds={walletToAddAssetTo.assets.map(a => a.id)}
+        />
+      )}
+      
+      {assetForTransaction && (
+        <AddTransactionModal
+          asset={assetForTransaction.asset}
+          currentQuantity={assetForTransaction.currentQuantity}
+          onClose={() => setAssetForTransaction(null)}
+          onAddTransaction={handleAddTransaction}
         />
       )}
     </div>

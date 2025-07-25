@@ -1,17 +1,16 @@
-
 import { useState, useEffect, useCallback } from 'react';
-import { PortfolioAsset, Wallet } from '../types';
+import { PortfolioAsset, Wallet, Transaction } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 
-const STORAGE_KEY = 'cryptoPortfolioWallets';
+const STORAGE_KEY = 'cryptoPortfolioWallets_v2'; // New key for the new data structure
 
 // Helper to get initial state from localStorage
 const getInitialState = (): Wallet[] => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
-      // Basic validation for the stored data
       const parsed = JSON.parse(stored);
+      // Basic validation for the new structure
       if (Array.isArray(parsed) && (parsed.length === 0 || parsed.every(w => 'id' in w && 'name' in w && 'assets' in w && Array.isArray(w.assets)))) {
         return parsed;
       }
@@ -54,36 +53,51 @@ export function usePortfolio() {
     setWallets(prevWallets => 
       prevWallets.map(wallet => {
         if (wallet.id === walletId) {
-          const existingAsset = wallet.assets.find(a => a.id === newAsset.id);
-          let newAssets: PortfolioAsset[];
-          if (existingAsset) {
-            // Update amount if asset already exists in this wallet
-            newAssets = wallet.assets.map(a => 
-              a.id === newAsset.id ? { ...a, amount: a.amount + newAsset.amount } : a
-            );
-          } else {
-            // Add new asset to this wallet
-            newAssets = [...wallet.assets, newAsset];
-          }
-          return { ...wallet, assets: newAssets };
+          // Since this function is for adding a *new* asset, we assume it doesn't exist yet.
+          // The logic to add transactions to an *existing* asset is separate.
+          return { ...wallet, assets: [...wallet.assets, newAsset] };
         }
         return wallet;
       })
     );
   }, []);
 
+  const addTransactionToAsset = useCallback((walletId: string, assetId: string, transaction: Transaction) => {
+      setWallets(prevWallets =>
+          prevWallets.map(wallet => {
+              if (wallet.id === walletId) {
+                  const updatedAssets = wallet.assets.map(asset => {
+                      if (asset.id === assetId) {
+                          // Add the new transaction to the existing asset
+                          return {
+                              ...asset,
+                              transactions: [...asset.transactions, transaction],
+                          };
+                      }
+                      return asset;
+                  });
+                  return { ...wallet, assets: updatedAssets };
+              }
+              return wallet;
+          })
+      );
+  }, []);
+
   const removeAssetFromWallet = useCallback((walletId: string, assetId: string) => {
-    setWallets(prevWallets => 
-      prevWallets.map(wallet => {
-        if (wallet.id === walletId) {
-          return {
-            ...wallet,
-            assets: wallet.assets.filter(asset => asset.id !== assetId),
-          };
-        }
-        return wallet;
-      })
-    );
+    // Confirmation is now more specific because this is a destructive action
+    if (window.confirm("Are you sure you want to remove this asset and all of its transaction history?")) {
+        setWallets(prevWallets => 
+        prevWallets.map(wallet => {
+            if (wallet.id === walletId) {
+            return {
+                ...wallet,
+                assets: wallet.assets.filter(asset => asset.id !== assetId),
+            };
+            }
+            return wallet;
+        })
+        );
+    }
   }, []);
 
   const exportWallets = useCallback(() => {
@@ -115,21 +129,20 @@ export function usePortfolio() {
         reader.onload = event => {
           try {
             const importedData = JSON.parse(event.target?.result as string);
-            // Basic validation for the new structure
-            if (Array.isArray(importedData) && (importedData.length === 0 || importedData.every(item => 'id' in item && 'name' in item && 'assets' in item && Array.isArray(item.assets)))) {
+            // Basic validation for the new transaction-based structure
+            const isValidNewFormat = Array.isArray(importedData) && 
+              (importedData.length === 0 || 
+               importedData.every(w => 'id' in w && 'name' in w && 'assets' in w && 
+                 Array.isArray(w.assets) && w.assets.every((a: any) => 'transactions' in a && Array.isArray(a.transactions))
+               )
+              );
+
+            if (isValidNewFormat) {
               if (window.confirm("This will replace your current portfolio. Are you sure?")) {
                 setWallets(importedData);
               }
             } else {
-              // Check for old format and offer to convert
-              if (Array.isArray(importedData) && importedData.every(item => 'id' in item && 'symbol' in item && 'name' in item && 'amount' in item)) {
-                 if (window.confirm("Old portfolio format detected. Would you like to import it into a new 'Imported Wallet'? Your current portfolio will be replaced.")) {
-                    const newWallet: Wallet = { id: uuidv4(), name: 'Imported Wallet', assets: importedData as PortfolioAsset[] };
-                    setWallets([newWallet]);
-                 }
-              } else {
-                alert('Invalid portfolio file format.');
-              }
+              alert('Invalid portfolio file format. The file must contain wallets with transaction data.');
             }
           } catch (error) {
             alert('Error reading or parsing the file.');
@@ -142,5 +155,5 @@ export function usePortfolio() {
     input.click();
   }, []);
 
-  return { wallets, addWallet, removeWallet, addAssetToWallet, removeAssetFromWallet, importWallets, exportWallets };
+  return { wallets, addWallet, removeWallet, addAssetToWallet, addTransactionToAsset, removeAssetFromWallet, importWallets, exportWallets };
 }

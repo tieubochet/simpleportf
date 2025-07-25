@@ -1,23 +1,21 @@
-
 import React from 'react';
-import { Wallet, PriceData } from '../types';
+import { Wallet, PriceData, PortfolioAsset } from '../types';
 import AssetTable from './AssetTable';
 import { PlusIcon, TrashIcon } from './icons';
+import { calculateTotalValue } from '../utils/calculations';
 
 interface WalletCardProps {
     wallet: Wallet;
     prices: PriceData;
     onAddAsset: (walletId: string) => void;
     onRemoveAsset: (walletId: string, assetId: string) => void;
-    onRemoveWallet: (walletId: string) => void;
+    onRemoveWallet: (walletId:string) => void;
+    onAddTransaction: (walletId: string, asset: PortfolioAsset) => void;
 }
 
-const WalletCard: React.FC<WalletCardProps> = ({ wallet, prices, onAddAsset, onRemoveAsset, onRemoveWallet }) => {
+const WalletCard: React.FC<WalletCardProps> = ({ wallet, prices, onAddAsset, onRemoveAsset, onRemoveWallet, onAddTransaction }) => {
     
-    const walletTotalValue = wallet.assets.reduce((acc, asset) => {
-        const price = prices[asset.id]?.usd ?? 0;
-        return acc + asset.amount * price;
-    }, 0);
+    const walletTotalValue = calculateTotalValue([wallet], prices);
     
     const formattedValue = new Intl.NumberFormat('en-US', {
         style: 'currency',
@@ -26,7 +24,7 @@ const WalletCard: React.FC<WalletCardProps> = ({ wallet, prices, onAddAsset, onR
 
     return (
         <div className="bg-slate-800 rounded-lg shadow-lg mb-8">
-            <div className="p-4 sm:p-6 border-b border-slate-700 flex justify-between items-center">
+            <header className="p-4 sm:p-6 border-b border-slate-700 flex justify-between items-center">
                 <div>
                     <h3 className="text-xl font-semibold text-white">{wallet.name}</h3>
                     <p className="text-slate-400 font-mono">{formattedValue}</p>
@@ -48,13 +46,14 @@ const WalletCard: React.FC<WalletCardProps> = ({ wallet, prices, onAddAsset, onR
                         <TrashIcon className="h-5 w-5" />
                     </button>
                 </div>
-            </div>
+            </header>
             
             {wallet.assets.length > 0 ? (
                 <AssetTable 
                     assets={wallet.assets} 
                     prices={prices} 
-                    onRemove={(assetId) => onRemoveAsset(wallet.id, assetId)} 
+                    onRemove={(assetId) => onRemoveAsset(wallet.id, assetId)}
+                    onAddTransaction={(asset) => onAddTransaction(wallet.id, asset)}
                 />
             ) : (
                 <div className="p-6 text-center text-slate-400">

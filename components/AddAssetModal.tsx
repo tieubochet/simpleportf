@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Coin, PortfolioAsset } from '../types';
+import { v4 as uuidv4 } from 'uuid';
+import { Coin, PortfolioAsset, Transaction } from '../types';
 import { searchCoins } from '../services/coingecko';
 import { SearchIcon, XIcon } from './icons';
 
@@ -10,14 +11,14 @@ interface AddAssetModalProps {
 }
 
 const AddAssetModal: React.FC<AddAssetModalProps> = ({ onClose, onAddAsset, existingAssetIds }) => {
-  const [step, setStep] = useState(1); // 1: Search, 2: Enter Amount
+  const [step, setStep] = useState(1); // 1: Search, 2: Enter First Transaction
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Coin[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [selectedCoin, setSelectedCoin] = useState<Coin | null>(null);
-  const [amount, setAmount] = useState('');
+  const [quantity, setQuantity] = useState('');
+  const [pricePerUnit, setPricePerUnit] = useState('');
 
-  // The debounce logic is now handled inside useEffect, which is a more idiomatic React pattern.
   useEffect(() => {
     if (searchQuery.trim().length < 2) {
       setSearchResults([]);
@@ -29,7 +30,6 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({ onClose, onAddAsset, exis
     const timerId = setTimeout(() => {
       searchCoins(searchQuery)
         .then(results => {
-          // Filter out coins that are already in the portfolio
           const filteredResults = results.filter(coin => !existingAssetIds.includes(coin.id));
           setSearchResults(filteredResults);
         })
@@ -40,11 +40,9 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({ onClose, onAddAsset, exis
         .finally(() => {
           setIsSearching(false);
         });
-    }, 300); // 300ms debounce delay
+    }, 300);
 
-    return () => {
-      clearTimeout(timerId);
-    };
+    return () => clearTimeout(timerId);
   }, [searchQuery, existingAssetIds]);
 
   const handleSelectCoin = (coin: Coin) => {
@@ -53,16 +51,29 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({ onClose, onAddAsset, exis
   };
 
   const handleSave = () => {
-    const numericAmount = parseFloat(amount);
-    if (selectedCoin && !isNaN(numericAmount) && numericAmount > 0) {
-      onAddAsset({
+    const numericQuantity = parseFloat(quantity);
+    const numericPrice = parseFloat(pricePerUnit);
+    if (selectedCoin && !isNaN(numericQuantity) && numericQuantity > 0 && !isNaN(numericPrice) && numericPrice >= 0) {
+      const firstTransaction: Transaction = {
+        id: uuidv4(),
+        type: 'buy',
+        quantity: numericQuantity,
+        pricePerUnit: numericPrice,
+        date: new Date().toISOString(),
+      };
+      
+      const newAsset: PortfolioAsset = {
         id: selectedCoin.id,
         name: selectedCoin.name,
         symbol: selectedCoin.symbol,
-        amount: numericAmount,
-      });
+        transactions: [firstTransaction],
+      };
+
+      onAddAsset(newAsset);
     }
   };
+
+  const canSave = parseFloat(quantity) > 0 && parseFloat(pricePerUnit) >= 0;
 
   return (
     <div 
@@ -92,6 +103,7 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({ onClose, onAddAsset, exis
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   className="w-full bg-slate-700 text-white placeholder-slate-400 border border-slate-600 rounded-lg py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  autoFocus
                 />
                 <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
               </div>
@@ -110,23 +122,36 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({ onClose, onAddAsset, exis
                   </ul>
                 )}
                 {!isSearching && searchQuery.length > 1 && searchResults.length === 0 && (
-                    <div className="text-center text-slate-400 p-4">No results found.</div>
+                    <div className="text-center text-slate-400 p-4">No results found or asset already in wallet.</div>
                 )}
               </div>
             </div>
           )}
 
           {step === 2 && selectedCoin && (
-            <div>
-              <p className="text-slate-400 mb-4">Enter the amount of {selectedCoin.name} ({selectedCoin.symbol.toUpperCase()}) you hold.</p>
-              <input
-                type="number"
-                placeholder="e.g., 0.5"
-                value={amount}
-                onChange={e => setAmount(e.target.value)}
-                autoFocus
-                className="w-full bg-slate-700 text-white placeholder-slate-400 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-              />
+            <div className="space-y-4">
+              <p className="text-slate-400">Enter the details of your first purchase of {selectedCoin.name} ({selectedCoin.symbol.toUpperCase()}).</p>
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">Quantity</label>
+                <input
+                  type="number"
+                  placeholder="e.g., 0.5"
+                  value={quantity}
+                  onChange={e => setQuantity(e.target.value)}
+                  autoFocus
+                  className="w-full bg-slate-700 text-white placeholder-slate-400 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">Price Per Coin (USD)</label>
+                <input
+                  type="number"
+                  placeholder="e.g., 50000.00"
+                  value={pricePerUnit}
+                  onChange={e => setPricePerUnit(e.target.value)}
+                  className="w-full bg-slate-700 text-white placeholder-slate-400 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                />
+              </div>
             </div>
           )}
         </div>
@@ -141,7 +166,7 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({ onClose, onAddAsset, exis
             Cancel
           </button>
           {step === 2 && 
-            <button onClick={handleSave} disabled={!amount || parseFloat(amount) <= 0} className="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg transition-colors disabled:bg-slate-700 disabled:cursor-not-allowed">
+            <button onClick={handleSave} disabled={!canSave} className="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg transition-colors disabled:bg-slate-700 disabled:cursor-not-allowed">
               Add Asset
             </button>
           }

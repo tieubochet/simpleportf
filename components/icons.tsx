@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 // Props for all icons
@@ -55,5 +54,13 @@ export const WalletIcon: React.FC<IconProps> = (props) => (
         <path d="M20 12V8H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h14v4"></path>
         <path d="M4 6v12a2 2 0 0 0 2 2h14v-6"></path>
         <path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z"></path>
+    </svg>
+);
+
+export const ReceiptIcon: React.FC<IconProps> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z" />
+        <path d="M16 8h-6a2 2 0 1 0 0 4h6" />
+        <path d="M12 14v-4" />
     </svg>
 );

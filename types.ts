@@ -1,10 +1,18 @@
+// Represents a single buy or sell transaction
+export interface Transaction {
+  id: string;
+  type: 'buy' | 'sell' | 'transfer_in' | 'transfer_out';
+  quantity: number;
+  pricePerUnit: number; // Price in USD. For transfers, this will be 0.
+  date: string; // ISO string for the date of the transaction
+}
 
-// Represents an asset held by the user in their portfolio
+// Represents an asset held by the user, composed of multiple transactions
 export interface PortfolioAsset {
-  id: string; // The unique ID from the crypto API (e.g., coingecko id: 'bitcoin')
+  id:string; // The unique ID from the crypto API (e.g., coingecko id: 'bitcoin')
   symbol: string;
   name: string;
-  amount: number;
+  transactions: Transaction[];
 }
 
 // Represents a single wallet containing multiple assets
