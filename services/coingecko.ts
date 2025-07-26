@@ -68,6 +68,7 @@ export async function fetchGlobalData(): Promise<GlobalData | null> {
       market_cap_change_percentage_24h_usd: global.market_cap_change_percentage_24h_usd,
       btc_dominance: global.market_cap_percentage.btc,
       eth_dominance: global.market_cap_percentage.eth,
+      active_cryptocurrencies: global.active_cryptocurrencies,
     };
 
   } catch (error) {
