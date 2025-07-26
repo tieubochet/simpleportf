@@ -61,6 +61,7 @@ const AssetTable: React.FC<AssetTableProps> = ({ assets, prices, onRemove, onAdd
         <table className="w-full text-left text-sm">
             <thead className="sticky top-0 bg-slate-800 z-10">
                 <tr className="border-b border-slate-700 text-slate-400">
+                    <th className="py-3 px-2 font-medium text-center">#</th>
                     <th className="py-3 px-4 font-medium">Asset</th>
                     <th className="py-3 px-4 font-medium text-right">Quantity</th>
                     <th className="py-3 px-4 font-medium text-right">Avg. Buy Price</th>
@@ -85,6 +86,9 @@ const AssetTable: React.FC<AssetTableProps> = ({ assets, prices, onRemove, onAdd
 
                     return (
                         <tr key={asset.id} className="border-b border-slate-700 hover:bg-slate-700/50">
+                             <td className="py-4 px-2 text-center font-mono text-slate-400">
+                                {priceInfo?.market_cap_rank ?? '-'}
+                            </td>
                             <td className="py-4 px-4">
                                 <div className="flex flex-col">
                                     <span className="font-bold text-base text-white">{asset.name}</span>
