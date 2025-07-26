@@ -1,4 +1,4 @@
-import { Coin, PriceData } from '../types';
+import { Coin, PriceData, GlobalData } from '../types';
 
 const API_BASE_URL = 'https://api.coingecko.com/api/v3';
 
@@ -50,5 +50,26 @@ export async function fetchPrices(coinIds: string[]): Promise<PriceData> {
   } catch (error) {
     console.error('Failed to fetch prices:', error);
     throw error;
+  }
+}
+
+export async function fetchGlobalData(): Promise<GlobalData | null> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/global`);
+    if (!response.ok) {
+      throw new Error('Network response for global data was not ok');
+    }
+    const data = await response.json();
+    const global = data.data;
+    
+    return {
+      total_market_cap_usd: global.total_market_cap.usd,
+      total_volume_usd: global.total_volume.usd,
+      market_cap_change_percentage_24h_usd: global.market_cap_change_percentage_24h_usd,
+    };
+
+  } catch (error) {
+    console.error('Failed to fetch global market data:', error);
+    return null; // Return null on error to handle it gracefully in the UI
   }
 }
