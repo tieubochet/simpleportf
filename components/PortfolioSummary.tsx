@@ -9,6 +9,10 @@ interface PortfolioSummaryProps {
     changeValue: number;
     changePercentage: number;
   };
+  change7dData: {
+    changeValue: number;
+    changePercentage: number;
+  };
   plData: {
     plValue: number;
     plPercentage: number;
@@ -28,13 +32,13 @@ const ChangeDisplay: React.FC<{ value: number; percentage: number }> = ({ value,
         signDisplay: 'exceptZero'
     }).format(value);
 
-    const formattedPercentage = `(${sign}${Math.abs(percentage).toFixed(2)}%)`;
+    const formattedPercentage = `(${sign}${Math.abs(percentage || 0).toFixed(2)}%)`;
     
-    if (Math.abs(value) < 0.01) {
-         return (
+    if (isNaN(value) || isNaN(percentage)) {
+        return (
             <div>
-               <p className="text-lg font-semibold text-slate-300">$0.00</p>
-               <p className="text-sm font-mono text-slate-400">(0.00%)</p>
+               <p className="text-lg font-semibold text-slate-300">-</p>
+               <p className="text-sm font-mono text-slate-400">(-)</p>
             </div>
         );
     }
@@ -55,7 +59,7 @@ const LoadingSkeletonBlock = () => (
 );
 
 
-const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ totalValue, changeData, plData, performer, isLoading }) => {
+const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ totalValue, changeData, change7dData, plData, performer, isLoading }) => {
   const formattedValue = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
@@ -76,13 +80,23 @@ const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ totalValue, changeD
           )}
         </div>
         
-        {/* Block 2: 24h Change */}
+        {/* Block 2: Performance (24h & 7d) */}
         <div>
-          <h2 className="text-lg font-medium text-slate-400 mb-2">24h Change</h2>
+          <h2 className="text-lg font-medium text-slate-400 mb-2">Performance</h2>
            {showLoadingSkeleton ? (
              <LoadingSkeletonBlock />
           ) : (
-             <ChangeDisplay value={changeData.changeValue} percentage={changeData.changePercentage} />
+             <div className="flex space-x-4 md:space-x-6">
+                <div>
+                    <h3 className="text-sm font-medium text-slate-500 mb-1">24H</h3>
+                    <ChangeDisplay value={changeData.changeValue} percentage={changeData.changePercentage} />
+                </div>
+                <div className="w-px bg-slate-700"></div> {/* Divider */}
+                <div>
+                    <h3 className="text-sm font-medium text-slate-500 mb-1">7D</h3>
+                    <ChangeDisplay value={change7dData.changeValue} percentage={change7dData.changePercentage} />
+                </div>
+             </div>
           )}
         </div>
 
