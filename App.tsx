@@ -13,7 +13,6 @@ import AddAssetModal from './components/AddAssetModal';
 import AddWalletModal from './components/AddWalletModal';
 import AddTransactionModal from './components/AddTransactionModal';
 import WalletCard from './components/WalletCard';
-import TopPerformer from './components/TopPerformer';
 import { WalletIcon } from './components/icons';
 
 type AssetForTransaction = {
@@ -137,7 +136,8 @@ export default function App() {
           totalValue={totalValue} 
           changeData={portfolio24hChange}
           plData={portfolioPL}
-          isLoading={isLoading && wallets.length > 0} 
+          isLoading={isLoading && wallets.length > 0}
+          performer={topPerformer}
         />
 
         {error && <div className="text-center text-red-400 bg-red-900/50 p-3 rounded-lg my-4">{error}</div>}
@@ -159,7 +159,6 @@ export default function App() {
             </div>
             <div className="lg:col-span-1 space-y-8">
               <AllocationChart wallets={wallets} prices={prices} />
-              <TopPerformer performer={topPerformer} isLoading={isLoading && wallets.length > 0} />
             </div>
           </div>
         ) : (

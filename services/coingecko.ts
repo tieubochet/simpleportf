@@ -55,20 +55,39 @@ export async function fetchPrices(coinIds: string[]): Promise<PriceData> {
 
 export async function fetchGlobalData(): Promise<GlobalData | null> {
   try {
-    const response = await fetch(`${API_BASE_URL}/global`);
-    if (!response.ok) {
+    // Fetch from CoinGecko
+    const globalResponse = await fetch(`${API_BASE_URL}/global`);
+    if (!globalResponse.ok) {
       throw new Error('Network response for global data was not ok');
     }
-    const data = await response.json();
-    const global = data.data;
+    const coingeckoData = await globalResponse.json();
+    const global = coingeckoData.data;
     
+    // Fetch ETH Gas Price from a separate, key-less API
+    let gasPriceGwei: number | undefined;
+    try {
+      // Using DeBank's public API as a key-less source
+      const gasResponse = await fetch('https://api.debank.com/chain/gas_price_dict_v2?chain=eth');
+      if (gasResponse.ok) {
+        const gasData = await gasResponse.json();
+        // Price is in Wei, convert to Gwei (1 Gwei = 1,000,000,000 Wei)
+        const priceInWei = gasData.data?.normal?.price;
+        if (priceInWei) {
+            gasPriceGwei = priceInWei / 1_000_000_000;
+        }
+      }
+    } catch (gasError) {
+      console.warn('Could not fetch ETH gas price:', gasError);
+      // Fail silently, the gas price is optional
+    }
+
     return {
       total_market_cap_usd: global.total_market_cap.usd,
       total_volume_usd: global.total_volume.usd,
       market_cap_change_percentage_24h_usd: global.market_cap_change_percentage_24h_usd,
       btc_dominance: global.market_cap_percentage.btc,
       eth_dominance: global.market_cap_percentage.eth,
-      active_cryptocurrencies: global.active_cryptocurrencies,
+      eth_gas_gwei: gasPriceGwei,
     };
 
   } catch (error) {

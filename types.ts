@@ -51,5 +51,5 @@ export interface GlobalData {
   market_cap_change_percentage_24h_usd: number;
   btc_dominance: number;
   eth_dominance: number;
-  active_cryptocurrencies: number;
+  eth_gas_gwei?: number;
 }

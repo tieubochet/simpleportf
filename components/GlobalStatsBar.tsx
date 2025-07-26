@@ -41,9 +41,7 @@ const GlobalStatsBar: React.FC<GlobalStatsBarProps> = ({ globalData }) => {
                 <div className="flex items-center h-10 space-x-4 md:space-x-6 text-xs font-mono overflow-x-auto whitespace-nowrap">
                     {globalData ? (
                         <>
-                             <Stat label="Active Cryptos">
-                                <span className="font-medium text-slate-200">{new Intl.NumberFormat('en-US').format(globalData.active_cryptocurrencies)}</span>
-                            </Stat>
+                            
                             <Stat label="Market Cap">
                                 <span className="font-medium text-slate-200">{formatLargeNumber(globalData.total_market_cap_usd)}</span>
                                 {typeof changePercentage === 'number' && (
@@ -61,11 +59,16 @@ const GlobalStatsBar: React.FC<GlobalStatsBarProps> = ({ globalData }) => {
                             <Stat label="ETH Dom">
                                 <span className="font-medium text-slate-200">{globalData.eth_dominance.toFixed(2)}%</span>
                             </Stat>
+                            {typeof globalData.eth_gas_gwei === 'number' && (
+                                <Stat label="Gas">
+                                    <span className="font-medium text-slate-200">{globalData.eth_gas_gwei.toFixed(2)} GWEI</span>
+                                </Stat>
+                            )}
                         </>
                     ) : (
                         // Loading Skeletons matching the stats
                         <>
-                           <SkeletonStat widthClass="w-28" />
+                           <SkeletonStat widthClass="w-24" />
                            <SkeletonStat widthClass="w-40" />
                            <SkeletonStat widthClass="w-28" />
                            <SkeletonStat widthClass="w-24" />
