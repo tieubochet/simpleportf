@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { PortfolioAsset, Transaction } from '../types';
@@ -22,12 +21,13 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ asset, curren
   const [type, setType] = useState<'buy' | 'sell' | 'transfer_in' | 'transfer_out'>('buy');
   const [quantity, setQuantity] = useState('');
   const [pricePerUnit, setPricePerUnit] = useState('');
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
 
   const isTransfer = type === 'transfer_in' || type === 'transfer_out';
   const isDebit = type === 'sell' || type === 'transfer_out';
   const exceedsBalance = isDebit && parseFloat(quantity) > currentQuantity;
 
-  const canSave = parseFloat(quantity) > 0 && !exceedsBalance && (isTransfer || parseFloat(pricePerUnit) >= 0);
+  const canSave = parseFloat(quantity) > 0 && !!date && !exceedsBalance && (isTransfer || parseFloat(pricePerUnit) >= 0);
 
   const handleSave = () => {
     if (!canSave) return;
@@ -37,7 +37,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ asset, curren
       type,
       quantity: parseFloat(quantity),
       pricePerUnit: isTransfer ? 0 : parseFloat(pricePerUnit || '0'),
-      date: new Date().toISOString(),
+      date: new Date(date).toISOString(),
     });
     onClose();
   };
@@ -135,6 +135,16 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ asset, curren
                     />
                 </div>
              )}
+            <div>
+                <label htmlFor="tx-date" className="block text-sm font-medium text-slate-300 mb-1">Date</label>
+                <input
+                    id="tx-date"
+                    type="date"
+                    value={date}
+                    onChange={e => setDate(e.target.value)}
+                    className="w-full bg-slate-700 text-white placeholder-slate-400 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                />
+            </div>
         </div>
 
         <div className="p-6 bg-slate-800/50 border-t border-slate-700 rounded-b-lg flex justify-end space-x-4">
