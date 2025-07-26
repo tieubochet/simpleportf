@@ -43,3 +43,10 @@ export interface PerformerData {
   symbol: string;
   change: number;
 }
+
+// Represents global market data from CoinGecko
+export interface GlobalData {
+  total_market_cap_usd: number;
+  total_volume_usd: number;
+  market_cap_change_percentage_24h_usd: number;
+}
