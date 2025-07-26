@@ -66,6 +66,8 @@ export async function fetchGlobalData(): Promise<GlobalData | null> {
       total_market_cap_usd: global.total_market_cap.usd,
       total_volume_usd: global.total_volume.usd,
       market_cap_change_percentage_24h_usd: global.market_cap_change_percentage_24h_usd,
+      btc_dominance: global.market_cap_percentage.btc,
+      eth_dominance: global.market_cap_percentage.eth,
     };
 
   } catch (error) {
