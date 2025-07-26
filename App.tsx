@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { PortfolioAsset, PriceData, Wallet, Transaction, PerformerData } from './types';
 import { usePortfolio } from './hooks/usePortfolio';
 import { fetchPrices } from './services/coingecko';
-import { calculateTotalValue, getAssetIds, getAssetMetrics, calculatePortfolio24hChange, calculatePortfolio7dChange, calculateTotalPL, findTopPerformer } from './utils/calculations';
+import { calculateTotalValue, getAssetIds, getAssetMetrics, calculatePortfolio24hChange, calculateTotalPL, findTopPerformer } from './utils/calculations';
 
 import PortfolioHeader from './components/PortfolioHeader';
 import PortfolioSummary from './components/PortfolioSummary';
@@ -43,10 +43,6 @@ export default function App() {
     return calculatePortfolio24hChange(wallets, prices);
   }, [wallets, prices]);
 
-  const portfolio7dChange = useMemo(() => {
-    return calculatePortfolio7dChange(wallets, prices);
-  }, [wallets, prices]);
-  
   const portfolioPL = useMemo(() => {
     return calculateTotalPL(wallets, prices);
   }, [wallets, prices]);
@@ -121,7 +117,6 @@ export default function App() {
         <PortfolioSummary 
           totalValue={totalValue} 
           changeData={portfolio24hChange}
-          change7dData={portfolio7dChange}
           plData={portfolioPL}
           performer={topPerformer}
           isLoading={isLoading && wallets.length > 0} 
