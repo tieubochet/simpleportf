@@ -1,7 +1,5 @@
 
 import React from 'react';
-import { PerformerData } from '../types';
-import { TrophyIcon } from './icons';
 
 interface PortfolioSummaryProps {
   totalValue: number;
@@ -13,7 +11,6 @@ interface PortfolioSummaryProps {
     plValue: number;
     plPercentage: number;
   };
-  performer: PerformerData | null;
   isLoading: boolean;
 }
 
@@ -55,7 +52,7 @@ const LoadingSkeletonBlock = () => (
 );
 
 
-const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ totalValue, changeData, plData, performer, isLoading }) => {
+const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ totalValue, changeData, plData, isLoading }) => {
   const formattedValue = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
@@ -65,7 +62,7 @@ const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ totalValue, changeD
 
   return (
     <div className="bg-slate-800 p-6 rounded-lg shadow-lg">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 items-start">
         {/* Block 1: Total Value */}
         <div>
           <h2 className="text-lg font-medium text-slate-400 mb-2">Total Portfolio Value</h2>
@@ -94,29 +91,6 @@ const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ totalValue, changeD
           ) : (
              <ChangeDisplay value={plData.plValue} percentage={plData.plPercentage} />
           )}
-        </div>
-
-        {/* Block 4: Top Performer */}
-        <div>
-            <h2 className="text-lg font-medium text-slate-400 mb-2 flex items-center space-x-2">
-                <TrophyIcon className="h-5 w-5 text-yellow-400" />
-                <span>Top Performer (24h)</span>
-            </h2>
-            {showLoadingSkeleton ? (
-                <LoadingSkeletonBlock />
-            ) : performer ? (
-                <div>
-                    <p className="text-lg font-semibold text-white truncate" title={performer.name}>{performer.name}</p>
-                    <p className="text-sm font-mono text-green-400">
-                        +{performer.change.toFixed(2)}%
-                    </p>
-                </div>
-            ) : (
-                <div>
-                    <p className="text-lg font-semibold text-slate-300">-</p>
-                    <p className="text-sm font-mono text-slate-400">N/A</p>
-                </div>
-            )}
         </div>
       </div>
     </div>
