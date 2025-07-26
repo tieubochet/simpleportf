@@ -2,7 +2,7 @@
 
 A modern, client-side cryptocurrency portfolio tracker that allows you to manage assets across multiple wallets, monitor real-time values, and visualize your holdings. Built with React, TypeScript, and Tailwind CSS, and designed for easy deployment on Vercel.
 
-![alt](https://private-user-images.githubusercontent.com/91001349/471089075-ba27ac6b-ee67-4b01-b20e-9060cdb93e7b.png)
+![alt](https://i.ibb.co/bMvS2zZr/crypto-porfolios.png)
 
 ## ✨ Features
 
