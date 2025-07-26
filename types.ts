@@ -34,6 +34,7 @@ export type PriceData = Record<string, {
   usd: number; 
   usd_24h_change?: number; 
   usd_7d_change?: number;
+  market_cap_rank?: number;
 }>;
 
 // Represents data for the top performing asset

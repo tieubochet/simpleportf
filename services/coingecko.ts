@@ -26,47 +26,24 @@ export async function fetchPrices(coinIds: string[]): Promise<PriceData> {
   if (coinIds.length === 0) return {};
   try {
     const ids = coinIds.join(',');
-    const currentPriceResponse = await fetch(`${API_BASE_URL}/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`);
-    if (!currentPriceResponse.ok) {
-      throw new Error('Network response for current prices was not ok');
+    // Use the /coins/markets endpoint which provides all necessary data in one call
+    const response = await fetch(`${API_BASE_URL}/coins/markets?vs_currency=usd&ids=${ids}&order=market_cap_desc&per_page=250&page=1&sparkline=false&price_change_percentage=7d`);
+
+    if (!response.ok) {
+      throw new Error('Network response for market data was not ok');
     }
-    const priceData: PriceData = await currentPriceResponse.json();
 
-    // Fetch prices from 7 days ago
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    const dateStr = `${sevenDaysAgo.getDate()}-${sevenDaysAgo.getMonth() + 1}-${sevenDaysAgo.getFullYear()}`;
+    const marketsData: any[] = await response.json();
 
-    const historicalPricePromises = coinIds.map(id =>
-      fetch(`${API_BASE_URL}/coins/${id}/history?date=${dateStr}&localization=false`)
-        .then(res => {
-          if (res.ok) return res.json();
-          // Log non-ok responses but don't fail the whole batch
-          console.warn(`Could not fetch 7-day history for ${id} (status: ${res.status}). New coins may not have historical data.`);
-          return null;
-        })
-        .then(historicalData => ({
-          id,
-          price: historicalData?.market_data?.current_price?.usd ?? null,
-        }))
-        .catch(error => {
-            console.error(`Fetch error for ${id} history:`, error);
-            return { id, price: null }; // Ensure promise doesn't reject
-        })
-    );
-
-    const historicalResults = await Promise.all(historicalPricePromises);
-
-    // Combine data and calculate 7d change
-    historicalResults.forEach(historical => {
-      if (priceData[historical.id] && historical.price !== null) {
-        const currentPrice = priceData[historical.id].usd;
-        const oldPrice = historical.price;
-        if (currentPrice && oldPrice > 0) {
-          const change = ((currentPrice - oldPrice) / oldPrice) * 100;
-          priceData[historical.id].usd_7d_change = change;
-        }
-      }
+    const priceData: PriceData = {};
+    
+    marketsData.forEach(coin => {
+      priceData[coin.id] = {
+        usd: coin.current_price,
+        usd_24h_change: coin.price_change_percentage_24h,
+        usd_7d_change: coin.price_change_percentage_7d_in_currency,
+        market_cap_rank: coin.market_cap_rank,
+      };
     });
 
     return priceData;
