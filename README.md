@@ -2,21 +2,28 @@
 
 A modern, client-side cryptocurrency portfolio tracker that allows you to manage assets across multiple wallets, monitor real-time values, and visualize your holdings. Built with React, TypeScript, and Tailwind CSS, and designed for easy deployment on Vercel.
 
-**Live Demo:** [Deploy your own to see it live!]
-
-*Note: You can add a screenshot of your deployed application here.*
+![alt](https://private-user-images.githubusercontent.com/91001349/471089075-ba27ac6b-ee67-4b01-b20e-9060cdb93e7b.png)
 
 ---
 
 ## ✨ Features
 
+-   **Global Market Dashboard**: A sticky header provides a real-time overview of the market, including **ETH Gas Price**, **Total Market Cap** with 24h change, **24h Volume**, and **BTC/ETH Dominance**.
+-   **Comprehensive Portfolio Summary**: At a glance, see your **Total Portfolio Value**, overall **24h Change**, total **Profit/Loss**, and the **Top Performing Asset** in the last 24 hours.
 -   **Multi-Wallet Management**: Organize your assets by creating separate wallets (e.g., "Binance Exchange", "Ledger Hardware", "DeFi Staking").
--   **Real-Time Price Data**: Fetches the latest cryptocurrency prices from the CoinGecko API.
--   **Consolidated Dashboard**: View your total portfolio value across all wallets.
--   **Asset Allocation Chart**: A dynamic pie chart shows the weight of each asset in your overall portfolio.
--   **No Account Needed**: Runs entirely in your browser. All data is securely stored in your browser's `localStorage`.
--   **Import/Export**: Easily back up your portfolio data to a JSON file or import it on another device.
--   **Responsive Design**: Clean and accessible UI that works beautifully on desktop and mobile devices.
+-   **Detailed Asset Tracking**: Each wallet contains a detailed table of its assets, showing:
+    -   Market Cap Rank
+    -   Quantity & Average Buy Price
+    -   Current Price
+    -   **24h & 7d Price Change %**
+    -   Unrealized Profit/Loss
+    -   Total Value
+-   **Transaction-Level History**: Add `buy`, `sell`, `transfer_in`, and `transfer_out` transactions for each asset with specific dates, quantities, and prices.
+-   **Dynamic Allocation Chart**: A beautiful pie chart visualizes the weight of each asset in your overall portfolio.
+-   **Client-Side & Private**: Runs entirely in your browser. All data is securely stored in your browser's `localStorage`. No accounts, no data collection.
+-   **Import/Export**: Easily back up your entire portfolio to a JSON file or import it on another device.
+-   **Responsive & Modern UI**: Clean and accessible interface built with Tailwind CSS that works beautifully on desktop and mobile.
+-   **Smart Pagination**: Asset tables with more than 10 tokens are paginated for a cleaner view.
 
 ## 🛠️ Tech Stack
 
@@ -43,7 +50,7 @@ npm install -g serve
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/your-username/your-repo-name.git
+    git clone https://github.com/tieubochet/simpleportf.git
     cd your-repo-name
     ```
 
@@ -82,12 +89,15 @@ Deploying this application to Vercel is a straightforward process.
 .
 ├── components/          # Reusable React components
 │   ├── AddAssetModal.tsx
+│   ├── AddTransactionModal.tsx
 │   ├── AddWalletModal.tsx
 │   ├── AllocationChart.tsx
 │   ├── AssetTable.tsx
+│   ├── GlobalStatsBar.tsx
 │   ├── icons.tsx
 │   ├── PortfolioHeader.tsx
 │   ├── PortfolioSummary.tsx
+│   ├── TopPerformer.tsx
 │   └── WalletCard.tsx
 ├── hooks/               # Custom React hooks
 │   └── usePortfolio.ts
