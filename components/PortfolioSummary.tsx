@@ -9,10 +9,6 @@ interface PortfolioSummaryProps {
     changeValue: number;
     changePercentage: number;
   };
-  change7dData: {
-    changeValue: number;
-    changePercentage: number;
-  };
   plData: {
     plValue: number;
     plPercentage: number;
@@ -59,7 +55,7 @@ const LoadingSkeletonBlock = () => (
 );
 
 
-const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ totalValue, changeData, change7dData, plData, performer, isLoading }) => {
+const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ totalValue, changeData, plData, performer, isLoading }) => {
   const formattedValue = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
@@ -80,23 +76,13 @@ const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ totalValue, changeD
           )}
         </div>
         
-        {/* Block 2: Performance (24h & 7d) */}
+        {/* Block 2: 24h Change */}
         <div>
-          <h2 className="text-lg font-medium text-slate-400 mb-2">Performance</h2>
+          <h2 className="text-lg font-medium text-slate-400 mb-2">24h Change</h2>
            {showLoadingSkeleton ? (
              <LoadingSkeletonBlock />
           ) : (
-             <div className="flex space-x-4 md:space-x-6">
-                <div>
-                    <h3 className="text-sm font-medium text-slate-500 mb-1">24H</h3>
-                    <ChangeDisplay value={changeData.changeValue} percentage={changeData.changePercentage} />
-                </div>
-                <div className="w-px bg-slate-700"></div> {/* Divider */}
-                <div>
-                    <h3 className="text-sm font-medium text-slate-500 mb-1">7D</h3>
-                    <ChangeDisplay value={change7dData.changeValue} percentage={change7dData.changePercentage} />
-                </div>
-             </div>
+             <ChangeDisplay value={changeData.changeValue} percentage={changeData.changePercentage} />
           )}
         </div>
 
