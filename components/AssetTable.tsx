@@ -38,6 +38,21 @@ const ProfitLoss: React.FC<{ value: number }> = ({ value }) => {
     );
 };
 
+const ChangePercentage: React.FC<{ value: number | undefined }> = ({ value }) => {
+    if (typeof value !== 'number' || isNaN(value)) {
+        return <span className="text-slate-400">-</span>;
+    }
+    const isPositive = value >= 0;
+    const colorClass = isPositive ? 'text-green-400' : 'text-red-400';
+    const sign = isPositive ? '+' : '';
+
+    return (
+        <span className={`${colorClass} w-16 text-right`}>
+            {sign}{value.toFixed(2)}%
+        </span>
+    );
+};
+
 
 const AssetTable: React.FC<AssetTableProps> = ({ assets, prices, onRemove, onAddTransaction }) => {
     
@@ -50,6 +65,7 @@ const AssetTable: React.FC<AssetTableProps> = ({ assets, prices, onRemove, onAdd
                     <th className="py-3 px-4 font-medium text-right">Quantity</th>
                     <th className="py-3 px-4 font-medium text-right">Avg. Buy Price</th>
                     <th className="py-3 px-4 font-medium text-right">Current Price</th>
+                    <th className="py-3 px-4 font-medium text-right">Change (24h/7d)</th>
                     <th className="py-3 px-4 font-medium text-right">P/L</th>
                     <th className="py-3 px-4 font-medium text-right">Value</th>
                     <th className="py-3 px-4 font-medium text-center">Actions</th>
@@ -57,7 +73,10 @@ const AssetTable: React.FC<AssetTableProps> = ({ assets, prices, onRemove, onAdd
             </thead>
             <tbody>
                 {assets.map(asset => {
-                    const currentPrice = prices[asset.id]?.usd ?? 0;
+                    const priceInfo = prices[asset.id];
+                    const currentPrice = priceInfo?.usd ?? 0;
+                    const change24h = priceInfo?.usd_24h_change;
+                    const change7d = priceInfo?.usd_7d_change;
                     const { currentQuantity, avgBuyPrice, unrealizedPL, marketValue } = getAssetMetrics(asset.transactions, currentPrice);
                     const isPriceLoading = currentPrice === 0 && currentQuantity > 0;
                     
@@ -75,6 +94,25 @@ const AssetTable: React.FC<AssetTableProps> = ({ assets, prices, onRemove, onAdd
                             <td className="py-4 px-4 text-right font-mono text-slate-300">{formatCurrency(avgBuyPrice)}</td>
                             <td className="py-4 px-4 text-right font-mono">
                                 {isPriceLoading ? <div className="h-5 bg-slate-700 rounded animate-pulse w-20 ml-auto"></div> : formatCurrency(currentPrice)}
+                            </td>
+                             <td className="py-4 px-4 text-right font-mono">
+                                {isPriceLoading ? (
+                                    <div className="flex flex-col items-end space-y-1">
+                                        <div className="h-4 bg-slate-700 rounded animate-pulse w-20"></div>
+                                        <div className="h-4 bg-slate-700 rounded animate-pulse w-20"></div>
+                                    </div>
+                                ) : (
+                                    <div className="text-xs">
+                                        <div className="flex justify-end items-center space-x-2">
+                                            <span className="text-slate-400">24h</span>
+                                            <ChangePercentage value={change24h} />
+                                        </div>
+                                        <div className="flex justify-end items-center space-x-2">
+                                            <span className="text-slate-400">7d</span>
+                                            <ChangePercentage value={change7d} />
+                                        </div>
+                                    </div>
+                                )}
                             </td>
                             <td className="py-4 px-4 text-right font-mono">
                                 {isPriceLoading ? <div className="h-5 bg-slate-700 rounded animate-pulse w-20 ml-auto"></div> : <ProfitLoss value={unrealizedPL} />}
