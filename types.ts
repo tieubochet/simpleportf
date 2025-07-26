@@ -49,4 +49,6 @@ export interface GlobalData {
   total_market_cap_usd: number;
   total_volume_usd: number;
   market_cap_change_percentage_24h_usd: number;
+  btc_dominance: number;
+  eth_dominance: number;
 }
