@@ -4,8 +4,6 @@ A modern, client-side cryptocurrency portfolio tracker that allows you to manage
 
 ![alt](https://private-user-images.githubusercontent.com/91001349/471089075-ba27ac6b-ee67-4b01-b20e-9060cdb93e7b.png)
 
----
-
 ## ✨ Features
 
 -   **Global Market Dashboard**: A sticky header provides a real-time overview of the market, including **ETH Gas Price**, **Total Market Cap** with 24h change, **24h Volume**, and **BTC/ETH Dominance**.
