@@ -18,6 +18,7 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({ onClose, onAddAsset, exis
   const [selectedCoin, setSelectedCoin] = useState<Coin | null>(null);
   const [quantity, setQuantity] = useState('');
   const [pricePerUnit, setPricePerUnit] = useState('');
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
 
   useEffect(() => {
     if (searchQuery.trim().length < 2) {
@@ -53,13 +54,13 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({ onClose, onAddAsset, exis
   const handleSave = () => {
     const numericQuantity = parseFloat(quantity);
     const numericPrice = parseFloat(pricePerUnit);
-    if (selectedCoin && !isNaN(numericQuantity) && numericQuantity > 0 && !isNaN(numericPrice) && numericPrice >= 0) {
+    if (selectedCoin && !isNaN(numericQuantity) && numericQuantity > 0 && !isNaN(numericPrice) && numericPrice >= 0 && !!date) {
       const firstTransaction: Transaction = {
         id: uuidv4(),
         type: 'buy',
         quantity: numericQuantity,
         pricePerUnit: numericPrice,
-        date: new Date().toISOString(),
+        date: new Date(date).toISOString(),
       };
       
       const newAsset: PortfolioAsset = {
@@ -73,7 +74,7 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({ onClose, onAddAsset, exis
     }
   };
 
-  const canSave = parseFloat(quantity) > 0 && parseFloat(pricePerUnit) >= 0;
+  const canSave = parseFloat(quantity) > 0 && parseFloat(pricePerUnit) >= 0 && !!date;
 
   return (
     <div 
@@ -149,6 +150,16 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({ onClose, onAddAsset, exis
                   placeholder="e.g., 50000.00"
                   value={pricePerUnit}
                   onChange={e => setPricePerUnit(e.target.value)}
+                  className="w-full bg-slate-700 text-white placeholder-slate-400 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                />
+              </div>
+              <div>
+                <label htmlFor="purchase-date" className="block text-sm font-medium text-slate-300 mb-1">Purchase Date</label>
+                <input
+                  id="purchase-date"
+                  type="date"
+                  value={date}
+                  onChange={e => setDate(e.target.value)}
                   className="w-full bg-slate-700 text-white placeholder-slate-400 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 />
               </div>
