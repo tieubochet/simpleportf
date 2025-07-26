@@ -1,10 +1,11 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { PortfolioAsset, PriceData, Wallet, Transaction, PerformerData } from './types';
+import { PortfolioAsset, PriceData, Wallet, Transaction, PerformerData, GlobalData } from './types';
 import { usePortfolio } from './hooks/usePortfolio';
-import { fetchPrices } from './services/coingecko';
+import { fetchPrices, fetchGlobalData } from './services/coingecko';
 import { calculateTotalValue, getAssetIds, getAssetMetrics, calculatePortfolio24hChange, calculateTotalPL, findTopPerformer } from './utils/calculations';
 
+import GlobalStatsBar from './components/GlobalStatsBar';
 import PortfolioHeader from './components/PortfolioHeader';
 import PortfolioSummary from './components/PortfolioSummary';
 import AllocationChart from './components/AllocationChart';
@@ -12,6 +13,7 @@ import AddAssetModal from './components/AddAssetModal';
 import AddWalletModal from './components/AddWalletModal';
 import AddTransactionModal from './components/AddTransactionModal';
 import WalletCard from './components/WalletCard';
+import TopPerformer from './components/TopPerformer';
 import { WalletIcon } from './components/icons';
 
 type AssetForTransaction = {
@@ -24,6 +26,7 @@ export default function App() {
   const { wallets, addWallet, removeWallet, addAssetToWallet, removeAssetFromWallet, addTransactionToAsset, importWallets, exportWallets } = usePortfolio();
   
   const [prices, setPrices] = useState<PriceData>({});
+  const [globalData, setGlobalData] = useState<GlobalData | null>(null);
   
   // Modal states
   const [addingAssetToWalletId, setAddingAssetToWalletId] = useState<string | null>(null);
@@ -76,6 +79,21 @@ export default function App() {
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allAssetIds.join(',')]); // Rerun when the list of assets changes
+  
+  useEffect(() => {
+    const updateGlobalData = async () => {
+      try {
+        const data = await fetchGlobalData();
+        setGlobalData(data);
+      } catch (err) {
+        console.error("Failed to fetch global data:", err);
+        // Do not set a global error for this, as it's non-critical
+      }
+    };
+    updateGlobalData();
+    const interval = setInterval(updateGlobalData, 300000); // 5 minutes
+    return () => clearInterval(interval);
+  }, []);
 
   const handleAddAsset = (asset: PortfolioAsset) => {
     if (addingAssetToWalletId) {
@@ -107,6 +125,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-200 font-sans">
+      <GlobalStatsBar globalData={globalData} />
       <main className="container mx-auto p-4 md:p-8">
         <PortfolioHeader
           onAddWallet={() => setIsAddWalletModalOpen(true)}
@@ -118,7 +137,6 @@ export default function App() {
           totalValue={totalValue} 
           changeData={portfolio24hChange}
           plData={portfolioPL}
-          performer={topPerformer}
           isLoading={isLoading && wallets.length > 0} 
         />
 
@@ -141,6 +159,7 @@ export default function App() {
             </div>
             <div className="lg:col-span-1 space-y-8">
               <AllocationChart wallets={wallets} prices={prices} />
+              <TopPerformer performer={topPerformer} isLoading={isLoading && wallets.length > 0} />
             </div>
           </div>
         ) : (
