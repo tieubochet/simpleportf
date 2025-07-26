@@ -47,7 +47,7 @@ const ChangePercentage: React.FC<{ value: number | undefined }> = ({ value }) =>
     const sign = isPositive ? '+' : '';
 
     return (
-        <span className={`${colorClass} w-16 text-right`}>
+        <span className={colorClass}>
             {sign}{value.toFixed(2)}%
         </span>
     );
@@ -65,7 +65,8 @@ const AssetTable: React.FC<AssetTableProps> = ({ assets, prices, onRemove, onAdd
                     <th className="py-3 px-4 font-medium text-right">Quantity</th>
                     <th className="py-3 px-4 font-medium text-right">Avg. Buy Price</th>
                     <th className="py-3 px-4 font-medium text-right">Current Price</th>
-                    <th className="py-3 px-4 font-medium text-right">Change (24h/7d)</th>
+                    <th className="py-3 px-4 font-medium text-right">24h %</th>
+                    <th className="py-3 px-4 font-medium text-right">7d %</th>
                     <th className="py-3 px-4 font-medium text-right">P/L</th>
                     <th className="py-3 px-4 font-medium text-right">Value</th>
                     <th className="py-3 px-4 font-medium text-center">Actions</th>
@@ -95,23 +96,18 @@ const AssetTable: React.FC<AssetTableProps> = ({ assets, prices, onRemove, onAdd
                             <td className="py-4 px-4 text-right font-mono">
                                 {isPriceLoading ? <div className="h-5 bg-slate-700 rounded animate-pulse w-20 ml-auto"></div> : formatCurrency(currentPrice)}
                             </td>
+                            <td className="py-4 px-4 text-right font-mono">
+                                {isPriceLoading ? (
+                                    <div className="h-5 bg-slate-700 rounded animate-pulse w-16 ml-auto"></div>
+                                ) : (
+                                    <ChangePercentage value={change24h} />
+                                )}
+                            </td>
                              <td className="py-4 px-4 text-right font-mono">
                                 {isPriceLoading ? (
-                                    <div className="flex flex-col items-end space-y-1">
-                                        <div className="h-4 bg-slate-700 rounded animate-pulse w-20"></div>
-                                        <div className="h-4 bg-slate-700 rounded animate-pulse w-20"></div>
-                                    </div>
+                                    <div className="h-5 bg-slate-700 rounded animate-pulse w-16 ml-auto"></div>
                                 ) : (
-                                    <div className="text-xs">
-                                        <div className="flex justify-end items-center space-x-2">
-                                            <span className="text-slate-400">24h</span>
-                                            <ChangePercentage value={change24h} />
-                                        </div>
-                                        <div className="flex justify-end items-center space-x-2">
-                                            <span className="text-slate-400">7d</span>
-                                            <ChangePercentage value={change7d} />
-                                        </div>
-                                    </div>
+                                    <ChangePercentage value={change7d} />
                                 )}
                             </td>
                             <td className="py-4 px-4 text-right font-mono">
