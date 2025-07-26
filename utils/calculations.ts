@@ -118,6 +118,52 @@ export const calculatePortfolio24hChange = (wallets: Wallet[], prices: PriceData
 };
 
 /**
+ * Calculates the portfolio's change in value over the last 7 days.
+ * @param wallets An array of wallets.
+ * @param prices An object with current prices and 7d change data.
+ * @returns An object with the change in value and percentage.
+ */
+export const calculatePortfolio7dChange = (wallets: Wallet[], prices: PriceData): { changeValue: number; changePercentage: number } => {
+  let totalValueNow = 0;
+  let totalValue7dAgo = 0;
+
+  wallets.forEach(wallet => {
+    wallet.assets.forEach(asset => {
+      const priceInfo = prices[asset.id];
+      if (!priceInfo) return; // Skip if no price data
+
+      const { usd: currentPrice, usd_7d_change: changePercent } = priceInfo;
+      const { currentQuantity } = getAssetMetrics(asset.transactions, currentPrice);
+
+      if (currentQuantity > 0) {
+        const marketValueNow = currentQuantity * currentPrice;
+        totalValueNow += marketValueNow;
+        
+        // Only calculate 7d ago value if change data is available
+        if (typeof changePercent === 'number') {
+          // Formula: price_7d_ago = currentPrice / (1 + (changePercent / 100))
+          const price7dAgo = currentPrice / (1 + (changePercent / 100));
+          const marketValue7dAgo = currentQuantity * price7dAgo;
+          totalValue7dAgo += marketValue7dAgo;
+        } else {
+          // If no 7d change data, assume its value 7d ago was the same as now.
+          totalValue7dAgo += marketValueNow;
+        }
+      }
+    });
+  });
+
+  if (totalValue7dAgo === 0) {
+    return { changeValue: 0, changePercentage: 0 };
+  }
+
+  const changeValue = totalValueNow - totalValue7dAgo;
+  const changePercentage = (changeValue / totalValue7dAgo) * 100;
+  
+  return { changeValue, changePercentage };
+};
+
+/**
  * Calculates the total profit/loss for the entire portfolio.
  * @param wallets - An array of wallets.
  * @param prices - An object mapping asset IDs to their current prices.
