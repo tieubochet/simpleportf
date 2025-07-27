@@ -45,11 +45,6 @@ const GlobalStatsBar: React.FC<GlobalStatsBarProps> = ({ globalData, streakCount
                     <div className="flex items-center space-x-4 md:space-x-6 overflow-x-auto whitespace-nowrap">
                         {globalData ? (
                             <>
-                                {typeof globalData.eth_gas_gwei === 'number' && (
-                                    <Stat label="Gas">
-                                        <span className="font-medium text-slate-800 dark:text-slate-200">{globalData.eth_gas_gwei.toFixed(2)} GWEI</span>
-                                    </Stat>
-                                )}
                                 <Stat label="Market Cap">
                                     <span className="font-medium text-slate-800 dark:text-slate-200">{formatLargeNumber(globalData.total_market_cap_usd)}</span>
                                     {typeof changePercentage === 'number' && (
@@ -71,7 +66,6 @@ const GlobalStatsBar: React.FC<GlobalStatsBarProps> = ({ globalData, streakCount
                         ) : (
                             // Loading Skeletons matching the stats
                             <>
-                            <SkeletonStat widthClass="w-24" />
                             <SkeletonStat widthClass="w-40" />
                             <SkeletonStat widthClass="w-28" />
                             <SkeletonStat widthClass="w-24" />
