@@ -19,7 +19,7 @@ interface PortfolioSummaryProps {
 
 const ChangeDisplay: React.FC<{ value: number; percentage: number }> = ({ value, percentage }) => {
     const isPositive = value >= 0;
-    const colorClass = isPositive ? 'text-green-400' : 'text-red-400';
+    const colorClass = isPositive ? 'text-green-500' : 'text-red-500';
     const sign = isPositive ? '+' : '';
 
     const formattedValue = new Intl.NumberFormat('en-US', {
@@ -33,8 +33,8 @@ const ChangeDisplay: React.FC<{ value: number; percentage: number }> = ({ value,
     if (isNaN(value) || isNaN(percentage)) {
         return (
             <div>
-               <p className="text-lg font-semibold text-slate-300">-</p>
-               <p className="text-sm font-mono text-slate-400">(-)</p>
+               <p className="text-lg font-semibold text-slate-600 dark:text-slate-300">-</p>
+               <p className="text-sm font-mono text-slate-500 dark:text-slate-400">(-)</p>
             </div>
         );
     }
@@ -49,15 +49,15 @@ const ChangeDisplay: React.FC<{ value: number; percentage: number }> = ({ value,
 
 const LoadingSkeletonBlock = () => (
     <>
-        <div className="h-6 bg-slate-700 rounded-md animate-pulse w-24"></div>
-        <div className="h-4 bg-slate-700 rounded-md animate-pulse w-16 mt-2"></div>
+        <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded-md animate-pulse w-24"></div>
+        <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded-md animate-pulse w-16 mt-2"></div>
     </>
 );
 
 const TopPerformerContent: React.FC<{ performer: PerformerData | null }> = ({ performer }) => {
     if (!performer) {
         return (
-            <div className="text-slate-400 h-full flex flex-col justify-center">
+            <div className="text-slate-500 dark:text-slate-400 h-full flex flex-col justify-center">
                 <p className="text-lg font-semibold">-</p>
                 <p className="text-sm">No positive gains.</p>
             </div>
@@ -70,8 +70,8 @@ const TopPerformerContent: React.FC<{ performer: PerformerData | null }> = ({ pe
                 <TrophyIcon className="h-6 w-6 text-yellow-400" />
             </div>
             <div>
-                <p className="font-bold text-base text-white truncate" title={performer.name}>{performer.name} <span className="text-slate-400 text-xs uppercase">{performer.symbol}</span></p>
-                <p className="text-lg font-bold text-green-400">
+                <p className="font-bold text-base text-slate-900 dark:text-white truncate" title={performer.name}>{performer.name} <span className="text-slate-500 dark:text-slate-400 text-xs uppercase">{performer.symbol}</span></p>
+                <p className="text-lg font-bold text-green-500">
                     +{performer.change.toFixed(2)}%
                 </p>
             </div>
@@ -89,21 +89,21 @@ const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ totalValue, changeD
   const showLoadingSkeleton = isLoading && totalValue === 0;
 
   return (
-    <div className="bg-slate-800 p-6 rounded-lg shadow-lg">
+    <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-lg shadow-lg">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
         {/* Block 1: Total Value */}
         <div>
-          <h2 className="text-lg font-medium text-slate-400 mb-2">Total Portfolio Value</h2>
+          <h2 className="text-lg font-medium text-slate-500 dark:text-slate-400 mb-2">Total Portfolio Value</h2>
           {showLoadingSkeleton ? (
-            <div className="h-10 bg-slate-700 rounded-md animate-pulse w-48"></div>
+            <div className="h-10 bg-slate-200 dark:bg-slate-700 rounded-md animate-pulse w-48"></div>
           ) : (
-            <p className="text-4xl font-bold text-white tracking-tight">{formattedValue}</p>
+            <p className="text-4xl font-bold text-slate-900 dark:text-white tracking-tight">{formattedValue}</p>
           )}
         </div>
         
         {/* Block 2: 24h Change */}
         <div>
-          <h2 className="text-lg font-medium text-slate-400 mb-2">24h Change</h2>
+          <h2 className="text-lg font-medium text-slate-500 dark:text-slate-400 mb-2">24h Change</h2>
            {showLoadingSkeleton ? (
              <LoadingSkeletonBlock />
           ) : (
@@ -113,7 +113,7 @@ const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ totalValue, changeD
 
         {/* Block 3: Total P/L */}
         <div>
-          <h2 className="text-lg font-medium text-slate-400 mb-2">Total P/L</h2>
+          <h2 className="text-lg font-medium text-slate-500 dark:text-slate-400 mb-2">Total P/L</h2>
            {showLoadingSkeleton ? (
              <LoadingSkeletonBlock />
           ) : (
@@ -123,7 +123,7 @@ const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ totalValue, changeD
 
         {/* Block 4: Top Performer */}
         <div>
-          <h2 className="text-lg font-medium text-slate-400 mb-2">Top Performer (24h)</h2>
+          <h2 className="text-lg font-medium text-slate-500 dark:text-slate-400 mb-2">Top Performer (24h)</h2>
            {showLoadingSkeleton ? (
              <LoadingSkeletonBlock />
           ) : (
