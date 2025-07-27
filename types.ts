@@ -1,3 +1,4 @@
+
 // Represents a single buy or sell transaction
 export interface Transaction {
   id: string;

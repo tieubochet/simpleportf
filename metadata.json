@@ -1,5 +1,7 @@
+
 {
   "name": "Crypto Portfolio Tracker",
   "description": "A personal cryptocurrency portfolio tracker that allows you to monitor your assets in real-time. Manage your holdings across different chains, view total portfolio value, and visualize token allocation with a pie chart. You can export your portfolio data to a file and import it on another device without needing an account.",
-  "requestFramePermissions": []
+  "requestFramePermissions": [],
+  "prompt": ""
 }

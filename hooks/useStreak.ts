@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 
 const STREAK_KEY = 'cryptoPortfolioStreak_v1';
