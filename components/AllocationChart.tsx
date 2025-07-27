@@ -9,7 +9,7 @@ interface AllocationChartProps {
   prices: PriceData;
 }
 
-const COLORS = ['#06b6d4', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#3b82f6', '#ef4444'];
+const COLORS = ['#06b6d4', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#3b82f6', '#ef4444', '#64748b'];
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
@@ -61,13 +61,29 @@ const AllocationChart: React.FC<AllocationChartProps> = ({ wallets, prices }) =>
     const totalValue = assetValues.reduce((acc, asset) => acc + asset.value, 0);
     if (totalValue === 0) return [];
 
-    return assetValues
+    const assetsWithPercent = assetValues
       .map(asset => ({
         ...asset,
         percent: (asset.value / totalValue) * 100,
       }))
-      .filter(item => item.value > 0)
-      .sort((a, b) => b.value - a.value);
+      .filter(item => item.value > 0);
+      
+    const mainAssets = assetsWithPercent.filter(asset => asset.percent > 2);
+    const otherAssets = assetsWithPercent.filter(asset => asset.percent <= 2);
+    
+    let finalChartData = [...mainAssets];
+    
+    if (otherAssets.length > 0) {
+        const othersTotalValue = otherAssets.reduce((sum, asset) => sum + asset.value, 0);
+        const othersTotalPercent = otherAssets.reduce((sum, asset) => sum + asset.percent, 0);
+        finalChartData.push({
+            name: 'Others',
+            value: othersTotalValue,
+            percent: othersTotalPercent,
+        });
+    }
+
+    return finalChartData.sort((a, b) => b.value - a.value);
       
   }, [wallets, prices]);
 
