@@ -69,8 +69,8 @@ export async function fetchGlobalData(): Promise<GlobalData | null> {
         return null; // Return null on failure
       }),
 
-    // Fetch ETH Gas Price from a reliable, CORS-friendly source: etherchain.org
-    fetch('https://api.etherchain.org/api/gasPriceOracle')
+    // Fetch ETH Gas Price from a reliable, CORS-friendly source: ETH Gas Station (via DeFi Pulse)
+    fetch('https://data-api.defipulse.com/api/v1/egs/api/ethgasAPI.json')
       .then(res => {
         if (!res.ok) throw new Error(`Gas API returned status ${res.status}`);
         return res.json();
@@ -91,10 +91,11 @@ export async function fetchGlobalData(): Promise<GlobalData | null> {
   let gasPriceGwei: number | undefined;
 
   // Safely parse gas price from the new source
-  if (gasResult && gasResult.standard) {
-    const standardGas = parseFloat(gasResult.standard);
-    if (!isNaN(standardGas)) {
-        gasPriceGwei = standardGas;
+  if (gasResult && gasResult.average) {
+    // The value is in Gwei
+    const averageGas = parseFloat(gasResult.average);
+    if (!isNaN(averageGas)) {
+        gasPriceGwei = averageGas;
     }
   }
   
