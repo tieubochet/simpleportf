@@ -47,16 +47,16 @@ const WalletCard: React.FC<WalletCardProps> = ({ wallet, prices, onAddAsset, onR
     const showHideButton = displayableAssets.length > 10 && !hasMore;
 
     return (
-        <div className="bg-slate-800 rounded-lg shadow-lg mb-8">
-            <header className="p-4 sm:p-6 border-b border-slate-700 flex justify-between items-center">
+        <div className="bg-slate-50 dark:bg-slate-800 rounded-lg shadow-lg mb-8">
+            <header className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
                 <div>
-                    <h3 className="text-xl font-semibold text-white">{wallet.name}</h3>
-                    <p className="text-slate-400 font-mono">{formattedValue}</p>
+                    <h3 className="text-xl font-semibold text-slate-900 dark:text-white">{wallet.name}</h3>
+                    <p className="text-slate-500 dark:text-slate-400 font-mono">{formattedValue}</p>
                 </div>
                 <div className="flex items-center space-x-2">
                     <button 
                         onClick={() => onAddAsset(wallet.id)} 
-                        className="flex items-center space-x-2 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 font-semibold py-2 px-3 rounded-lg transition-colors duration-200"
+                        className="flex items-center space-x-2 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 font-semibold py-2 px-3 rounded-lg transition-colors duration-200"
                         aria-label={`Add asset to ${wallet.name}`}
                     >
                         <PlusIcon className="h-5 w-5" />
@@ -64,7 +64,7 @@ const WalletCard: React.FC<WalletCardProps> = ({ wallet, prices, onAddAsset, onR
                     </button>
                     <button 
                         onClick={() => onRemoveWallet(wallet.id)}
-                        className="p-2 text-slate-400 hover:bg-red-500/20 hover:text-red-400 rounded-full transition-colors duration-200"
+                        className="p-2 text-slate-500 dark:text-slate-400 hover:bg-red-500/20 hover:text-red-400 rounded-full transition-colors duration-200"
                         aria-label={`Delete wallet ${wallet.name}`}
                     >
                         <TrashIcon className="h-5 w-5" />
@@ -81,11 +81,11 @@ const WalletCard: React.FC<WalletCardProps> = ({ wallet, prices, onAddAsset, onR
                         onAddTransaction={(asset) => onAddTransaction(wallet.id, asset)}
                     />
                     {(hasMore || showHideButton) && (
-                        <div className="py-3 px-6 text-center border-t border-slate-700">
+                        <div className="py-3 px-6 text-center border-t border-slate-200 dark:border-slate-700">
                             {hasMore && (
                                 <button
                                     onClick={handleShowMore}
-                                    className="bg-slate-700 hover:bg-slate-600 text-slate-300 font-semibold py-2 px-5 rounded-lg transition-colors duration-300 w-full sm:w-auto"
+                                    className="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 font-semibold py-2 px-5 rounded-lg transition-colors duration-300 w-full sm:w-auto"
                                 >
                                     Show More
                                 </button>
@@ -93,7 +93,7 @@ const WalletCard: React.FC<WalletCardProps> = ({ wallet, prices, onAddAsset, onR
                             {showHideButton && (
                                 <button
                                     onClick={handleHide}
-                                    className="bg-slate-700 hover:bg-slate-600 text-slate-300 font-semibold py-2 px-5 rounded-lg transition-colors duration-300 w-full sm:w-auto"
+                                    className="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 font-semibold py-2 px-5 rounded-lg transition-colors duration-300 w-full sm:w-auto"
                                 >
                                     Hide
                                 </button>
@@ -102,7 +102,7 @@ const WalletCard: React.FC<WalletCardProps> = ({ wallet, prices, onAddAsset, onR
                     )}
                 </>
             ) : (
-                <div className="p-6 text-center text-slate-400">
+                <div className="p-6 text-center text-slate-500 dark:text-slate-400">
                     <p>This wallet is empty.</p>
                     <p>Click 'Add Asset' to get started.</p>
                 </div>
