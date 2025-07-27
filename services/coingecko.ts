@@ -55,44 +55,55 @@ export async function fetchPrices(coinIds: string[]): Promise<PriceData> {
 }
 
 export async function fetchGlobalData(): Promise<GlobalData | null> {
-  try {
-    // Fetch from CoinGecko
-    const globalResponse = await fetch(`${API_BASE_URL}/global`);
-    if (!globalResponse.ok) {
-      throw new Error('Network response for global data was not ok');
-    }
-    const coingeckoData = await globalResponse.json();
-    const global = coingeckoData.data;
-    
-    // Fetch ETH Gas Price from a separate, key-less API
-    let gasPriceGwei: number | undefined;
-    try {
-      // Using ethgas.watch as a reliable, CORS-friendly source for gas prices.
-      const gasResponse = await fetch('https://ethgas.watch/api/gas');
-      if (gasResponse.ok) {
-        const gasData = await gasResponse.json();
-        // Use the "normal" speed gas price in Gwei
-        const normalGas = gasData?.normal?.gwei;
-        if (typeof normalGas === 'number') {
-            gasPriceGwei = normalGas;
-        }
-      }
-    } catch (gasError) {
-      console.warn('Could not fetch ETH gas price:', gasError);
-      // Fail silently, the gas price is optional
-    }
+  // Use Promise.all to fetch data concurrently and make the function more resilient.
+  // If one fails, the other can still succeed.
+  const [coingeckoResult, gasResult] = await Promise.all([
+    // Fetch main global data from CoinGecko
+    fetch(`${API_BASE_URL}/global`)
+      .then(res => {
+        if (!res.ok) throw new Error(`CoinGecko API returned status ${res.status}`);
+        return res.json();
+      })
+      .catch(err => {
+        console.warn("Failed to fetch main global data from CoinGecko:", err);
+        return null; // Return null on failure
+      }),
 
-    return {
-      total_market_cap_usd: global.total_market_cap.usd,
-      total_volume_usd: global.total_volume.usd,
-      market_cap_change_percentage_24h_usd: global.market_cap_change_percentage_24h_usd,
-      btc_dominance: global.market_cap_percentage.btc,
-      eth_dominance: global.market_cap_percentage.eth,
-      eth_gas_gwei: gasPriceGwei,
-    };
+    // Fetch ETH Gas Price from a reliable, CORS-friendly source: etherchain.org
+    fetch('https://api.etherchain.org/api/gasPriceOracle')
+      .then(res => {
+        if (!res.ok) throw new Error(`Gas API returned status ${res.status}`);
+        return res.json();
+      })
+      .catch(err => {
+        console.warn('Could not fetch ETH gas price:', err);
+        return null; // Return null on failure
+      })
+  ]);
 
-  } catch (error) {
-    console.error('Failed to fetch global market data:', error);
-    throw new Error('Failed to fetch'); // Re-throw to be caught by the UI component
+  // If the primary CoinGecko data fails, we cannot proceed.
+  if (!coingeckoResult) {
+    console.error('Critical failure: Could not retrieve global market data.');
+    throw new Error('Failed to fetch global market data');
   }
+
+  const global = coingeckoResult.data;
+  let gasPriceGwei: number | undefined;
+
+  // Safely parse gas price from the new source
+  if (gasResult && gasResult.standard) {
+    const standardGas = parseFloat(gasResult.standard);
+    if (!isNaN(standardGas)) {
+        gasPriceGwei = standardGas;
+    }
+  }
+  
+  return {
+    total_market_cap_usd: global.total_market_cap.usd,
+    total_volume_usd: global.total_volume.usd,
+    market_cap_change_percentage_24h_usd: global.market_cap_change_percentage_24h_usd,
+    btc_dominance: global.market_cap_percentage.btc,
+    eth_dominance: global.market_cap_percentage.eth,
+    eth_gas_gwei: gasPriceGwei,
+  };
 }
