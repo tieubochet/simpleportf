@@ -76,8 +76,9 @@ const AllocationChart: React.FC<AllocationChartProps> = ({ wallets, prices }) =>
       .filter(item => item.value > 0)
       .sort((a, b) => b.value - a.value);
 
-    const mainAssets = assetsWithPercent.filter(asset => asset.percent > 2);
-    const otherAssets = assetsWithPercent.filter(asset => asset.percent <= 2);
+    const LEGEND_LIMIT = 6;
+    const mainAssets = assetsWithPercent.slice(0, LEGEND_LIMIT);
+    const otherAssets = assetsWithPercent.slice(LEGEND_LIMIT);
     
     let finalGroupedData = [...mainAssets];
     
