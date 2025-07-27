@@ -85,8 +85,9 @@ export default function App() {
         const data = await fetchGlobalData();
         setGlobalData(data);
       } catch (err) {
-        console.error("Failed to fetch global data:", err);
-        // Do not set a global error for this, as it's non-critical
+        console.error("Failed to fetch global market data:", err);
+        // Do not set a global error for this, as it's non-critical.
+        // It will fail gracefully in the GlobalStatsBar component.
       }
     };
     updateGlobalData();

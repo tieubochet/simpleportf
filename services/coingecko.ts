@@ -1,3 +1,4 @@
+
 import { Coin, PriceData, GlobalData } from '../types';
 
 const API_BASE_URL = 'https://api.coingecko.com/api/v3';
@@ -66,14 +67,14 @@ export async function fetchGlobalData(): Promise<GlobalData | null> {
     // Fetch ETH Gas Price from a separate, key-less API
     let gasPriceGwei: number | undefined;
     try {
-      // Using DeBank's public API as a key-less source
-      const gasResponse = await fetch('https://api.debank.com/chain/gas_price_dict_v2?chain=eth');
+      // Using ethgas.watch as a reliable, CORS-friendly source for gas prices.
+      const gasResponse = await fetch('https://ethgas.watch/api/gas');
       if (gasResponse.ok) {
         const gasData = await gasResponse.json();
-        // Price is in Wei, convert to Gwei (1 Gwei = 1,000,000,000 Wei)
-        const priceInWei = gasData.data?.normal?.price;
-        if (priceInWei) {
-            gasPriceGwei = priceInWei / 1_000_000_000;
+        // Use the "normal" speed gas price in Gwei
+        const normalGas = gasData?.normal?.gwei;
+        if (typeof normalGas === 'number') {
+            gasPriceGwei = normalGas;
         }
       }
     } catch (gasError) {
@@ -92,6 +93,6 @@ export async function fetchGlobalData(): Promise<GlobalData | null> {
 
   } catch (error) {
     console.error('Failed to fetch global market data:', error);
-    return null; // Return null on error to handle it gracefully in the UI
+    throw new Error('Failed to fetch'); // Re-throw to be caught by the UI component
   }
 }
