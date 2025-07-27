@@ -7,40 +7,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Crypto Portfolio Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      // Prevents FOUC (Flash of Unstyled Content) by applying the theme before the app loads.
-      (function() {
-        const theme = localStorage.getItem('theme');
-        if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-          document.documentElement.classList.add('dark');
-        }
-      })();
-    </script>
     <style>
-      /* Custom scrollbar for a better aesthetic in both modes */
-      :root {
-        --scrollbar-track: #f1f5f9; /* slate-100 */
-        --scrollbar-thumb: #94a3b8; /* slate-400 */
-        --scrollbar-thumb-hover: #64748b; /* slate-500 */
-      }
-      .dark {
-        --scrollbar-track: #1e293b; /* slate-800 */
-        --scrollbar-thumb: #475569; /* slate-600 */
-        --scrollbar-thumb-hover: #64748b; /* slate-500 */
-      }
+      /* Custom scrollbar for dark theme */
       ::-webkit-scrollbar {
         width: 8px;
         height: 8px;
       }
       ::-webkit-scrollbar-track {
-        background: var(--scrollbar-track);
+        background: #1e293b; /* slate-800 */
       }
       ::-webkit-scrollbar-thumb {
-        background: var(--scrollbar-thumb);
+        background: #475569; /* slate-600 */
         border-radius: 4px;
       }
       ::-webkit-scrollbar-thumb:hover {
-        background: var(--scrollbar-thumb-hover);
+        background: #64748b; /* slate-500 */
       }
     </style>
   <script type="importmap">
@@ -55,7 +36,7 @@
 }
 </script>
 </head>
-  <body>
+  <body class="bg-slate-900">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>

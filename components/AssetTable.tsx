@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { PortfolioAsset, PriceData } from '../types';
 import { TrashIcon, ReceiptIcon } from './icons';
@@ -28,7 +29,7 @@ const formatNumber = (value: number) => {
 
 const ProfitLoss: React.FC<{ value: number }> = ({ value }) => {
     const isProfit = value >= 0;
-    const colorClass = isProfit ? 'text-green-400' : 'text-red-400';
+    const colorClass = isProfit ? 'text-green-500' : 'text-red-500';
     const sign = isProfit ? '+' : '';
 
     return (
@@ -43,7 +44,7 @@ const ChangePercentage: React.FC<{ value: number | undefined }> = ({ value }) =>
         return <span className="text-slate-400">-</span>;
     }
     const isPositive = value >= 0;
-    const colorClass = isPositive ? 'text-green-400' : 'text-red-400';
+    const colorClass = isPositive ? 'text-green-500' : 'text-red-500';
     const sign = isPositive ? '+' : '';
 
     return (
@@ -97,7 +98,7 @@ const AssetTable: React.FC<AssetTableProps> = ({ assets, prices, onRemove, onAdd
                             </td>
                             <td className="py-4 px-4 text-right font-mono text-white">{formatNumber(currentQuantity)}</td>
                             <td className="py-4 px-4 text-right font-mono text-slate-300">{formatCurrency(avgBuyPrice)}</td>
-                            <td className="py-4 px-4 text-right font-mono">
+                            <td className="py-4 px-4 text-right font-mono text-slate-100">
                                 {isPriceLoading ? <div className="h-5 bg-slate-700 rounded animate-pulse w-20 ml-auto"></div> : formatCurrency(currentPrice)}
                             </td>
                             <td className="py-4 px-4 text-right font-mono">

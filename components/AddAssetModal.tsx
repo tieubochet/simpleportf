@@ -83,14 +83,14 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({ onClose, onAddAsset, exis
       onClick={onClose}
     >
       <div 
-        className="bg-white dark:bg-slate-800 rounded-lg shadow-2xl w-full max-w-md"
+        className="bg-slate-800 rounded-lg shadow-2xl w-full max-w-md"
         onClick={e => e.stopPropagation()}
       >
-        <div className="p-6 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+        <div className="p-6 border-b border-slate-700 flex justify-between items-center">
+          <h2 className="text-xl font-bold text-white">
             {step === 1 ? 'Add New Asset' : `Add ${selectedCoin?.name}`}
           </h2>
-          <button onClick={onClose} className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+          <button onClick={onClose} className="text-slate-400 hover:text-white">
             <XIcon className="h-6 w-6" />
           </button>
         </div>
@@ -104,27 +104,27 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({ onClose, onAddAsset, exis
                   placeholder="Search for a cryptocurrency..."
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  className="w-full bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 border border-slate-300 dark:border-slate-600 rounded-lg py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  className="w-full bg-slate-700 text-white placeholder-slate-400 border border-slate-600 rounded-lg py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                   autoFocus
                 />
                 <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
               </div>
               <div className="h-64 overflow-y-auto">
-                {isSearching && <div className="text-center text-slate-500 dark:text-slate-400 p-4">Searching...</div>}
+                {isSearching && <div className="text-center text-slate-400 p-4">Searching...</div>}
                 {!isSearching && searchResults.length > 0 && (
                   <ul>
                     {searchResults.map(coin => (
-                      <li key={coin.id} onClick={() => handleSelectCoin(coin)} className="flex items-center p-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer transition-colors">
+                      <li key={coin.id} onClick={() => handleSelectCoin(coin)} className="flex items-center p-3 rounded-lg hover:bg-slate-700 cursor-pointer transition-colors">
                         <div className="flex-grow">
-                            <span className="font-semibold text-slate-900 dark:text-white">{coin.name}</span>
-                            <span className="text-slate-500 dark:text-slate-400 ml-2 uppercase">{coin.symbol}</span>
+                            <span className="font-semibold text-white">{coin.name}</span>
+                            <span className="text-slate-400 ml-2 uppercase">{coin.symbol}</span>
                         </div>
                       </li>
                     ))}
                   </ul>
                 )}
                 {!isSearching && searchQuery.length > 1 && searchResults.length === 0 && (
-                    <div className="text-center text-slate-500 dark:text-slate-400 p-4">No results found or asset already in wallet.</div>
+                    <div className="text-center text-slate-400 p-4">No results found or asset already in wallet.</div>
                 )}
               </div>
             </div>
@@ -132,53 +132,53 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({ onClose, onAddAsset, exis
 
           {step === 2 && selectedCoin && (
             <div className="space-y-4">
-              <p className="text-slate-500 dark:text-slate-400">Enter the details of your first purchase of {selectedCoin.name} ({selectedCoin.symbol.toUpperCase()}).</p>
+              <p className="text-slate-400">Enter the details of your first purchase of {selectedCoin.name} ({selectedCoin.symbol.toUpperCase()}).</p>
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Quantity</label>
+                <label className="block text-sm font-medium text-slate-300 mb-1">Quantity</label>
                 <input
                   type="number"
                   placeholder="e.g., 0.5"
                   value={quantity}
                   onChange={e => setQuantity(e.target.value)}
                   autoFocus
-                  className="w-full bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 border border-slate-300 dark:border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  className="w-full bg-slate-700 text-white placeholder-slate-400 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Price Per Coin (USD)</label>
+                <label className="block text-sm font-medium text-slate-300 mb-1">Price Per Coin (USD)</label>
                 <input
                   type="number"
                   placeholder="e.g., 50000.00"
                   value={pricePerUnit}
                   onChange={e => setPricePerUnit(e.target.value)}
-                  className="w-full bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 border border-slate-300 dark:border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  className="w-full bg-slate-700 text-white placeholder-slate-400 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 />
               </div>
               <div>
-                <label htmlFor="purchase-date" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Purchase Date</label>
+                <label htmlFor="purchase-date" className="block text-sm font-medium text-slate-300 mb-1">Purchase Date</label>
                 <input
                   id="purchase-date"
                   type="date"
                   value={date}
                   onChange={e => setDate(e.target.value)}
-                  className="w-full bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 border border-slate-300 dark:border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  className="w-full bg-slate-700 text-white placeholder-slate-400 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 />
               </div>
             </div>
           )}
         </div>
 
-        <div className="p-6 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-700 rounded-b-lg flex justify-end space-x-4">
+        <div className="p-6 bg-slate-800/50 border-t border-slate-700 rounded-b-lg flex justify-end space-x-4">
           {step === 2 && 
-            <button onClick={() => setStep(1)} className="bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500 text-slate-800 dark:text-white font-bold py-2 px-4 rounded-lg transition-colors">
+            <button onClick={() => setStep(1)} className="bg-slate-600 hover:bg-slate-500 text-white font-bold py-2 px-4 rounded-lg transition-colors">
               Back to Search
             </button>
           }
-          <button onClick={onClose} className="bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500 text-slate-800 dark:text-white font-bold py-2 px-4 rounded-lg transition-colors">
+          <button onClick={onClose} className="bg-slate-600 hover:bg-slate-500 text-white font-bold py-2 px-4 rounded-lg transition-colors">
             Cancel
           </button>
           {step === 2 && 
-            <button onClick={handleSave} disabled={!canSave} className="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg transition-colors disabled:bg-slate-400 dark:disabled:bg-slate-700 disabled:text-slate-600 dark:disabled:text-slate-500 disabled:cursor-not-allowed">
+            <button onClick={handleSave} disabled={!canSave} className="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg transition-colors disabled:bg-slate-700 disabled:text-slate-500 disabled:cursor-not-allowed">
               Add Asset
             </button>
           }

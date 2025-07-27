@@ -126,7 +126,7 @@ export default function App() {
   }, [addingAssetToWalletId, wallets]);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-sans transition-colors duration-300">
+    <div className="min-h-screen bg-slate-900 text-slate-200 font-sans">
       <GlobalStatsBar globalData={globalData} streakCount={streakCount} />
       <main className="container mx-auto p-4 md:p-8">
         <PortfolioHeader
@@ -165,9 +165,9 @@ export default function App() {
             </div>
           </div>
         ) : (
-          <div className="text-center py-20 px-6 bg-slate-100 dark:bg-slate-800 rounded-lg mt-8">
-            <h2 className="text-2xl font-semibold text-slate-900 dark:text-white mb-2">Your Portfolio is Empty</h2>
-            <p className="text-slate-500 dark:text-slate-400 mb-6">Create a wallet to start tracking your assets.</p>
+          <div className="text-center py-20 px-6 bg-slate-800 rounded-lg mt-8">
+            <h2 className="text-2xl font-semibold text-white mb-2">Your Portfolio is Empty</h2>
+            <p className="text-slate-400 mb-6">Create a wallet to start tracking your assets.</p>
             <button
               onClick={() => setIsAddWalletModalOpen(true)}
               className="bg-cyan-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-cyan-600 transition-colors duration-300 inline-flex items-center space-x-2"

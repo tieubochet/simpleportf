@@ -15,10 +15,10 @@ const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
-      <div className="bg-white dark:bg-slate-700 p-3 rounded-lg border border-slate-200 dark:border-slate-600 shadow-lg">
-        <p className="font-bold text-slate-900 dark:text-white">{`${data.name}`}</p>
-        <p className="text-slate-600 dark:text-slate-300">{`Value: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(data.value)}`}</p>
-        <p className="text-cyan-500 dark:text-cyan-400">{`Allocation: ${data.percent.toFixed(2)}%`}</p>
+      <div className="bg-slate-700 p-3 rounded-lg border border-slate-600 shadow-lg">
+        <p className="font-bold text-white">{`${data.name}`}</p>
+        <p className="text-slate-300">{`Value: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(data.value)}`}</p>
+        <p className="text-cyan-400">{`Allocation: ${data.percent.toFixed(2)}%`}</p>
       </div>
     );
   }
@@ -73,16 +73,16 @@ const AllocationChart: React.FC<AllocationChartProps> = ({ wallets, prices }) =>
 
   if (chartData.length === 0) {
     return (
-        <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-lg shadow-lg flex flex-col items-center justify-center min-h-[300px]">
-            <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">Overall Allocation</h3>
-            <p className="text-slate-500 dark:text-slate-400">Not enough data to display chart.</p>
+        <div className="bg-slate-800 p-6 rounded-lg shadow-lg flex flex-col items-center justify-center min-h-[300px]">
+            <h3 className="text-xl font-semibold text-white mb-4">Overall Allocation</h3>
+            <p className="text-slate-400">Not enough data to display chart.</p>
         </div>
     );
   }
 
   return (
-    <div className="bg-slate-50 dark:bg-slate-800 p-4 sm:p-6 rounded-lg shadow-lg">
-      <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">Overall Allocation</h3>
+    <div className="bg-slate-800 p-4 sm:p-6 rounded-lg shadow-lg">
+      <h3 className="text-xl font-semibold text-white mb-4">Overall Allocation</h3>
       <div style={{ width: '100%', height: 300 }}>
         <ResponsiveContainer>
           <PieChart>
