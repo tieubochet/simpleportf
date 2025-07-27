@@ -1,13 +1,10 @@
-
 import React from 'react';
 import { SunIcon, MoonIcon } from './icons';
+import { useTheme } from '../hooks/useTheme';
 
-interface ThemeToggleProps {
-  theme: 'light' | 'dark';
-  toggleTheme: () => void;
-}
+const ThemeToggle: React.FC = () => {
+  const { theme, toggleTheme } = useTheme();
 
-const ThemeToggle: React.FC<ThemeToggleProps> = ({ theme, toggleTheme }) => {
   return (
     <button
       onClick={toggleTheme}

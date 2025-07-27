@@ -1,7 +1,5 @@
-
 import React from 'react';
 import { UploadIcon, DownloadIcon, WalletIcon } from './icons';
-import { useTheme } from '../hooks/useTheme';
 import ThemeToggle from './ThemeToggle';
 
 interface PortfolioHeaderProps {
@@ -11,7 +9,6 @@ interface PortfolioHeaderProps {
 }
 
 const PortfolioHeader: React.FC<PortfolioHeaderProps> = ({ onAddWallet, onImport, onExport }) => {
-  const { theme, toggleTheme } = useTheme();
 
   return (
     <header className="flex flex-col md:flex-row items-center justify-between mb-8">
@@ -19,7 +16,7 @@ const PortfolioHeader: React.FC<PortfolioHeaderProps> = ({ onAddWallet, onImport
         Crypto Portfolios
       </h1>
       <div className="flex items-center space-x-2">
-        <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
+        <ThemeToggle />
         <button onClick={onImport} className="flex items-center space-x-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300">
           <UploadIcon className="h-5 w-5" />
           <span>Import</span>
