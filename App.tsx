@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { PortfolioAsset, PriceData, Wallet, Transaction, PerformerData, GlobalData } from './types';
 import { usePortfolio } from './hooks/usePortfolio';
+import { useStreak } from './hooks/useStreak';
 import { fetchPrices, fetchGlobalData } from './services/coingecko';
 import { calculateTotalValue, getAssetIds, getAssetMetrics, calculatePortfolio24hChange, calculateTotalPL, findTopPerformer } from './utils/calculations';
 
@@ -23,6 +24,7 @@ type AssetForTransaction = {
 
 export default function App() {
   const { wallets, addWallet, removeWallet, addAssetToWallet, removeAssetFromWallet, addTransactionToAsset, importWallets, exportWallets } = usePortfolio();
+  const streakCount = useStreak();
   
   const [prices, setPrices] = useState<PriceData>({});
   const [globalData, setGlobalData] = useState<GlobalData | null>(null);
@@ -125,7 +127,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-200 font-sans">
-      <GlobalStatsBar globalData={globalData} />
+      <GlobalStatsBar globalData={globalData} streakCount={streakCount} />
       <main className="container mx-auto p-4 md:p-8">
         <PortfolioHeader
           onAddWallet={() => setIsAddWalletModalOpen(true)}
