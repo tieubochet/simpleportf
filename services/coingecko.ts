@@ -1,5 +1,4 @@
-
-import { Coin, PriceData, GlobalData } from '../types';
+import { Coin, PriceData } from '../types';
 
 const API_BASE_URL = 'https://api.coingecko.com/api/v3';
 
@@ -51,28 +50,5 @@ export async function fetchPrices(coinIds: string[]): Promise<PriceData> {
   } catch (error) {
     console.error('Failed to fetch prices:', error);
     throw error;
-  }
-}
-
-export async function fetchGlobalData(): Promise<GlobalData | null> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/global`);
-    if (!response.ok) {
-      throw new Error(`CoinGecko API returned status ${response.status}`);
-    }
-    const result = await response.json();
-    
-    const global = result.data;
-    
-    return {
-      total_market_cap_usd: global.total_market_cap.usd,
-      total_volume_usd: global.total_volume.usd,
-      market_cap_change_percentage_24h_usd: global.market_cap_change_percentage_24h_usd,
-      btc_dominance: global.market_cap_percentage.btc,
-      eth_dominance: global.market_cap_percentage.eth,
-    };
-  } catch (err) {
-    console.error('Critical failure: Could not retrieve global market data.', err);
-    throw new Error('Failed to fetch global market data');
   }
 }

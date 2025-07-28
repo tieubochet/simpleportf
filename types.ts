@@ -1,4 +1,3 @@
-
 // Represents a single buy or sell transaction
 export interface Transaction {
   id: string;
@@ -45,11 +44,10 @@ export interface PerformerData {
   change: number;
 }
 
-// Represents global market data from CoinGecko
 export interface GlobalData {
-  total_market_cap_usd: number;
-  total_volume_usd: number;
-  market_cap_change_percentage_24h_usd: number;
-  btc_dominance: number;
-  eth_dominance: number;
+    total_market_cap_usd: number;
+    total_volume_usd: number;
+    market_cap_change_percentage_24h_usd: number;
+    btc_dominance: number;
+    eth_dominance: number;
 }

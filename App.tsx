@@ -1,12 +1,9 @@
-
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { PortfolioAsset, PriceData, Wallet, Transaction, PerformerData, GlobalData } from './types';
+import { PortfolioAsset, PriceData, Wallet, Transaction, PerformerData } from './types';
 import { usePortfolio } from './hooks/usePortfolio';
-import { useStreak } from './hooks/useStreak';
-import { fetchPrices, fetchGlobalData } from './services/coingecko';
+import { fetchPrices } from './services/coingecko';
 import { calculateTotalValue, getAssetIds, getAssetMetrics, calculatePortfolio24hChange, calculateTotalPL, findTopPerformer } from './utils/calculations';
 
-import GlobalStatsBar from './components/GlobalStatsBar';
 import PortfolioHeader from './components/PortfolioHeader';
 import PortfolioSummary from './components/PortfolioSummary';
 import AllocationChart from './components/AllocationChart';
@@ -24,10 +21,8 @@ type AssetForTransaction = {
 
 export default function App() {
   const { wallets, addWallet, removeWallet, addAssetToWallet, removeAssetFromWallet, addTransactionToAsset, importWallets, exportWallets } = usePortfolio();
-  const streakCount = useStreak();
   
   const [prices, setPrices] = useState<PriceData>({});
-  const [globalData, setGlobalData] = useState<GlobalData | null>(null);
   
   // Modal states
   const [addingAssetToWalletId, setAddingAssetToWalletId] = useState<string | null>(null);
@@ -80,22 +75,6 @@ export default function App() {
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allAssetIds.join(',')]); // Rerun when the list of assets changes
-  
-  useEffect(() => {
-    const updateGlobalData = async () => {
-      try {
-        const data = await fetchGlobalData();
-        setGlobalData(data);
-      } catch (err) {
-        console.error("Failed to fetch global market data:", err);
-        // Do not set a global error for this, as it's non-critical.
-        // It will fail gracefully in the GlobalStatsBar component.
-      }
-    };
-    updateGlobalData();
-    const interval = setInterval(updateGlobalData, 300000); // 5 minutes
-    return () => clearInterval(interval);
-  }, []);
 
   const handleAddAsset = (asset: PortfolioAsset) => {
     if (addingAssetToWalletId) {
@@ -127,7 +106,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-200 font-sans">
-      <GlobalStatsBar globalData={globalData} streakCount={streakCount} />
       <main className="container mx-auto p-4 md:p-8">
         <PortfolioHeader
           onAddWallet={() => setIsAddWalletModalOpen(true)}
