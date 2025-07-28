@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { UploadIcon, DownloadIcon, WalletIcon } from './icons';
+import DailyStreak from './DailyStreak';
 
 interface PortfolioHeaderProps {
   onAddWallet: () => void;
@@ -28,6 +29,7 @@ const PortfolioHeader: React.FC<PortfolioHeaderProps> = ({ onAddWallet, onImport
           <WalletIcon className="h-5 w-5" />
           <span>Add Wallet</span>
         </button>
+        <DailyStreak />
       </div>
     </header>
   );
