@@ -1,6 +1,5 @@
-
 import React, { useMemo, useState } from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { Wallet, PriceData } from '../types';
 import { getAssetMetrics } from '../utils/calculations';
 
@@ -33,6 +32,30 @@ const CustomLegend = ({ payload, onToggleViewAll, showAll, hasOthers }: any) => 
       )}
     </div>
   );
+};
+
+const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: any[] }) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    const value = data.value;
+    const percent = data.percent;
+    const name = data.name;
+
+    const formattedValue = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(value);
+
+    return (
+      <div className="bg-slate-900/80 backdrop-blur-sm border border-slate-600 p-3 rounded-lg shadow-lg text-sm">
+        <p className="font-bold text-white mb-1">{name}</p>
+        <p className="text-slate-300">{formattedValue}</p>
+        <p className="text-slate-400">{`${percent.toFixed(2)}% of portfolio`}</p>
+      </div>
+    );
+  }
+
+  return null;
 };
 
 
@@ -120,6 +143,7 @@ const AllocationChart: React.FC<AllocationChartProps> = ({ wallets, prices }) =>
         <div className="h-[200px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
               <Pie
                 data={pieDataToShow}
                 cx="50%"
