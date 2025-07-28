@@ -1,43 +1,243 @@
-import React from 'react';
-import { PerformerData } from '../types';
-import { TrophyIcon } from './icons';
 
-interface TopPerformerProps {
-  performer: PerformerData | null;
-  isLoading: boolean;
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { PortfolioAsset, PriceData, Wallet, Transaction, HistoricalDataPoint, PerformerData } from './types';
+import { usePortfolio } from './hooks/usePortfolio';
+import { fetchPrices, fetchHistoricalChartData } from './services/coingecko';
+import { calculateTotalValue, getAssetIds, getAssetMetrics, calculatePortfolio24hChange, calculateTotalPL, calculateHistoricalPortfolioValue, findTopPerformer } from './utils/calculations';
+
+import PortfolioHeader from './components/PortfolioHeader';
+import PortfolioSummary from './components/PortfolioSummary';
+import AllocationChart from './components/AllocationChart';
+import AddAssetModal from './components/AddAssetModal';
+import AddWalletModal from './components/AddWalletModal';
+import AddTransactionModal from './components/AddTransactionModal';
+import WalletCard from './components/WalletCard';
+import { WalletIcon } from './components/icons';
+import PerformanceChart from './components/PerformanceChart';
+
+type AssetForTransaction = {
+  walletId: string;
+  asset: PortfolioAsset;
+  currentQuantity: number;
 }
 
-const TopPerformer: React.FC<TopPerformerProps> = ({ performer, isLoading }) => {
-  const showLoadingSkeleton = isLoading && !performer;
+export default function App() {
+  const { wallets, addWallet, removeWallet, addAssetToWallet, removeAssetFromWallet, addTransactionToAsset, importWallets, exportWallets } = usePortfolio();
+  
+  const [prices, setPrices] = useState<PriceData>({});
+  
+  // Modal states
+  const [addingAssetToWalletId, setAddingAssetToWalletId] = useState<string | null>(null);
+  const [isAddWalletModalOpen, setIsAddWalletModalOpen] = useState(false);
+  const [assetForTransaction, setAssetForTransaction] = useState<AssetForTransaction | null>(null);
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Performance Chart State
+  const [timeRange, setTimeRange] = useState<'24h' | '7d' | '1m' | '3m' | '1y'>('7d');
+  const [historicalData, setHistoricalData] = useState<HistoricalDataPoint[]>([]);
+  const [isChartLoading, setIsChartLoading] = useState(true);
+
+  const allAssetIds = useMemo(() => getAssetIds(wallets), [wallets]);
+
+  const totalValue = useMemo(() => {
+    return calculateTotalValue(wallets, prices);
+  }, [wallets, prices]);
+  
+  const portfolio24hChange = useMemo(() => {
+    return calculatePortfolio24hChange(wallets, prices);
+  }, [wallets, prices]);
+
+  const portfolioPL = useMemo(() => {
+    return calculateTotalPL(wallets, prices);
+  }, [wallets, prices]);
+
+  const topPerformer = useMemo(() => {
+    return findTopPerformer(wallets, prices);
+  }, [wallets, prices]);
+
+  const updatePrices = useCallback(async () => {
+    if (allAssetIds.length === 0) {
+      setPrices({});
+      setIsLoading(false);
+      return;
+    }
+    setError(null);
+    if (!isLoading) setIsLoading(true);
+    try {
+      const fetchedPrices = await fetchPrices(allAssetIds);
+      setPrices(fetchedPrices);
+    } catch (err) {
+      console.error("Failed to fetch prices:", err);
+      setError("Could not update prices. Please try again later.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [allAssetIds, isLoading]);
+
+  useEffect(() => {
+    updatePrices();
+    const interval = setInterval(updatePrices, 60000); // Update every 60 seconds
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allAssetIds.join(',')]); // Rerun when the list of assets changes
+  
+  // Effect for fetching historical data for the chart
+  useEffect(() => {
+    const fetchAndCalculateHistoricalData = async () => {
+        if (allAssetIds.length === 0) {
+            setHistoricalData([]);
+            setIsChartLoading(false);
+            return;
+        }
+
+        setIsChartLoading(true);
+        try {
+            const daysMap: { [key: string]: string } = { '24h': '1', '7d': '7', '1m': '30', '3m': '90', '1y': '365' };
+            const days = daysMap[timeRange];
+
+            const promises = allAssetIds.map(id => fetchHistoricalChartData(id, days));
+            const results = await Promise.all(promises);
+
+            const historicalPrices: Record<string, [number, number][]> = {};
+            allAssetIds.forEach((id, index) => {
+                historicalPrices[id] = results[index];
+            });
+
+            const calculatedData = calculateHistoricalPortfolioValue(wallets, historicalPrices);
+            setHistoricalData(calculatedData);
+
+        } catch (err) {
+            console.error("Failed to fetch or calculate historical chart data:", err);
+            // set an error state for the chart if needed
+            setHistoricalData([]); // Clear data on error
+        } finally {
+            setIsChartLoading(false);
+        }
+    };
+
+    fetchAndCalculateHistoricalData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wallets, timeRange, allAssetIds.join(',')]);
+
+  const handleAddAsset = (asset: PortfolioAsset) => {
+    if (addingAssetToWalletId) {
+      addAssetToWallet(addingAssetToWalletId, asset);
+      setAddingAssetToWalletId(null);
+    }
+  };
+  
+  const handleAddTransaction = (transaction: Transaction) => {
+    if (assetForTransaction) {
+      addTransactionToAsset(assetForTransaction.walletId, assetForTransaction.asset.id, transaction);
+      setAssetForTransaction(null);
+    }
+  };
+
+  const handleOpenAddAssetModal = (walletId: string) => {
+    setAddingAssetToWalletId(walletId);
+  };
+  
+  const handleOpenAddTransactionModal = (walletId: string, asset: PortfolioAsset) => {
+    const { currentQuantity } = getAssetMetrics(asset.transactions, 0); // Price is not needed for quantity
+    setAssetForTransaction({ walletId, asset, currentQuantity });
+  };
+
+  const walletToAddAssetTo = useMemo(() => {
+    if (!addingAssetToWalletId) return null;
+    return wallets.find(w => w.id === addingAssetToWalletId);
+  }, [addingAssetToWalletId, wallets]);
 
   return (
-    <div className="bg-slate-800 p-6 rounded-lg shadow-lg">
-      <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
-        <TrophyIcon className="h-6 w-6 mr-3 text-amber-400" />
-        Top Performer (24h)
-      </h3>
-      {showLoadingSkeleton ? (
-        <div className="animate-pulse flex items-center space-x-4">
-          <div className="flex-grow space-y-2">
-            <div className="h-5 bg-slate-700 rounded w-3/4"></div>
-            <div className="h-4 bg-slate-700 rounded w-1/2"></div>
+    <div className="min-h-screen bg-slate-900 text-slate-200 font-sans">
+      <main className="container mx-auto p-4 md:p-8">
+        <PortfolioHeader
+          onAddWallet={() => setIsAddWalletModalOpen(true)}
+          onImport={importWallets}
+          onExport={exportWallets}
+        />
+
+        <PortfolioSummary 
+          totalValue={totalValue} 
+          changeData={portfolio24hChange}
+          plData={portfolioPL}
+          performer={topPerformer}
+          isLoading={isLoading && wallets.length > 0}
+        />
+
+        {error && <div className="text-center text-red-400 bg-red-900/50 p-3 rounded-lg my-4">{error}</div>}
+
+        {wallets.length > 0 ? (
+          <>
+            <div className="mt-8">
+              <PerformanceChart 
+                data={historicalData} 
+                isLoading={isChartLoading}
+                timeRange={timeRange}
+                setTimeRange={setTimeRange}
+              />
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+              <div className="lg:col-span-2">
+                {wallets.map(wallet => (
+                    <WalletCard 
+                        key={wallet.id}
+                        wallet={wallet}
+                        prices={prices}
+                        onAddAsset={handleOpenAddAssetModal}
+                        onRemoveAsset={removeAssetFromWallet}
+                        onRemoveWallet={removeWallet}
+                        onAddTransaction={handleOpenAddTransactionModal}
+                    />
+                ))}
+              </div>
+              <div className="lg:col-span-1 space-y-8">
+                <AllocationChart wallets={wallets} prices={prices} />
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="text-center py-20 px-6 bg-slate-800 rounded-lg mt-8">
+            <h2 className="text-2xl font-semibold text-white mb-2">Your Portfolio is Empty</h2>
+            <p className="text-slate-400 mb-6">Create a wallet to start tracking your assets.</p>
+            <button
+              onClick={() => setIsAddWalletModalOpen(true)}
+              className="bg-cyan-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-cyan-600 transition-colors duration-300 inline-flex items-center space-x-2"
+            >
+              <WalletIcon className="h-5 w-5" />
+              <span>Create Your First Wallet</span>
+            </button>
           </div>
-        </div>
-      ) : performer ? (
-        <div>
-          <p className="text-2xl font-bold text-white">{performer.name}</p>
-          <div className="flex items-baseline space-x-2">
-            <p className="text-lg font-mono text-green-400">
-              +{performer.change.toFixed(2)}%
-            </p>
-            <p className="text-slate-400 uppercase">{performer.symbol}</p>
-          </div>
-        </div>
-      ) : (
-        <p className="text-slate-400">No performance data available.</p>
+        )}
+      </main>
+
+      {isAddWalletModalOpen && (
+        <AddWalletModal 
+          onClose={() => setIsAddWalletModalOpen(false)}
+          onAddWallet={(name) => {
+            addWallet(name);
+            setIsAddWalletModalOpen(false);
+          }}
+        />
+      )}
+
+      {walletToAddAssetTo && (
+        <AddAssetModal
+          onClose={() => setAddingAssetToWalletId(null)}
+          onAddAsset={handleAddAsset}
+          existingAssetIds={walletToAddAssetTo.assets.map(a => a.id)}
+        />
+      )}
+      
+      {assetForTransaction && (
+        <AddTransactionModal
+          asset={assetForTransaction.asset}
+          currentQuantity={assetForTransaction.currentQuantity}
+          onClose={() => setAssetForTransaction(null)}
+          onAddTransaction={handleAddTransaction}
+        />
       )}
     </div>
   );
-};
-
-export default TopPerformer;
+}
