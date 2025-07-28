@@ -112,7 +112,7 @@ const AllocationChart: React.FC<AllocationChartProps> = ({ wallets, prices }) =>
       .filter(item => item.value > 0)
       .sort((a, b) => b.value - a.value);
 
-    const LEGEND_LIMIT = 12;
+    const LEGEND_LIMIT = 10;
     const mainAssets = assetsWithPercent.slice(0, LEGEND_LIMIT);
     const otherAssets = assetsWithPercent.slice(LEGEND_LIMIT);
     
