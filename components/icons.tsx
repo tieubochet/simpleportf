@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 // Props for all icons
@@ -74,4 +75,13 @@ export const TrophyIcon: React.FC<IconProps> = (props) => (
         <path d="M14 14.66V22"/>
         <path d="M8 2h8v12.66a1 1 0 0 1-.33.74l-2.67 2.67a1 1 0 0 1-1.41 0l-2.67-2.67A1 1 0 0 1 8 12.66V2z"/>
     </svg>
+);
+
+export const FireIcon: React.FC<IconProps> = (props) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="M14.5 4.5c3 3 3 7.5 0 10.5-3-3-3-7.5 0-10.5z" />
+    <path d="M12 12.5c1.667 1.667 1.667 4.167 0 5.833-1.667-1.666-1.667-4.166 0-5.833z" />
+    <path d="M7.5 10c0 4.5 3.5 8 8 8" />
+    <path d="M4.5 18c-2-2.5-2.5-6-1-8.5" />
+  </svg>
 );
