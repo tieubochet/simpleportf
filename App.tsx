@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { PortfolioAsset, PriceData, Wallet, Transaction, HistoricalDataPoint } from './types';
+import { PortfolioAsset, PriceData, Wallet, Transaction, HistoricalDataPoint, PerformerData } from './types';
 import { usePortfolio } from './hooks/usePortfolio';
 import { fetchPrices, fetchHistoricalChartData } from './services/coingecko';
-import { calculateTotalValue, getAssetIds, getAssetMetrics, calculatePortfolio24hChange, calculateTotalPL, calculateHistoricalPortfolioValue } from './utils/calculations';
+import { calculateTotalValue, getAssetIds, getAssetMetrics, calculatePortfolio24hChange, calculateTotalPL, calculateHistoricalPortfolioValue, findTopPerformer } from './utils/calculations';
 
 import PortfolioHeader from './components/PortfolioHeader';
 import PortfolioSummary from './components/PortfolioSummary';
@@ -13,6 +13,7 @@ import AddTransactionModal from './components/AddTransactionModal';
 import WalletCard from './components/WalletCard';
 import { WalletIcon } from './components/icons';
 import PerformanceChart from './components/PerformanceChart';
+import TopPerformer from './components/TopPerformer';
 
 type AssetForTransaction = {
   walletId: string;
@@ -50,6 +51,10 @@ export default function App() {
 
   const portfolioPL = useMemo(() => {
     return calculateTotalPL(wallets, prices);
+  }, [wallets, prices]);
+
+  const topPerformer = useMemo(() => {
+    return findTopPerformer(wallets, prices);
   }, [wallets, prices]);
 
   const updatePrices = useCallback(async () => {
@@ -187,6 +192,7 @@ export default function App() {
                 ))}
               </div>
               <div className="lg:col-span-1 space-y-8">
+                <TopPerformer performer={topPerformer} isLoading={isLoading && wallets.length > 0} />
                 <AllocationChart wallets={wallets} prices={prices} />
               </div>
             </div>

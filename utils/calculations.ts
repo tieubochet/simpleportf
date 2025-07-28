@@ -1,4 +1,4 @@
-import { Wallet, PriceData, Transaction, PortfolioAsset, HistoricalDataPoint } from '../types';
+import { Wallet, PriceData, Transaction, PortfolioAsset, HistoricalDataPoint, PerformerData } from '../types';
 
 /**
  * Calculates key metrics for a single asset based on its transaction history and current price.
@@ -181,6 +181,39 @@ export const getAssetIds = (wallets: Wallet[]): string[] => {
     wallets.forEach(w => w.assets.forEach(a => ids.add(a.id)));
     return Array.from(ids);
 };
+
+/**
+ * Finds the asset with the highest positive 24-hour change.
+ * @param wallets - An array of wallets.
+ * @param prices - An object with current prices and 24h change data.
+ * @returns A PerformerData object for the top performer, or null if none.
+ */
+export const findTopPerformer = (wallets: Wallet[], prices: PriceData): PerformerData | null => {
+  let topPerformer: PerformerData | null = null;
+  let maxChange = -Infinity;
+
+  wallets.forEach(wallet => {
+    wallet.assets.forEach(asset => {
+      const priceInfo = prices[asset.id];
+      const { currentQuantity } = getAssetMetrics(asset.transactions, priceInfo?.usd ?? 0);
+
+      if (priceInfo && typeof priceInfo.usd_24h_change === 'number' && currentQuantity > 0) {
+        if (priceInfo.usd_24h_change > maxChange) {
+          maxChange = priceInfo.usd_24h_change;
+          topPerformer = {
+            id: asset.id,
+            name: asset.name,
+            symbol: asset.symbol,
+            change: priceInfo.usd_24h_change,
+          };
+        }
+      }
+    });
+  });
+
+  return topPerformer;
+};
+
 
 /**
  * Calculates the historical total value of a portfolio over time.
