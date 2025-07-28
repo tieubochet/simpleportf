@@ -37,17 +37,14 @@ export type PriceData = Record<string, {
   market_cap_rank?: number;
 }>;
 
-// Represents data for the top performing asset
-export interface PerformerData {
-  name: string;
-  symbol: string;
-  change: number;
-}
+// Represents a data point for the historical performance chart: [timestamp, value]
+export type HistoricalDataPoint = [number, number];
 
+// Represents global cryptocurrency market data for the stats bar
 export interface GlobalData {
-    total_market_cap_usd: number;
-    total_volume_usd: number;
-    market_cap_change_percentage_24h_usd: number;
-    btc_dominance: number;
-    eth_dominance: number;
+  total_market_cap_usd: number;
+  total_volume_usd: number;
+  market_cap_change_percentage_24h_usd: number;
+  btc_dominance: number;
+  eth_dominance: number;
 }

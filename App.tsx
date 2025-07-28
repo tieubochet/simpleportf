@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { PortfolioAsset, PriceData, Wallet, Transaction, PerformerData } from './types';
+import { PortfolioAsset, PriceData, Wallet, Transaction, HistoricalDataPoint } from './types';
 import { usePortfolio } from './hooks/usePortfolio';
-import { fetchPrices } from './services/coingecko';
-import { calculateTotalValue, getAssetIds, getAssetMetrics, calculatePortfolio24hChange, calculateTotalPL, findTopPerformer } from './utils/calculations';
+import { fetchPrices, fetchHistoricalChartData } from './services/coingecko';
+import { calculateTotalValue, getAssetIds, getAssetMetrics, calculatePortfolio24hChange, calculateTotalPL, calculateHistoricalPortfolioValue } from './utils/calculations';
 
 import PortfolioHeader from './components/PortfolioHeader';
 import PortfolioSummary from './components/PortfolioSummary';
@@ -12,6 +12,7 @@ import AddWalletModal from './components/AddWalletModal';
 import AddTransactionModal from './components/AddTransactionModal';
 import WalletCard from './components/WalletCard';
 import { WalletIcon } from './components/icons';
+import PerformanceChart from './components/PerformanceChart';
 
 type AssetForTransaction = {
   walletId: string;
@@ -32,6 +33,11 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
+  // Performance Chart State
+  const [timeRange, setTimeRange] = useState<'24h' | '7d' | '1m' | '3m' | '1y'>('7d');
+  const [historicalData, setHistoricalData] = useState<HistoricalDataPoint[]>([]);
+  const [isChartLoading, setIsChartLoading] = useState(true);
+
   const allAssetIds = useMemo(() => getAssetIds(wallets), [wallets]);
 
   const totalValue = useMemo(() => {
@@ -44,10 +50,6 @@ export default function App() {
 
   const portfolioPL = useMemo(() => {
     return calculateTotalPL(wallets, prices);
-  }, [wallets, prices]);
-  
-  const topPerformer = useMemo(() => {
-    return findTopPerformer(wallets, prices);
   }, [wallets, prices]);
 
   const updatePrices = useCallback(async () => {
@@ -75,6 +77,44 @@ export default function App() {
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allAssetIds.join(',')]); // Rerun when the list of assets changes
+  
+  // Effect for fetching historical data for the chart
+  useEffect(() => {
+    const fetchAndCalculateHistoricalData = async () => {
+        if (allAssetIds.length === 0) {
+            setHistoricalData([]);
+            setIsChartLoading(false);
+            return;
+        }
+
+        setIsChartLoading(true);
+        try {
+            const daysMap: { [key: string]: string } = { '24h': '1', '7d': '7', '1m': '30', '3m': '90', '1y': '365' };
+            const days = daysMap[timeRange];
+
+            const promises = allAssetIds.map(id => fetchHistoricalChartData(id, days));
+            const results = await Promise.all(promises);
+
+            const historicalPrices: Record<string, [number, number][]> = {};
+            allAssetIds.forEach((id, index) => {
+                historicalPrices[id] = results[index];
+            });
+
+            const calculatedData = calculateHistoricalPortfolioValue(wallets, historicalPrices);
+            setHistoricalData(calculatedData);
+
+        } catch (err) {
+            console.error("Failed to fetch or calculate historical chart data:", err);
+            // set an error state for the chart if needed
+            setHistoricalData([]); // Clear data on error
+        } finally {
+            setIsChartLoading(false);
+        }
+    };
+
+    fetchAndCalculateHistoricalData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wallets, timeRange, allAssetIds.join(',')]);
 
   const handleAddAsset = (asset: PortfolioAsset) => {
     if (addingAssetToWalletId) {
@@ -118,30 +158,39 @@ export default function App() {
           changeData={portfolio24hChange}
           plData={portfolioPL}
           isLoading={isLoading && wallets.length > 0}
-          performer={topPerformer}
         />
 
         {error && <div className="text-center text-red-400 bg-red-900/50 p-3 rounded-lg my-4">{error}</div>}
 
         {wallets.length > 0 ? (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
-            <div className="lg:col-span-2">
-              {wallets.map(wallet => (
-                  <WalletCard 
-                      key={wallet.id}
-                      wallet={wallet}
-                      prices={prices}
-                      onAddAsset={handleOpenAddAssetModal}
-                      onRemoveAsset={removeAssetFromWallet}
-                      onRemoveWallet={removeWallet}
-                      onAddTransaction={handleOpenAddTransactionModal}
-                  />
-              ))}
+          <>
+            <div className="mt-8">
+              <PerformanceChart 
+                data={historicalData} 
+                isLoading={isChartLoading}
+                timeRange={timeRange}
+                setTimeRange={setTimeRange}
+              />
             </div>
-            <div className="lg:col-span-1 space-y-8">
-              <AllocationChart wallets={wallets} prices={prices} />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+              <div className="lg:col-span-2">
+                {wallets.map(wallet => (
+                    <WalletCard 
+                        key={wallet.id}
+                        wallet={wallet}
+                        prices={prices}
+                        onAddAsset={handleOpenAddAssetModal}
+                        onRemoveAsset={removeAssetFromWallet}
+                        onRemoveWallet={removeWallet}
+                        onAddTransaction={handleOpenAddTransactionModal}
+                    />
+                ))}
+              </div>
+              <div className="lg:col-span-1 space-y-8">
+                <AllocationChart wallets={wallets} prices={prices} />
+              </div>
             </div>
-          </div>
+          </>
         ) : (
           <div className="text-center py-20 px-6 bg-slate-800 rounded-lg mt-8">
             <h2 className="text-2xl font-semibold text-white mb-2">Your Portfolio is Empty</h2>

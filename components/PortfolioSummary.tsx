@@ -1,7 +1,4 @@
-
 import React from 'react';
-import { PerformerData } from '../types';
-import { TrophyIcon } from './icons';
 
 interface PortfolioSummaryProps {
   totalValue: number;
@@ -14,7 +11,6 @@ interface PortfolioSummaryProps {
     plPercentage: number;
   };
   isLoading: boolean;
-  performer: PerformerData | null;
 }
 
 const ChangeDisplay: React.FC<{ value: number; percentage: number }> = ({ value, percentage }) => {
@@ -54,33 +50,7 @@ const LoadingSkeletonBlock = () => (
     </>
 );
 
-const TopPerformerContent: React.FC<{ performer: PerformerData | null }> = ({ performer }) => {
-    if (!performer) {
-        return (
-            <div className="text-slate-400 h-full flex flex-col justify-center">
-                <p className="text-lg font-semibold">-</p>
-                <p className="text-sm">No positive gains.</p>
-            </div>
-        );
-    }
-
-    return (
-        <div className="flex items-center space-x-3">
-            <div className="bg-yellow-500/10 rounded-full p-2 flex-shrink-0">
-                <TrophyIcon className="h-6 w-6 text-yellow-400" />
-            </div>
-            <div>
-                <p className="font-bold text-base text-white truncate" title={performer.name}>{performer.name} <span className="text-slate-400 text-xs uppercase">{performer.symbol}</span></p>
-                <p className="text-lg font-bold text-green-500">
-                    +{performer.change.toFixed(2)}%
-                </p>
-            </div>
-        </div>
-    );
-};
-
-
-const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ totalValue, changeData, plData, isLoading, performer }) => {
+const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ totalValue, changeData, plData, isLoading }) => {
   const formattedValue = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
@@ -90,7 +60,7 @@ const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ totalValue, changeD
 
   return (
     <div className="bg-slate-800 p-6 rounded-lg shadow-lg">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
         {/* Block 1: Total Value */}
         <div>
           <h2 className="text-lg font-medium text-slate-400 mb-2">Total Portfolio Value</h2>
@@ -118,16 +88,6 @@ const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ totalValue, changeD
              <LoadingSkeletonBlock />
           ) : (
              <ChangeDisplay value={plData.plValue} percentage={plData.plPercentage} />
-          )}
-        </div>
-
-        {/* Block 4: Top Performer */}
-        <div>
-          <h2 className="text-lg font-medium text-slate-400 mb-2">Top Performer (24h)</h2>
-           {showLoadingSkeleton ? (
-             <LoadingSkeletonBlock />
-          ) : (
-             <TopPerformerContent performer={performer} />
           )}
         </div>
       </div>

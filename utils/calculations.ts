@@ -1,5 +1,4 @@
-
-import { Wallet, PriceData, Transaction, PortfolioAsset, PerformerData } from '../types';
+import { Wallet, PriceData, Transaction, PortfolioAsset, HistoricalDataPoint } from '../types';
 
 /**
  * Calculates key metrics for a single asset based on its transaction history and current price.
@@ -184,34 +183,72 @@ export const getAssetIds = (wallets: Wallet[]): string[] => {
 };
 
 /**
- * Finds the asset with the best performance in the last 24 hours.
- * @param wallets An array of wallets.
- * @param prices An object with current prices and 24h change data.
- * @returns The top performing asset's data, or null if none have positive performance.
+ * Calculates the historical total value of a portfolio over time.
+ * @param wallets The user's wallets with all transaction data.
+ * @param historicalPrices A record mapping coin IDs to their historical price data from CoinGecko.
+ * @returns An array of [timestamp, value] tuples for charting.
  */
-export const findTopPerformer = (wallets: Wallet[], prices: PriceData): PerformerData | null => {
-  let topPerformer: PerformerData | null = null;
-  let maxChange = 0;
+export const calculateHistoricalPortfolioValue = (
+  wallets: Wallet[],
+  historicalPrices: Record<string, [number, number][]>
+): HistoricalDataPoint[] => {
+  const assetIds = Object.keys(historicalPrices);
+  if (assetIds.length === 0 || !historicalPrices[assetIds[0]] || historicalPrices[assetIds[0]].length === 0) {
+    return [];
+  }
 
+  // Use the timestamps from the first asset's data as the reference timeline
+  const timeline = historicalPrices[assetIds[0]].map(p => p[0]);
+  const portfolioValues = new Array(timeline.length).fill(0);
+
+  // Combine all transactions for each asset across all wallets
+  const allAssetsMap = new Map<string, Transaction[]>();
   wallets.forEach(wallet => {
     wallet.assets.forEach(asset => {
-      const priceInfo = prices[asset.id];
-      const { currentQuantity } = getAssetMetrics(asset.transactions, priceInfo?.usd ?? 0);
-
-      // Only consider assets currently held and with valid price change data
-      if (currentQuantity > 0 && priceInfo && typeof priceInfo.usd_24h_change === 'number') {
-        const change = priceInfo.usd_24h_change;
-        if (change > maxChange) {
-          maxChange = change;
-          topPerformer = {
-            name: asset.name,
-            symbol: asset.symbol,
-            change: change,
-          };
-        }
-      }
+      const existingTxs = allAssetsMap.get(asset.id) || [];
+      allAssetsMap.set(asset.id, [...existingTxs, ...asset.transactions]);
     });
   });
 
-  return topPerformer;
+  // For each asset we hold, calculate its value over time and add it to the total
+  allAssetsMap.forEach((transactions, assetId) => {
+    const assetPriceHistory = historicalPrices[assetId];
+    if (!assetPriceHistory || assetPriceHistory.length !== timeline.length) {
+      // Skip if data is missing or length doesn't match the timeline
+      return;
+    }
+
+    const sortedTransactions = [...transactions].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    let txIndex = 0;
+    let currentQuantity = 0;
+
+    // Iterate through each point in our timeline
+    for (let i = 0; i < timeline.length; i++) {
+      const currentTimestamp = timeline[i];
+      
+      // Update quantity by processing all transactions that occurred up to this point in time
+      while (txIndex < sortedTransactions.length && new Date(sortedTransactions[txIndex].date).getTime() <= currentTimestamp) {
+        const tx = sortedTransactions[txIndex];
+        switch (tx.type) {
+          case 'buy':
+          case 'transfer_in':
+            currentQuantity += tx.quantity;
+            break;
+          case 'sell':
+          case 'transfer_out':
+            currentQuantity -= tx.quantity;
+            break;
+        }
+        txIndex++;
+      }
+      
+      // If we hold any quantity of the asset at this time, calculate its value and add to the portfolio total for that timestamp
+      if (currentQuantity > 0) {
+        const price = assetPriceHistory[i][1];
+        portfolioValues[i] += currentQuantity * price;
+      }
+    }
+  });
+  
+  return timeline.map((timestamp, i) => [timestamp, portfolioValues[i]]);
 };
