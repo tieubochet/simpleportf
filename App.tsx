@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { PortfolioAsset, PriceData, Wallet, Transaction, HistoricalDataPoint, PerformerData } from './types';
 import { usePortfolio } from './hooks/usePortfolio';
@@ -13,7 +14,6 @@ import AddTransactionModal from './components/AddTransactionModal';
 import WalletCard from './components/WalletCard';
 import { WalletIcon } from './components/icons';
 import PerformanceChart from './components/PerformanceChart';
-import TopPerformer from './components/TopPerformer';
 
 type AssetForTransaction = {
   walletId: string;
@@ -162,6 +162,7 @@ export default function App() {
           totalValue={totalValue} 
           changeData={portfolio24hChange}
           plData={portfolioPL}
+          performer={topPerformer}
           isLoading={isLoading && wallets.length > 0}
         />
 
@@ -192,7 +193,6 @@ export default function App() {
                 ))}
               </div>
               <div className="lg:col-span-1 space-y-8">
-                <TopPerformer performer={topPerformer} isLoading={isLoading && wallets.length > 0} />
                 <AllocationChart wallets={wallets} prices={prices} />
               </div>
             </div>
