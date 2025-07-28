@@ -170,31 +170,32 @@ export default function App() {
 
         {wallets.length > 0 ? (
           <>
-            <div className="mt-8">
-              <PerformanceChart 
-                data={historicalData} 
-                isLoading={isChartLoading}
-                timeRange={timeRange}
-                setTimeRange={setTimeRange}
-              />
+            <div className="grid grid-cols-1 lg:grid-cols-10 gap-8 mt-8">
+              <div className="lg:col-span-7">
+                <PerformanceChart 
+                  data={historicalData} 
+                  isLoading={isChartLoading}
+                  timeRange={timeRange}
+                  setTimeRange={setTimeRange}
+                />
+              </div>
+              <div className="lg:col-span-3">
+                 <AllocationChart wallets={wallets} prices={prices} />
+              </div>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
-              <div className="lg:col-span-2">
-                {wallets.map(wallet => (
-                    <WalletCard 
-                        key={wallet.id}
-                        wallet={wallet}
-                        prices={prices}
-                        onAddAsset={handleOpenAddAssetModal}
-                        onRemoveAsset={removeAssetFromWallet}
-                        onRemoveWallet={removeWallet}
-                        onAddTransaction={handleOpenAddTransactionModal}
-                    />
-                ))}
-              </div>
-              <div className="lg:col-span-1 space-y-8">
-                <AllocationChart wallets={wallets} prices={prices} />
-              </div>
+            
+            <div className="mt-8">
+              {wallets.map(wallet => (
+                  <WalletCard 
+                      key={wallet.id}
+                      wallet={wallet}
+                      prices={prices}
+                      onAddAsset={handleOpenAddAssetModal}
+                      onRemoveAsset={removeAssetFromWallet}
+                      onRemoveWallet={removeWallet}
+                      onAddTransaction={handleOpenAddTransactionModal}
+                  />
+              ))}
             </div>
           </>
         ) : (
