@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { PortfolioAsset, PriceData, Wallet, Transaction, HistoricalDataPoint, PerformerData } from './types';
 import { usePortfolio } from './hooks/usePortfolio';
 import { fetchPrices, fetchHistoricalChartData } from './services/coingecko';
-import { calculateTotalValue, getAssetIds, getAssetMetrics, calculatePortfolio24hChange, calculateTotalPL, calculateHistoricalPortfolioValue, findTopPerformer } from './utils/calculations';
+import { calculateTotalValue, getAssetIds, getAssetMetrics, calculatePortfolio24hChange, calculateTotalPL, calculateHistoricalPortfolioValue, findTopPerformer, findTopLoser } from './utils/calculations';
 
 import PortfolioHeader from './components/PortfolioHeader';
 import PortfolioSummary from './components/PortfolioSummary';
@@ -55,6 +55,10 @@ export default function App() {
 
   const topPerformer = useMemo(() => {
     return findTopPerformer(wallets, prices);
+  }, [wallets, prices]);
+  
+  const topLoser = useMemo(() => {
+    return findTopLoser(wallets, prices);
   }, [wallets, prices]);
 
   const updatePrices = useCallback(async () => {
@@ -163,6 +167,7 @@ export default function App() {
           changeData={portfolio24hChange}
           plData={portfolioPL}
           performer={topPerformer}
+          loser={topLoser}
           isLoading={isLoading && wallets.length > 0}
         />
 
