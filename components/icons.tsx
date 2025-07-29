@@ -77,11 +77,16 @@ export const TrophyIcon: React.FC<IconProps> = (props) => (
     </svg>
 );
 
+export const TrendingDownIcon: React.FC<IconProps> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline>
+        <polyline points="17 18 23 18 23 12"></polyline>
+    </svg>
+);
+
 export const FireIcon: React.FC<IconProps> = (props) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-    <path d="M14.5 4.5c3 3 3 7.5 0 10.5-3-3-3-7.5 0-10.5z" />
-    <path d="M12 12.5c1.667 1.667 1.667 4.167 0 5.833-1.667-1.666-1.667-4.166 0-5.833z" />
-    <path d="M7.5 10c0 4.5 3.5 8 8 8" />
-    <path d="M4.5 18c-2-2.5-2.5-6-1-8.5" />
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" {...props}>
+    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+    <path d="M12 12c2 -2.96 0 -7 -1 -8c-1 -1 -2.5 -1.5 -4 -1.5c-1.5 0 -2.8 .5 -3.5 1.5c-1.5 2 -2.5 5.5 -1.5 8c1 2.5 4 4.5 6.5 6c2.5 -1.5 5.5 -3.5 6.5 -6c1 -2.5 0 -6 -1.5 -8c-.7 -1 -2 -1.5 -3.5 -1.5c-1.5 0 -3 .5 -4 1.5c-1 1 -2.223 3.124 -1.243 5.43" />
   </svg>
 );
