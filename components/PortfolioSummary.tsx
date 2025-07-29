@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { PerformerData } from '../types';
 import { TrophyIcon, TrendingDownIcon } from './icons';
@@ -34,7 +33,7 @@ const ChangeDisplay: React.FC<{ value: number; percentage: number }> = ({ value,
     if (isNaN(value) || isNaN(percentage)) {
         return (
             <div>
-               <p className="text-lg font-semibold text-slate-300">-</p>
+               <p className="text-base font-semibold text-slate-300">-</p>
                <p className="text-sm font-mono text-slate-400">(-)</p>
             </div>
         );
@@ -42,7 +41,7 @@ const ChangeDisplay: React.FC<{ value: number; percentage: number }> = ({ value,
 
     return (
         <div className={colorClass}>
-            <p className="text-lg font-semibold">{formattedValue}</p>
+            <p className="text-base font-semibold">{formattedValue}</p>
             <p className="text-sm font-mono">{formattedPercentage}</p>
         </div>
     );
@@ -50,7 +49,7 @@ const ChangeDisplay: React.FC<{ value: number; percentage: number }> = ({ value,
 
 const LoadingSkeletonBlock = () => (
     <>
-        <div className="h-6 bg-slate-700 rounded-md animate-pulse w-24"></div>
+        <div className="h-5 bg-slate-700 rounded-md animate-pulse w-20"></div>
         <div className="h-4 bg-slate-700 rounded-md animate-pulse w-16 mt-2"></div>
     </>
 );
@@ -64,72 +63,69 @@ const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ totalValue, changeD
   const showLoadingSkeleton = isLoading && totalValue === 0;
 
   return (
-    <div className="bg-slate-800 p-6 rounded-lg shadow-lg">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="bg-slate-800 rounded-lg shadow-lg">
+      <div className="grid grid-cols-1 md:grid-cols-5 divide-y md:divide-y-0 md:divide-x divide-slate-700">
         
-        {/* Block 1: Total Value (takes 1/3 on md+) */}
-        <div className="md:col-span-1">
-          <h2 className="text-lg font-medium text-slate-400 mb-2">Total Portfolio Value</h2>
+        {/* Stat Block 1: Total Value */}
+        <div className="p-4 text-center md:text-left">
+          <h2 className="text-sm font-medium text-slate-400 mb-2">Total Portfolio Value</h2>
           {showLoadingSkeleton ? (
-            <div className="h-10 bg-slate-700 rounded-md animate-pulse w-48"></div>
+            <div className="h-8 bg-slate-700 rounded-md animate-pulse w-32 mx-auto md:mx-0"></div>
           ) : (
-            <p className="text-4xl font-bold text-white tracking-tight">{formattedValue}</p>
+            <p className="text-2xl font-bold text-white tracking-tight">{formattedValue}</p>
           )}
         </div>
         
-        {/* Block 2: Other stats (takes 2/3 on md+ and forms a grid) */}
-        <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {/* Item 1: 24h Change */}
-            <div>
-              <h2 className="text-lg font-medium text-slate-400 mb-2">24h Change</h2>
-               {showLoadingSkeleton ? <LoadingSkeletonBlock /> : <ChangeDisplay value={changeData.changeValue} percentage={changeData.changePercentage} />}
-            </div>
+        {/* Stat Block 2: 24h Change */}
+        <div className="p-4 text-center md:text-left">
+          <h2 className="text-sm font-medium text-slate-400 mb-2">24h Change</h2>
+           {showLoadingSkeleton ? <LoadingSkeletonBlock /> : <ChangeDisplay value={changeData.changeValue} percentage={changeData.changePercentage} />}
+        </div>
 
-            {/* Item 2: Total P/L */}
+        {/* Stat Block 3: Total P/L */}
+        <div className="p-4 text-center md:text-left">
+          <h2 className="text-sm font-medium text-slate-400 mb-2">Total P/L</h2>
+           {showLoadingSkeleton ? <LoadingSkeletonBlock /> : <ChangeDisplay value={plData.plValue} percentage={plData.plPercentage} />}
+        </div>
+        
+        {/* Stat Block 4: Top Gainer */}
+        <div className="p-4 text-center md:text-left">
+          <h2 className="text-sm font-medium text-slate-400 mb-2 flex items-center space-x-2 justify-center md:justify-start">
+            <TrophyIcon className="h-4 w-4 text-amber-400" />
+            <span>Top Gainer (24h)</span>
+          </h2>
+          {showLoadingSkeleton ? (
+            <LoadingSkeletonBlock />
+          ) : performer ? (
             <div>
-              <h2 className="text-lg font-medium text-slate-400 mb-2">Total P/L</h2>
-               {showLoadingSkeleton ? <LoadingSkeletonBlock /> : <ChangeDisplay value={plData.plValue} percentage={plData.plPercentage} />}
+              <p className="text-base font-semibold text-white truncate" title={performer.name}>{performer.name}</p>
+              <p className={`text-sm font-mono ${performer.change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                {performer.change >= 0 ? '+' : ''}{performer.change.toFixed(2)}%
+              </p>
             </div>
-            
-            {/* Item 3: Top Gainer */}
-            <div>
-              <h2 className="text-lg font-medium text-slate-400 mb-2 flex items-center space-x-2">
-                <TrophyIcon className="h-5 w-5 text-amber-400" />
-                <span>Top Gainer (24h)</span>
-              </h2>
-              {showLoadingSkeleton ? (
-                <LoadingSkeletonBlock />
-              ) : performer ? (
-                <div>
-                  <p className="text-lg font-semibold text-white truncate" title={performer.name}>{performer.name}</p>
-                  <p className={`text-sm font-mono ${performer.change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                    {performer.change >= 0 ? '+' : ''}{performer.change.toFixed(2)}%
-                  </p>
-                </div>
-              ) : (
-                <p className="text-lg font-semibold text-slate-300">-</p>
-              )}
-            </div>
+          ) : (
+            <p className="text-base font-semibold text-slate-300">-</p>
+          )}
+        </div>
 
-            {/* Item 4: Top Loser */}
+        {/* Stat Block 5: Top Loser */}
+        <div className="p-4 text-center md:text-left">
+          <h2 className="text-sm font-medium text-slate-400 mb-2 flex items-center space-x-2 justify-center md:justify-start">
+            <TrendingDownIcon className="h-4 w-4 text-red-400" />
+            <span>Top Loser (24h)</span>
+          </h2>
+          {showLoadingSkeleton ? (
+            <LoadingSkeletonBlock />
+          ) : loser ? (
             <div>
-              <h2 className="text-lg font-medium text-slate-400 mb-2 flex items-center space-x-2">
-                <TrendingDownIcon className="h-5 w-5 text-red-400" />
-                <span>Top Loser (24h)</span>
-              </h2>
-              {showLoadingSkeleton ? (
-                <LoadingSkeletonBlock />
-              ) : loser ? (
-                <div>
-                  <p className="text-lg font-semibold text-white truncate" title={loser.name}>{loser.name}</p>
-                  <p className="text-sm font-mono text-red-500">
-                    {loser.change.toFixed(2)}%
-                  </p>
-                </div>
-              ) : (
-                <p className="text-lg font-semibold text-slate-300">-</p>
-              )}
+              <p className="text-base font-semibold text-white truncate" title={loser.name}>{loser.name}</p>
+              <p className="text-sm font-mono text-red-500">
+                {loser.change.toFixed(2)}%
+              </p>
             </div>
+          ) : (
+            <p className="text-base font-semibold text-slate-300">-</p>
+          )}
         </div>
       </div>
     </div>
