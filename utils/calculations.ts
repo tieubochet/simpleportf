@@ -1,3 +1,4 @@
+
 import { Wallet, PriceData, Transaction, PortfolioAsset, HistoricalDataPoint, PerformerData } from '../types';
 
 /**
@@ -212,6 +213,39 @@ export const findTopPerformer = (wallets: Wallet[], prices: PriceData): Performe
   });
 
   return topPerformer;
+};
+
+/**
+ * Finds the asset with the most negative 24-hour change (top loser).
+ * @param wallets - An array of wallets.
+ * @param prices - An object with current prices and 24h change data.
+ * @returns A PerformerData object for the top loser, or null if there are no assets with negative change.
+ */
+export const findTopLoser = (wallets: Wallet[], prices: PriceData): PerformerData | null => {
+  let topLoser: PerformerData | null = null;
+  let minChange = 0; // Find the most negative change, so start from 0
+
+  wallets.forEach(wallet => {
+    wallet.assets.forEach(asset => {
+      const priceInfo = prices[asset.id];
+      const { currentQuantity } = getAssetMetrics(asset.transactions, priceInfo?.usd ?? 0);
+
+      // We are looking for a negative change, so we check priceInfo.usd_24h_change < minChange
+      if (priceInfo && typeof priceInfo.usd_24h_change === 'number' && currentQuantity > 0) {
+        if (priceInfo.usd_24h_change < minChange) {
+          minChange = priceInfo.usd_24h_change;
+          topLoser = {
+            id: asset.id,
+            name: asset.name,
+            symbol: asset.symbol,
+            change: priceInfo.usd_24h_change,
+          };
+        }
+      }
+    });
+  });
+
+  return topLoser;
 };
 
 
