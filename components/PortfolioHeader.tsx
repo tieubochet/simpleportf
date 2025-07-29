@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { UploadIcon, DownloadIcon, WalletIcon } from './icons';
-import DailyStreak from './DailyStreak';
+import { DailyStreak } from './DailyStreak';
 
 interface PortfolioHeaderProps {
   onAddWallet: () => void;
