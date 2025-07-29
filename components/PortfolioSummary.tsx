@@ -95,7 +95,7 @@ const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ totalValue, changeD
           )}
         </div>
         
-        {/* Block 4: Top Gainer */}
+        {/* Block 4: Top Performer */}
         <div>
           <h2 className="text-lg font-medium text-slate-400 mb-2 flex items-center space-x-2">
             <TrophyIcon className="h-5 w-5 text-amber-400" />
