@@ -1,6 +1,5 @@
-
 {
   "framework": null,
   "installCommand": "echo 'Skipping installation, as this project uses CDN imports.'",
-  "buildCommand": "echo 'Skipping build, as this project runs directly in the browser.'"
+  "buildCommand": "mkdir dist && cp index.html index.tsx metadata.json types.ts App.tsx dist/ && cp -r components hooks services utils dist/"
 }
