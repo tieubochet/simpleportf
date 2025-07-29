@@ -1,135 +1,249 @@
-import React from 'react';
-import { PerformerData } from '../types';
-import { TrophyIcon, TrendingDownIcon } from './icons';
 
-interface PortfolioSummaryProps {
-  totalValue: number;
-  changeData: {
-    changeValue: number;
-    changePercentage: number;
-  };
-  plData: {
-    plValue: number;
-    plPercentage: number;
-  };
-  performer: PerformerData | null;
-  loser: PerformerData | null;
-  isLoading: boolean;
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { PortfolioAsset, PriceData, Wallet, Transaction, HistoricalDataPoint, PerformerData } from './types';
+import { usePortfolio } from './hooks/usePortfolio';
+import { fetchPrices, fetchHistoricalChartData } from './services/coingecko';
+import { calculateTotalValue, getAssetIds, getAssetMetrics, calculatePortfolio24hChange, calculateTotalPL, calculateHistoricalPortfolioValue, findTopPerformer, findTopLoser } from './utils/calculations';
+
+import PortfolioHeader from './components/PortfolioHeader';
+import PortfolioSummary from './components/PortfolioSummary';
+import AllocationChart from './components/AllocationChart';
+import AddAssetModal from './components/AddAssetModal';
+import AddWalletModal from './components/AddWalletModal';
+import AddTransactionModal from './components/AddTransactionModal';
+import WalletCard from './components/WalletCard';
+import { WalletIcon } from './components/icons';
+import PerformanceChart from './components/PerformanceChart';
+
+type AssetForTransaction = {
+  walletId: string;
+  asset: PortfolioAsset;
+  currentQuantity: number;
 }
 
-const ChangeDisplay: React.FC<{ value: number; percentage: number }> = ({ value, percentage }) => {
-    const isPositive = value >= 0;
-    const colorClass = isPositive ? 'text-green-500' : 'text-red-500';
-    const sign = isPositive ? '+' : '';
+export default function App() {
+  const { wallets, addWallet, removeWallet, addAssetToWallet, removeAssetFromWallet, addTransactionToAsset, importWallets, exportWallets } = usePortfolio();
+  
+  const [prices, setPrices] = useState<PriceData>({});
+  
+  // Modal states
+  const [addingAssetToWalletId, setAddingAssetToWalletId] = useState<string | null>(null);
+  const [isAddWalletModalOpen, setIsAddWalletModalOpen] = useState(false);
+  const [assetForTransaction, setAssetForTransaction] = useState<AssetForTransaction | null>(null);
 
-    const formattedValue = new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        signDisplay: 'exceptZero'
-    }).format(value);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Performance Chart State
+  const [timeRange, setTimeRange] = useState<'24h' | '7d' | '1m' | '3m' | '1y'>('7d');
+  const [historicalData, setHistoricalData] = useState<HistoricalDataPoint[]>([]);
+  const [isChartLoading, setIsChartLoading] = useState(true);
 
-    const formattedPercentage = `(${sign}${Math.abs(percentage || 0).toFixed(2)}%)`;
-    
-    if (isNaN(value) || isNaN(percentage)) {
-        return (
-            <div>
-               <p className="text-base font-semibold text-slate-300">-</p>
-               <p className="text-sm font-mono text-slate-400">(-)</p>
-            </div>
-        );
+  const allAssetIds = useMemo(() => getAssetIds(wallets), [wallets]);
+
+  const totalValue = useMemo(() => {
+    return calculateTotalValue(wallets, prices);
+  }, [wallets, prices]);
+  
+  const portfolio24hChange = useMemo(() => {
+    return calculatePortfolio24hChange(wallets, prices);
+  }, [wallets, prices]);
+
+  const portfolioPL = useMemo(() => {
+    return calculateTotalPL(wallets, prices);
+  }, [wallets, prices]);
+
+  const topPerformer = useMemo(() => {
+    return findTopPerformer(wallets, prices);
+  }, [wallets, prices]);
+  
+  const topLoser = useMemo(() => {
+    return findTopLoser(wallets, prices);
+  }, [wallets, prices]);
+
+  const updatePrices = useCallback(async () => {
+    if (allAssetIds.length === 0) {
+      setPrices({});
+      setIsLoading(false);
+      return;
     }
+    setError(null);
+    if (!isLoading) setIsLoading(true);
+    try {
+      const fetchedPrices = await fetchPrices(allAssetIds);
+      setPrices(fetchedPrices);
+    } catch (err) {
+      console.error("Failed to fetch prices:", err);
+      setError("Could not update prices. Please try again later.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [allAssetIds, isLoading]);
 
-    return (
-        <div className={colorClass}>
-            <p className="text-base font-semibold">{formattedValue}</p>
-            <p className="text-sm font-mono">{formattedPercentage}</p>
-        </div>
-    );
-};
+  useEffect(() => {
+    updatePrices();
+    const interval = setInterval(updatePrices, 60000); // Update every 60 seconds
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allAssetIds.join(',')]); // Rerun when the list of assets changes
+  
+  // Effect for fetching historical data for the chart
+  useEffect(() => {
+    const fetchAndCalculateHistoricalData = async () => {
+        if (allAssetIds.length === 0) {
+            setHistoricalData([]);
+            setIsChartLoading(false);
+            return;
+        }
 
-const LoadingSkeletonBlock = () => (
-    <>
-        <div className="h-5 bg-slate-700 rounded-md animate-pulse w-20"></div>
-        <div className="h-4 bg-slate-700 rounded-md animate-pulse w-16 mt-2"></div>
-    </>
-);
+        setIsChartLoading(true);
+        try {
+            const daysMap: { [key: string]: string } = { '24h': '1', '7d': '7', '1m': '30', '3m': '90', '1y': '365' };
+            const days = daysMap[timeRange];
 
-const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ totalValue, changeData, plData, performer, loser, isLoading }) => {
-  const formattedValue = new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(totalValue);
+            const promises = allAssetIds.map(id => fetchHistoricalChartData(id, days));
+            const results = await Promise.all(promises);
 
-  const showLoadingSkeleton = isLoading && totalValue === 0;
+            const historicalPrices: Record<string, [number, number][]> = {};
+            allAssetIds.forEach((id, index) => {
+                historicalPrices[id] = results[index];
+            });
+
+            const calculatedData = calculateHistoricalPortfolioValue(wallets, historicalPrices);
+            setHistoricalData(calculatedData);
+
+        } catch (err) {
+            console.error("Failed to fetch or calculate historical chart data:", err);
+            // set an error state for the chart if needed
+            setHistoricalData([]); // Clear data on error
+        } finally {
+            setIsChartLoading(false);
+        }
+    };
+
+    fetchAndCalculateHistoricalData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wallets, timeRange, allAssetIds.join(',')]);
+
+  const handleAddAsset = (asset: PortfolioAsset) => {
+    if (addingAssetToWalletId) {
+      addAssetToWallet(addingAssetToWalletId, asset);
+      setAddingAssetToWalletId(null);
+    }
+  };
+  
+  const handleAddTransaction = (transaction: Transaction) => {
+    if (assetForTransaction) {
+      addTransactionToAsset(assetForTransaction.walletId, assetForTransaction.asset.id, transaction);
+      setAssetForTransaction(null);
+    }
+  };
+
+  const handleOpenAddAssetModal = (walletId: string) => {
+    setAddingAssetToWalletId(walletId);
+  };
+  
+  const handleOpenAddTransactionModal = (walletId: string, asset: PortfolioAsset) => {
+    const { currentQuantity } = getAssetMetrics(asset.transactions, 0); // Price is not needed for quantity
+    setAssetForTransaction({ walletId, asset, currentQuantity });
+  };
+
+  const walletToAddAssetTo = useMemo(() => {
+    if (!addingAssetToWalletId) return null;
+    return wallets.find(w => w.id === addingAssetToWalletId);
+  }, [addingAssetToWalletId, wallets]);
 
   return (
-    <div className="bg-slate-800 rounded-lg shadow-lg">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 divide-y sm:divide-y-0 sm:divide-x divide-slate-700">
-        
-        {/* Stat Block 1: Total Value */}
-        <div className="p-4 text-center sm:text-left">
-          <h2 className="text-sm font-medium text-slate-400 mb-2">Total Portfolio Value</h2>
-          {showLoadingSkeleton ? (
-            <div className="h-8 bg-slate-700 rounded-md animate-pulse w-32 mx-auto sm:mx-0"></div>
-          ) : (
-            <p className="text-2xl font-bold text-white tracking-tight">{formattedValue}</p>
-          )}
-        </div>
-        
-        {/* Stat Block 2: 24h Change */}
-        <div className="p-4 text-center sm:text-left">
-          <h2 className="text-sm font-medium text-slate-400 mb-2">24h Change</h2>
-           {showLoadingSkeleton ? <LoadingSkeletonBlock /> : <ChangeDisplay value={changeData.changeValue} percentage={changeData.changePercentage} />}
-        </div>
+    <div className="min-h-screen bg-slate-900 text-slate-200 font-sans">
+      <main className="container mx-auto p-4 md:p-8">
+        <PortfolioHeader
+          onAddWallet={() => setIsAddWalletModalOpen(true)}
+          onImport={importWallets}
+          onExport={exportWallets}
+        />
 
-        {/* Stat Block 3: Total P/L */}
-        <div className="p-4 text-center sm:text-left">
-          <h2 className="text-sm font-medium text-slate-400 mb-2">Total P/L</h2>
-           {showLoadingSkeleton ? <LoadingSkeletonBlock /> : <ChangeDisplay value={plData.plValue} percentage={plData.plPercentage} />}
-        </div>
-        
-        {/* Stat Block 4: Top Gainer */}
-        <div className="p-4 text-center sm:text-left">
-          <h2 className="text-sm font-medium text-slate-400 mb-2 flex items-center space-x-2 justify-center sm:justify-start">
-            <TrophyIcon className="h-4 w-4 text-amber-400" />
-            <span>Top Gainer (24h)</span>
-          </h2>
-          {showLoadingSkeleton ? (
-            <LoadingSkeletonBlock />
-          ) : performer ? (
-            <div>
-              <p className="text-base font-semibold text-white truncate" title={performer.name}>{performer.name}</p>
-              <p className={`text-sm font-mono ${performer.change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                {performer.change >= 0 ? '+' : ''}{performer.change.toFixed(2)}%
-              </p>
-            </div>
-          ) : (
-            <p className="text-base font-semibold text-slate-300">-</p>
-          )}
-        </div>
+        <PortfolioSummary 
+          totalValue={totalValue} 
+          changeData={portfolio24hChange}
+          plData={portfolioPL}
+          performer={topPerformer}
+          loser={topLoser}
+          isLoading={isLoading && wallets.length > 0}
+        />
 
-        {/* Stat Block 5: Top Loser */}
-        <div className="p-4 text-center sm:text-left">
-          <h2 className="text-sm font-medium text-slate-400 mb-2 flex items-center space-x-2 justify-center sm:justify-start">
-            <TrendingDownIcon className="h-4 w-4 text-red-400" />
-            <span>Top Loser (24h)</span>
-          </h2>
-          {showLoadingSkeleton ? (
-            <LoadingSkeletonBlock />
-          ) : loser ? (
-            <div>
-              <p className="text-base font-semibold text-white truncate" title={loser.name}>{loser.name}</p>
-              <p className="text-sm font-mono text-red-500">
-                {loser.change.toFixed(2)}%
-              </p>
+        {error && <div className="text-center text-red-400 bg-red-900/50 p-3 rounded-lg my-4">{error}</div>}
+
+        {wallets.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 lg:grid-cols-10 gap-8 mt-8">
+              <div className="lg:col-span-7">
+                <PerformanceChart 
+                  data={historicalData} 
+                  isLoading={isChartLoading}
+                  timeRange={timeRange}
+                  setTimeRange={setTimeRange}
+                />
+              </div>
+              <div className="lg:col-span-3">
+                 <AllocationChart wallets={wallets} prices={prices} />
+              </div>
             </div>
-          ) : (
-            <p className="text-base font-semibold text-slate-300">-</p>
-          )}
-        </div>
-      </div>
+            
+            <div className="mt-8">
+              {wallets.map(wallet => (
+                  <WalletCard 
+                      key={wallet.id}
+                      wallet={wallet}
+                      prices={prices}
+                      onAddAsset={handleOpenAddAssetModal}
+                      onRemoveAsset={removeAssetFromWallet}
+                      onRemoveWallet={removeWallet}
+                      onAddTransaction={handleOpenAddTransactionModal}
+                  />
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="text-center py-20 px-6 bg-slate-800 rounded-lg mt-8">
+            <h2 className="text-2xl font-semibold text-white mb-2">Your Portfolio is Empty</h2>
+            <p className="text-slate-400 mb-6">Create a wallet to start tracking your assets.</p>
+            <button
+              onClick={() => setIsAddWalletModalOpen(true)}
+              className="bg-cyan-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-cyan-600 transition-colors duration-300 inline-flex items-center space-x-2"
+            >
+              <WalletIcon className="h-5 w-5" />
+              <span>Create Your First Wallet</span>
+            </button>
+          </div>
+        )}
+      </main>
+
+      {isAddWalletModalOpen && (
+        <AddWalletModal 
+          onClose={() => setIsAddWalletModalOpen(false)}
+          onAddWallet={(name) => {
+            addWallet(name);
+            setIsAddWalletModalOpen(false);
+          }}
+        />
+      )}
+
+      {walletToAddAssetTo && (
+        <AddAssetModal
+          onClose={() => setAddingAssetToWalletId(null)}
+          onAddAsset={handleAddAsset}
+          existingAssetIds={walletToAddAssetTo.assets.map(a => a.id)}
+        />
+      )}
+      
+      {assetForTransaction && (
+        <AddTransactionModal
+          asset={assetForTransaction.asset}
+          currentQuantity={assetForTransaction.currentQuantity}
+          onClose={() => setAssetForTransaction(null)}
+          onAddTransaction={handleAddTransaction}
+        />
+      )}
     </div>
   );
-};
-
-export default PortfolioSummary;
+}
