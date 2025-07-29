@@ -95,11 +95,11 @@ const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ totalValue, changeD
           )}
         </div>
         
-        {/* Block 4: Top Performer */}
+        {/* Block 4: Top Gainer */}
         <div>
           <h2 className="text-lg font-medium text-slate-400 mb-2 flex items-center space-x-2">
             <TrophyIcon className="h-5 w-5 text-amber-400" />
-            <span>Top Performer (24h)</span>
+            <span>Top Gainer (24h)</span>
           </h2>
           {showLoadingSkeleton ? (
             <LoadingSkeletonBlock />
