@@ -5,7 +5,7 @@ import AssetTable from './AssetTable';
 import { PlusIcon, TrashIcon } from './icons';
 import { calculateTotalValue, getAssetMetrics } from '../utils/calculations';
 
-type SortKey = 'rank' | 'change24h' | 'pl';
+type SortKey = 'rank' | 'change24h' | 'change7d' | 'pl';
 
 interface SortConfig {
     key: SortKey | null;
@@ -76,6 +76,10 @@ const WalletCard: React.FC<WalletCardProps> = ({ wallet, prices, onAddAsset, onR
                 case 'change24h':
                     valA = prices[a.id]?.usd_24h_change ?? -Infinity;
                     valB = prices[b.id]?.usd_24h_change ?? -Infinity;
+                    break;
+                case 'change7d':
+                    valA = prices[a.id]?.usd_7d_change ?? -Infinity;
+                    valB = prices[b.id]?.usd_7d_change ?? -Infinity;
                     break;
                 case 'pl':
                     const metricsA = getAssetMetrics(a.transactions, prices[a.id]?.usd ?? 0);
