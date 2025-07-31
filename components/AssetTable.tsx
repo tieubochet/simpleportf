@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { PortfolioAsset, PriceData, Transaction } from '../types';
-import { TrashIcon, ReceiptIcon, ChevronDownIcon, ChevronUpIcon } from './icons';
+import { TrashIcon, ReceiptIcon, ChevronDownIcon, ChevronUpIcon, ArrowUpIcon, ArrowDownIcon } from './icons';
 import { getAssetMetrics } from '../utils/calculations';
 
 interface AssetTableProps {
@@ -9,6 +9,8 @@ interface AssetTableProps {
   prices: PriceData;
   onRemove: (assetId: string) => void;
   onAddTransaction: (asset: PortfolioAsset) => void;
+  sortDirection: 'asc' | 'desc' | null;
+  onSortChange: () => void;
 }
 
 const formatCurrency = (value: number) => {
@@ -110,7 +112,7 @@ const TransactionHistory: React.FC<{ transactions: Transaction[] }> = ({ transac
 };
 
 
-const AssetTable: React.FC<AssetTableProps> = ({ assets, prices, onRemove, onAddTransaction }) => {
+const AssetTable: React.FC<AssetTableProps> = ({ assets, prices, onRemove, onAddTransaction, sortDirection, onSortChange }) => {
     const [expandedAssetId, setExpandedAssetId] = useState<string | null>(null);
 
     const handleToggleExpand = (assetId: string) => {
@@ -122,7 +124,21 @@ const AssetTable: React.FC<AssetTableProps> = ({ assets, prices, onRemove, onAdd
         <table className="w-full text-left text-sm">
             <thead className="sticky top-0 bg-slate-800 z-10">
                 <tr className="border-b border-slate-700 text-slate-400">
-                    <th className="py-3 px-2 font-medium text-center">#</th>
+                    <th className="py-3 px-2 font-medium text-center">
+                        <button
+                            onClick={onSortChange}
+                            className="flex items-center justify-center w-full group text-slate-400 hover:text-white transition-colors"
+                            title="Sort by Rank"
+                        >
+                            #
+                            <span className="ml-1">
+                                {sortDirection === 'asc' ? <ArrowUpIcon className="h-4 w-4" /> :
+                                 sortDirection === 'desc' ? <ArrowDownIcon className="h-4 w-4" /> :
+                                 <div className="h-4 w-4" />
+                                }
+                            </span>
+                        </button>
+                    </th>
                     <th className="py-3 px-4 font-medium">Asset</th>
                     <th className="py-3 px-4 font-medium text-right">Quantity</th>
                     <th className="py-3 px-4 font-medium text-right">Avg. Buy Price</th>
