@@ -24,6 +24,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ asset, curren
   const [pricePerUnit, setPricePerUnit] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [notes, setNotes] = useState('');
+  const [fee, setFee] = useState('');
 
   const isTransfer = type === 'transfer_in' || type === 'transfer_out';
   const isDebit = type === 'sell' || type === 'transfer_out';
@@ -34,6 +35,8 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ asset, curren
   const handleSave = () => {
     if (!canSave) return;
 
+    const numericFee = fee ? parseFloat(fee) : 0;
+
     onAddTransaction({
       id: uuidv4(),
       type,
@@ -41,6 +44,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ asset, curren
       pricePerUnit: isTransfer ? 0 : parseFloat(pricePerUnit || '0'),
       date: new Date(date).toISOString(),
       notes: notes.trim() ? notes.trim() : undefined,
+      fee: numericFee > 0 ? numericFee : undefined,
     });
     onClose();
   };
@@ -138,6 +142,17 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ asset, curren
                     />
                 </div>
              )}
+            <div>
+              <label htmlFor="tx-fee" className="block text-sm font-medium text-slate-300 mb-1">Fee (USD) (Optional)</label>
+              <input
+                  id="tx-fee"
+                  type="number"
+                  placeholder="e.g., 1.49"
+                  value={fee}
+                  onChange={e => setFee(e.target.value)}
+                  className="w-full bg-slate-700 text-white placeholder-slate-400 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              />
+            </div>
             <div>
                 <label htmlFor="tx-date" className="block text-sm font-medium text-slate-300 mb-1">Date</label>
                 <input
