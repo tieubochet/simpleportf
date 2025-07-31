@@ -90,3 +90,15 @@ export const FireIcon: React.FC<IconProps> = (props) => (
     <path d="M12 12c2 -2.96 0 -7 -1 -8c-1 -1 -2.5 -1.5 -4 -1.5c-1.5 0 -2.8 .5 -3.5 1.5c-1.5 2 -2.5 5.5 -1.5 8c1 2.5 4 4.5 6.5 6c2.5 -1.5 5.5 -3.5 6.5 -6c1 -2.5 0 -6 -1.5 -8c-.7 -1 -2 -1.5 -3.5 -1.5c-1.5 0 -3 .5 -4 1.5c-1 1 -2.223 3.124 -1.243 5.43" />
   </svg>
 );
+
+export const ChevronDownIcon: React.FC<IconProps> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <polyline points="6 9 12 15 18 9"></polyline>
+    </svg>
+);
+  
+export const ChevronUpIcon: React.FC<IconProps> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+);
