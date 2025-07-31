@@ -6,6 +6,7 @@ export interface Transaction {
   pricePerUnit: number; // Price in USD. For transfers, this will be 0.
   date: string; // ISO string for the date of the transaction
   notes?: string; // Optional field for user notes
+  fee?: number; // Optional fee in USD for the transaction
 }
 
 // Represents an asset held by the user, composed of multiple transactions
