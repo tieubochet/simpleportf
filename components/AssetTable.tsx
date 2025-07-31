@@ -79,6 +79,7 @@ const TransactionHistory: React.FC<{ transactions: Transaction[] }> = ({ transac
                             <th className="p-3 font-medium">Date</th>
                             <th className="p-3 font-medium text-right">Quantity</th>
                             <th className="p-3 font-medium text-right">Price</th>
+                            <th className="p-3 font-medium text-right">Fee</th>
                             <th className="p-3 font-medium">Notes</th>
                         </tr>
                     </thead>
@@ -95,7 +96,10 @@ const TransactionHistory: React.FC<{ transactions: Transaction[] }> = ({ transac
                                 <td className="p-3 font-mono text-slate-300 text-right">
                                     {tx.type === 'buy' || tx.type === 'sell' ? `$${tx.pricePerUnit.toLocaleString(undefined, {style: 'currency', currency: 'USD'}).replace('$', '')}` : '-'}
                                 </td>
-                                <td className="p-3 text-slate-400 max-w-[200px] whitespace-normal break-words">{tx.notes || <span className="text-slate-500">-</span>}</td>
+                                <td className="p-3 font-mono text-slate-300 text-right">
+                                    {tx.fee ? formatCurrency(tx.fee) : <span className="text-slate-500">-</span>}
+                                </td>
+                                <td className="p-3 text-slate-400 max-w-[150px] whitespace-normal break-words">{tx.notes || <span className="text-slate-500">-</span>}</td>
                             </tr>
                         ))}
                     </tbody>
