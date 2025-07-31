@@ -3,13 +3,11 @@ import React from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Brush, ResponsiveContainer } from 'recharts';
 import { HistoricalDataPoint } from '../types';
 
-type TimeRange = '24h' | '7d';
-
 interface PerformanceChartProps {
   data: HistoricalDataPoint[];
   isLoading: boolean;
-  timeRange: TimeRange;
-  setTimeRange: (range: TimeRange) => void;
+  timeRange: '4h' | '24h' | '7d';
+  setTimeRange: (range: '4h' | '24h' | '7d') => void;
 }
 
 const formatValue = (value: number) => {
@@ -21,7 +19,7 @@ const formatValue = (value: number) => {
 
 const formatDate = (tickItem: number, timeRange: string) => {
     const date = new Date(tickItem);
-    if (timeRange === '24h') {
+    if (timeRange === '4h' || timeRange === '24h') {
         return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
     }
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -33,8 +31,8 @@ const CustomTooltip = ({ active, payload, label, timeRange }: any) => {
       <div className="bg-slate-900/80 backdrop-blur-sm border border-slate-600 p-3 rounded-lg shadow-lg text-sm">
         <p className="font-bold text-white">{formatValue(payload[0].value)}</p>
         <p className="text-slate-400">{new Date(label).toLocaleString('en-US', {
-            dateStyle: timeRange === '24h' ? undefined : 'medium',
-            timeStyle: timeRange === '24h' ? 'short' : undefined,
+            dateStyle: timeRange === '4h' || timeRange === '24h' ? undefined : 'medium',
+            timeStyle: timeRange === '4h' || timeRange === '24h' ? 'short' : undefined,
         })}</p>
       </div>
     );
@@ -44,9 +42,9 @@ const CustomTooltip = ({ active, payload, label, timeRange }: any) => {
 
 const TimeRangeButton: React.FC<{
     label: string;
-    range: TimeRange;
+    range: '4h' | '24h' | '7d';
     activeRange: string;
-    onClick: (range: TimeRange) => void;
+    onClick: (range: '4h' | '24h' | '7d') => void;
 }> = ({ label, range, activeRange, onClick }) => {
     const isActive = activeRange === range;
     return (
@@ -68,6 +66,7 @@ const LoadingSkeleton = () => (
         <div className="flex justify-between items-center mb-6">
             <div className="h-6 w-32 bg-slate-700 rounded-md"></div>
             <div className="flex space-x-1 p-1 bg-slate-700/50 rounded-lg">
+                <div className="h-7 w-10 bg-slate-700 rounded-md"></div>
                 <div className="h-7 w-10 bg-slate-600 rounded-md"></div>
                 <div className="h-7 w-10 bg-slate-700 rounded-md"></div>
             </div>
@@ -93,9 +92,10 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({ data, isLoading, ti
         );
     }
 
-    const timeRanges: { label: string; range: TimeRange }[] = [
-        { label: '24H', range: '24h' },
-        { label: '7D', range: '7d' },
+    const timeRanges: { label: string; range: '4h' | '24h' | '7d' }[] = [
+        { label: '4h', range: '4h' },
+        { label: '24h', range: '24h' },
+        { label: '7d', range: '7d' },
     ];
     
     const chartData = data.map(([timestamp, value]) => ({ timestamp, value }));
