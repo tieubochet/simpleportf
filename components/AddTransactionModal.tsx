@@ -23,6 +23,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ asset, curren
   const [quantity, setQuantity] = useState('');
   const [pricePerUnit, setPricePerUnit] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [notes, setNotes] = useState('');
 
   const isTransfer = type === 'transfer_in' || type === 'transfer_out';
   const isDebit = type === 'sell' || type === 'transfer_out';
@@ -39,6 +40,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ asset, curren
       quantity: parseFloat(quantity),
       pricePerUnit: isTransfer ? 0 : parseFloat(pricePerUnit || '0'),
       date: new Date(date).toISOString(),
+      notes: notes.trim() ? notes.trim() : undefined,
     });
     onClose();
   };
@@ -146,6 +148,17 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ asset, curren
                     className="w-full bg-slate-700 text-white placeholder-slate-400 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 />
             </div>
+             <div>
+                <label htmlFor="notes" className="block text-sm font-medium text-slate-300 mb-1">Notes (Optional)</label>
+                <textarea
+                  id="notes"
+                  placeholder="e.g., Taking profits"
+                  value={notes}
+                  onChange={e => setNotes(e.target.value)}
+                  rows={2}
+                  className="w-full bg-slate-700 text-white placeholder-slate-400 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                />
+              </div>
         </div>
 
         <div className="p-6 bg-slate-800/50 border-t border-slate-700 rounded-b-lg flex justify-end space-x-4">
