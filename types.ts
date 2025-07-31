@@ -5,6 +5,7 @@ export interface Transaction {
   quantity: number;
   pricePerUnit: number; // Price in USD. For transfers, this will be 0.
   date: string; // ISO string for the date of the transaction
+  notes?: string; // Optional field for user notes
 }
 
 // Represents an asset held by the user, composed of multiple transactions
