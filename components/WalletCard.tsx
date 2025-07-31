@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Wallet, PriceData, PortfolioAsset } from '../types';
 import AssetTable from './AssetTable';
@@ -51,7 +50,7 @@ const WalletCard: React.FC<WalletCardProps> = ({ wallet, prices, onAddAsset, onR
             <header className="p-4 sm:p-6 border-b border-slate-700 flex justify-between items-center">
                 <div>
                     <h3 className="text-xl font-semibold text-white">{wallet.name}</h3>
-                    <p className="text-slate-400 font-mono">{formattedValue}</p>
+                    <p className="text-xl font-bold font-mono text-cyan-400 mt-1">{formattedValue}</p>
                 </div>
                 <div className="flex items-center space-x-2">
                     <button 
