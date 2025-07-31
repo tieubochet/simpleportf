@@ -9,16 +9,17 @@ import { Wallet, PriceData, Transaction, PortfolioAsset, HistoricalDataPoint, Pe
  */
 export const getAssetMetrics = (transactions: Transaction[], currentPrice: number) => {
   let totalQuantityBought = 0;
-  let totalCostBasis = 0; // Cost basis from 'buy' transactions only
+  let totalCostBasisWithFees = 0; // Cost basis from 'buy' transactions only, including fees
   let totalQuantitySold = 0;
   let totalQuantityTransferredIn = 0;
   let totalQuantityTransferredOut = 0;
 
   for (const tx of transactions) {
+    const fee = tx.fee || 0;
     switch (tx.type) {
       case 'buy':
         totalQuantityBought += tx.quantity;
-        totalCostBasis += tx.quantity * tx.pricePerUnit;
+        totalCostBasisWithFees += (tx.quantity * tx.pricePerUnit) + fee;
         break;
       case 'sell':
         totalQuantitySold += tx.quantity;
@@ -34,8 +35,8 @@ export const getAssetMetrics = (transactions: Transaction[], currentPrice: numbe
 
   const currentQuantity = totalQuantityBought + totalQuantityTransferredIn - totalQuantitySold - totalQuantityTransferredOut;
   
-  // Average buy price is based only on what was purchased.
-  const avgBuyPrice = totalQuantityBought > 0 ? totalCostBasis / totalQuantityBought : 0;
+  // Average buy price now includes fees to reflect true cost per unit.
+  const avgBuyPrice = totalQuantityBought > 0 ? totalCostBasisWithFees / totalQuantityBought : 0;
   
   // The cost of the assets currently held.
   const costOfCurrentHoldings = currentQuantity * avgBuyPrice;
@@ -43,7 +44,6 @@ export const getAssetMetrics = (transactions: Transaction[], currentPrice: numbe
   const marketValue = currentQuantity * currentPrice;
   
   // P/L is only calculated if there's a cost basis from 'buy' transactions.
-  // Otherwise, it's considered neutral (0) for assets that were only transferred in.
   const unrealizedPL = totalQuantityBought > 0 ? marketValue - costOfCurrentHoldings : 0;
 
   return {
@@ -125,8 +125,8 @@ export const calculatePortfolio24hChange = (wallets: Wallet[], prices: PriceData
  */
 export const calculateTotalPL = (wallets: Wallet[], prices: PriceData): { plValue: number; plPercentage: number } => {
   let totalMarketValue = 0;
-  let totalCostOfPurchases = 0;
-  let totalValueFromSales = 0;
+  let totalCostBasis = 0; // Total capital invested, including all fees
+  let totalValueRealized = 0; // Net proceeds from sales
 
   wallets.forEach(wallet => {
     wallet.assets.forEach(asset => {
@@ -135,20 +135,23 @@ export const calculateTotalPL = (wallets: Wallet[], prices: PriceData): { plValu
       let currentQuantity = 0;
       
       asset.transactions.forEach(tx => {
+        const fee = tx.fee || 0;
         switch (tx.type) {
           case 'buy':
             currentQuantity += tx.quantity;
-            totalCostOfPurchases += tx.quantity * tx.pricePerUnit;
+            totalCostBasis += (tx.quantity * tx.pricePerUnit) + fee;
             break;
           case 'sell':
             currentQuantity -= tx.quantity;
-            totalValueFromSales += tx.quantity * tx.pricePerUnit;
+            totalValueRealized += (tx.quantity * tx.pricePerUnit) - fee;
             break;
           case 'transfer_in':
             currentQuantity += tx.quantity;
+            totalCostBasis += fee; // Fees on transfers are a cost
             break;
           case 'transfer_out':
             currentQuantity -= tx.quantity;
+            totalCostBasis += fee; // Fees on transfers are a cost
             break;
         }
       });
@@ -159,14 +162,13 @@ export const calculateTotalPL = (wallets: Wallet[], prices: PriceData): { plValu
     });
   });
 
-  if (totalCostOfPurchases === 0) {
-    // If nothing was ever bought, P/L is 0. Avoid division by zero.
-    // This handles portfolios that only have transferred-in assets.
+  if (totalCostBasis === 0) {
+    // If nothing was ever bought or invested, P/L is 0. Avoid division by zero.
     return { plValue: 0, plPercentage: 0 };
   }
 
-  const plValue = totalMarketValue + totalValueFromSales - totalCostOfPurchases;
-  const plPercentage = (plValue / totalCostOfPurchases) * 100;
+  const plValue = totalMarketValue + totalValueRealized - totalCostBasis;
+  const plPercentage = (plValue / totalCostBasis) * 100;
 
   return { plValue, plPercentage };
 };
