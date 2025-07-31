@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Wallet, PriceData, PortfolioAsset } from '../types';
 import AssetTable from './AssetTable';
@@ -16,6 +17,15 @@ interface WalletCardProps {
 const WalletCard: React.FC<WalletCardProps> = ({ wallet, prices, onAddAsset, onRemoveAsset, onRemoveWallet, onAddTransaction }) => {
     
     const [visibleCount, setVisibleCount] = useState(10);
+    const [sortDirection, setSortDirection] = useState<'asc' | 'desc' | null>(null);
+
+    const handleSortChange = () => {
+        setSortDirection(current => {
+            if (current === null) return 'asc';
+            if (current === 'asc') return 'desc';
+            return null; // Cycle back to unsorted
+        });
+    };
 
     const walletTotalValue = calculateTotalValue([wallet], prices);
     
@@ -32,7 +42,27 @@ const WalletCard: React.FC<WalletCardProps> = ({ wallet, prices, onAddAsset, onR
         });
     }, [wallet.assets, prices]);
 
-    const visibleAssets = useMemo(() => displayableAssets.slice(0, visibleCount), [displayableAssets, visibleCount]);
+    const sortedAssets = useMemo(() => {
+        const assetsToSort = [...displayableAssets]; // create a mutable copy
+        if (sortDirection === null) {
+            return assetsToSort; // Return in original order (by insertion)
+        }
+
+        assetsToSort.sort((a, b) => {
+            const rankA = prices[a.id]?.market_cap_rank ?? Infinity;
+            const rankB = prices[b.id]?.market_cap_rank ?? Infinity;
+            
+            if (rankA === Infinity && rankB === Infinity) return 0;
+            if (rankA === Infinity) return 1; // Put assets without rank at the end
+            if (rankB === Infinity) return -1;
+
+            return sortDirection === 'asc' ? rankA - rankB : rankB - rankA;
+        });
+
+        return assetsToSort;
+    }, [displayableAssets, prices, sortDirection]);
+
+    const visibleAssets = useMemo(() => sortedAssets.slice(0, visibleCount), [sortedAssets, visibleCount]);
 
     const handleShowMore = () => {
         setVisibleCount(prevCount => prevCount + 10);
@@ -78,6 +108,8 @@ const WalletCard: React.FC<WalletCardProps> = ({ wallet, prices, onAddAsset, onR
                         prices={prices} 
                         onRemove={(assetId) => onRemoveAsset(wallet.id, assetId)}
                         onAddTransaction={(asset) => onAddTransaction(wallet.id, asset)}
+                        sortDirection={sortDirection}
+                        onSortChange={handleSortChange}
                     />
                     {(hasMore || showHideButton) && (
                         <div className="py-3 px-6 text-center border-t border-slate-700">
