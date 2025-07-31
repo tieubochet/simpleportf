@@ -5,6 +5,13 @@ import AssetTable from './AssetTable';
 import { PlusIcon, TrashIcon } from './icons';
 import { calculateTotalValue, getAssetMetrics } from '../utils/calculations';
 
+type SortKey = 'rank' | 'change24h' | 'pl';
+
+interface SortConfig {
+    key: SortKey | null;
+    direction: 'asc' | 'desc';
+}
+
 interface WalletCardProps {
     wallet: Wallet;
     prices: PriceData;
@@ -17,13 +24,21 @@ interface WalletCardProps {
 const WalletCard: React.FC<WalletCardProps> = ({ wallet, prices, onAddAsset, onRemoveAsset, onRemoveWallet, onAddTransaction }) => {
     
     const [visibleCount, setVisibleCount] = useState(10);
-    const [sortDirection, setSortDirection] = useState<'asc' | 'desc' | null>(null);
+    const [sortConfig, setSortConfig] = useState<SortConfig>({ key: null, direction: 'asc' });
 
-    const handleSortChange = () => {
-        setSortDirection(current => {
-            if (current === null) return 'asc';
-            if (current === 'asc') return 'desc';
-            return null; // Cycle back to unsorted
+    const handleSortChange = (key: SortKey) => {
+        setSortConfig(currentConfig => {
+            // If it's a new column, set a default sort direction
+            if (currentConfig.key !== key) {
+                // Rank sorts asc (1, 2, 3), others sort desc (highest first)
+                return { key, direction: key === 'rank' ? 'asc' : 'desc' };
+            }
+            // If it's the same column, cycle direction: desc -> asc -> null
+            if (currentConfig.direction === 'desc') {
+                return { key, direction: 'asc' };
+            }
+            // Last step in cycle, remove sort
+            return { key: null, direction: 'asc' }; // Reset to default
         });
     };
 
@@ -34,7 +49,6 @@ const WalletCard: React.FC<WalletCardProps> = ({ wallet, prices, onAddAsset, onR
         currency: 'USD',
     }).format(walletTotalValue);
     
-    // Filter assets with a positive quantity to determine what can be displayed.
     const displayableAssets = useMemo(() => {
         return wallet.assets.filter(asset => {
             const { currentQuantity } = getAssetMetrics(asset.transactions, prices[asset.id]?.usd ?? 0);
@@ -43,24 +57,48 @@ const WalletCard: React.FC<WalletCardProps> = ({ wallet, prices, onAddAsset, onR
     }, [wallet.assets, prices]);
 
     const sortedAssets = useMemo(() => {
-        const assetsToSort = [...displayableAssets]; // create a mutable copy
-        if (sortDirection === null) {
-            return assetsToSort; // Return in original order (by insertion)
+        const assetsToSort = [...displayableAssets];
+        const { key, direction } = sortConfig;
+
+        if (key === null) {
+            return assetsToSort; // Default sort is by insertion order
         }
 
         assetsToSort.sort((a, b) => {
-            const rankA = prices[a.id]?.market_cap_rank ?? Infinity;
-            const rankB = prices[b.id]?.market_cap_rank ?? Infinity;
-            
-            if (rankA === Infinity && rankB === Infinity) return 0;
-            if (rankA === Infinity) return 1; // Put assets without rank at the end
-            if (rankB === Infinity) return -1;
+            let valA: number;
+            let valB: number;
 
-            return sortDirection === 'asc' ? rankA - rankB : rankB - rankA;
+            switch (key) {
+                case 'rank':
+                    valA = prices[a.id]?.market_cap_rank ?? Infinity;
+                    valB = prices[b.id]?.market_cap_rank ?? Infinity;
+                    break;
+                case 'change24h':
+                    valA = prices[a.id]?.usd_24h_change ?? -Infinity;
+                    valB = prices[b.id]?.usd_24h_change ?? -Infinity;
+                    break;
+                case 'pl':
+                    const metricsA = getAssetMetrics(a.transactions, prices[a.id]?.usd ?? 0);
+                    const metricsB = getAssetMetrics(b.transactions, prices[b.id]?.usd ?? 0);
+                    valA = metricsA.unrealizedPL;
+                    valB = metricsB.unrealizedPL;
+                    break;
+                default:
+                    return 0;
+            }
+
+            if (valA === valB) return 0;
+            
+            // Special handling for infinity to keep un-ranked/un-priced items at the bottom
+            if (valA === Infinity || valA === -Infinity) return 1;
+            if (valB === Infinity || valB === -Infinity) return -1;
+
+            const order = valA > valB ? 1 : -1;
+            return direction === 'asc' ? order : -order;
         });
 
         return assetsToSort;
-    }, [displayableAssets, prices, sortDirection]);
+    }, [displayableAssets, prices, sortConfig]);
 
     const visibleAssets = useMemo(() => sortedAssets.slice(0, visibleCount), [sortedAssets, visibleCount]);
 
@@ -108,7 +146,7 @@ const WalletCard: React.FC<WalletCardProps> = ({ wallet, prices, onAddAsset, onR
                         prices={prices} 
                         onRemove={(assetId) => onRemoveAsset(wallet.id, assetId)}
                         onAddTransaction={(asset) => onAddTransaction(wallet.id, asset)}
-                        sortDirection={sortDirection}
+                        sortConfig={sortConfig}
                         onSortChange={handleSortChange}
                     />
                     {(hasMore || showHideButton) && (
