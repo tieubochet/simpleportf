@@ -35,7 +35,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   
   // Performance Chart State
-  const [timeRange, setTimeRange] = useState<'24h' | '7d' | '1m' | '3m' | '1y'>('7d');
+  const [timeRange, setTimeRange] = useState<'24h' | '7d'>('7d');
   const [historicalData, setHistoricalData] = useState<HistoricalDataPoint[]>([]);
   const [isChartLoading, setIsChartLoading] = useState(true);
 
@@ -98,7 +98,7 @@ export default function App() {
 
         setIsChartLoading(true);
         try {
-            const daysMap: { [key: string]: string } = { '24h': '1', '7d': '7', '1m': '30', '3m': '90', '1y': '365' };
+            const daysMap: { [key: string]: string } = { '24h': '1', '7d': '7' };
             const days = daysMap[timeRange];
 
             const promises = allAssetIds.map(id => fetchHistoricalChartData(id, days));

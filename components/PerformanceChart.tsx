@@ -1,12 +1,15 @@
+
 import React from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Brush, ResponsiveContainer } from 'recharts';
 import { HistoricalDataPoint } from '../types';
 
+type TimeRange = '24h' | '7d';
+
 interface PerformanceChartProps {
   data: HistoricalDataPoint[];
   isLoading: boolean;
-  timeRange: '24h' | '7d' | '1m' | '3m' | '1y';
-  setTimeRange: (range: '24h' | '7d' | '1m' | '3m' | '1y') => void;
+  timeRange: TimeRange;
+  setTimeRange: (range: TimeRange) => void;
 }
 
 const formatValue = (value: number) => {
@@ -41,9 +44,9 @@ const CustomTooltip = ({ active, payload, label, timeRange }: any) => {
 
 const TimeRangeButton: React.FC<{
     label: string;
-    range: '24h' | '7d' | '1m' | '3m' | '1y';
+    range: TimeRange;
     activeRange: string;
-    onClick: (range: '24h' | '7d' | '1m' | '3m' | '1y') => void;
+    onClick: (range: TimeRange) => void;
 }> = ({ label, range, activeRange, onClick }) => {
     const isActive = activeRange === range;
     return (
@@ -66,9 +69,6 @@ const LoadingSkeleton = () => (
             <div className="h-6 w-32 bg-slate-700 rounded-md"></div>
             <div className="flex space-x-1 p-1 bg-slate-700/50 rounded-lg">
                 <div className="h-7 w-10 bg-slate-600 rounded-md"></div>
-                <div className="h-7 w-10 bg-slate-700 rounded-md"></div>
-                <div className="h-7 w-10 bg-slate-700 rounded-md"></div>
-                <div className="h-7 w-10 bg-slate-700 rounded-md"></div>
                 <div className="h-7 w-10 bg-slate-700 rounded-md"></div>
             </div>
         </div>
@@ -93,12 +93,9 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({ data, isLoading, ti
         );
     }
 
-    const timeRanges: { label: string; range: '24h' | '7d' | '1m' | '3m' | '1y' }[] = [
-        { label: '24h', range: '24h' },
-        { label: '7d', range: '7d' },
-        { label: '1m', range: '1m' },
-        { label: '3m', range: '3m' },
-        { label: '1y', range: '1y' },
+    const timeRanges: { label: string; range: TimeRange }[] = [
+        { label: '24H', range: '24h' },
+        { label: '7D', range: '7d' },
     ];
     
     const chartData = data.map(([timestamp, value]) => ({ timestamp, value }));
