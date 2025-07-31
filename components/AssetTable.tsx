@@ -4,13 +4,20 @@ import { PortfolioAsset, PriceData, Transaction } from '../types';
 import { TrashIcon, ReceiptIcon, ChevronDownIcon, ChevronUpIcon, ArrowUpIcon, ArrowDownIcon } from './icons';
 import { getAssetMetrics } from '../utils/calculations';
 
+type SortKey = 'rank' | 'change24h' | 'pl';
+
+interface SortConfig {
+    key: SortKey | null;
+    direction: 'asc' | 'desc';
+}
+
 interface AssetTableProps {
   assets: PortfolioAsset[];
   prices: PriceData;
   onRemove: (assetId: string) => void;
   onAddTransaction: (asset: PortfolioAsset) => void;
-  sortDirection: 'asc' | 'desc' | null;
-  onSortChange: () => void;
+  sortConfig: SortConfig;
+  onSortChange: (key: SortKey) => void;
 }
 
 const formatCurrency = (value: number) => {
@@ -112,7 +119,7 @@ const TransactionHistory: React.FC<{ transactions: Transaction[] }> = ({ transac
 };
 
 
-const AssetTable: React.FC<AssetTableProps> = ({ assets, prices, onRemove, onAddTransaction, sortDirection, onSortChange }) => {
+const AssetTable: React.FC<AssetTableProps> = ({ assets, prices, onRemove, onAddTransaction, sortConfig, onSortChange }) => {
     const [expandedAssetId, setExpandedAssetId] = useState<string | null>(null);
 
     const handleToggleExpand = (assetId: string) => {
@@ -126,14 +133,14 @@ const AssetTable: React.FC<AssetTableProps> = ({ assets, prices, onRemove, onAdd
                 <tr className="border-b border-slate-700 text-slate-400">
                     <th className="py-3 px-2 font-medium text-center">
                         <button
-                            onClick={onSortChange}
+                            onClick={() => onSortChange('rank')}
                             className="flex items-center justify-center w-full group text-slate-400 hover:text-white transition-colors"
                             title="Sort by Rank"
                         >
                             #
                             <span className="ml-1">
-                                {sortDirection === 'asc' ? <ArrowUpIcon className="h-4 w-4" /> :
-                                 sortDirection === 'desc' ? <ArrowDownIcon className="h-4 w-4" /> :
+                                {sortConfig.key === 'rank' && sortConfig.direction === 'asc' ? <ArrowUpIcon className="h-4 w-4" /> :
+                                 sortConfig.key === 'rank' && sortConfig.direction === 'desc' ? <ArrowDownIcon className="h-4 w-4" /> :
                                  <div className="h-4 w-4" />
                                 }
                             </span>
@@ -143,9 +150,37 @@ const AssetTable: React.FC<AssetTableProps> = ({ assets, prices, onRemove, onAdd
                     <th className="py-3 px-4 font-medium text-right">Quantity</th>
                     <th className="py-3 px-4 font-medium text-right">Avg. Buy Price</th>
                     <th className="py-3 px-4 font-medium text-right">Current Price</th>
-                    <th className="py-3 px-4 font-medium text-right">24h %</th>
+                    <th className="py-3 px-4 font-medium text-right">
+                        <button
+                            onClick={() => onSortChange('change24h')}
+                            className="flex items-center justify-end w-full group text-slate-400 hover:text-white transition-colors"
+                            title="Sort by 24h %"
+                        >
+                            24h %
+                            <span className="ml-1">
+                                {sortConfig.key === 'change24h' && sortConfig.direction === 'asc' ? <ArrowUpIcon className="h-4 w-4" /> :
+                                 sortConfig.key === 'change24h' && sortConfig.direction === 'desc' ? <ArrowDownIcon className="h-4 w-4" /> :
+                                 <div className="h-4 w-4" />
+                                }
+                            </span>
+                        </button>
+                    </th>
                     <th className="py-3 px-4 font-medium text-right">7d %</th>
-                    <th className="py-3 px-4 font-medium text-right">P/L</th>
+                    <th className="py-3 px-4 font-medium text-right">
+                         <button
+                            onClick={() => onSortChange('pl')}
+                            className="flex items-center justify-end w-full group text-slate-400 hover:text-white transition-colors"
+                            title="Sort by P/L"
+                        >
+                            P/L
+                            <span className="ml-1">
+                                {sortConfig.key === 'pl' && sortConfig.direction === 'asc' ? <ArrowUpIcon className="h-4 w-4" /> :
+                                 sortConfig.key === 'pl' && sortConfig.direction === 'desc' ? <ArrowDownIcon className="h-4 w-4" /> :
+                                 <div className="h-4 w-4" />
+                                }
+                            </span>
+                        </button>
+                    </th>
                     <th className="py-3 px-4 font-medium text-right">Value</th>
                     <th className="py-3 px-4 font-medium text-center">Actions</th>
                 </tr>
