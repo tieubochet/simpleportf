@@ -4,7 +4,7 @@ import { PortfolioAsset, PriceData, Transaction } from '../types';
 import { TrashIcon, ReceiptIcon, ChevronDownIcon, ChevronUpIcon, ArrowUpIcon, ArrowDownIcon } from './icons';
 import { getAssetMetrics } from '../utils/calculations';
 
-type SortKey = 'rank' | 'change24h' | 'pl';
+type SortKey = 'rank' | 'change24h' | 'change7d' | 'pl';
 
 interface SortConfig {
     key: SortKey | null;
@@ -165,7 +165,21 @@ const AssetTable: React.FC<AssetTableProps> = ({ assets, prices, onRemove, onAdd
                             </span>
                         </button>
                     </th>
-                    <th className="py-3 px-4 font-medium text-right">7d %</th>
+                    <th className="py-3 px-4 font-medium text-right">
+                        <button
+                            onClick={() => onSortChange('change7d')}
+                            className="flex items-center justify-end w-full group text-slate-400 hover:text-white transition-colors"
+                            title="Sort by 7d %"
+                        >
+                            7d %
+                            <span className="ml-1">
+                                {sortConfig.key === 'change7d' && sortConfig.direction === 'asc' ? <ArrowUpIcon className="h-4 w-4" /> :
+                                 sortConfig.key === 'change7d' && sortConfig.direction === 'desc' ? <ArrowDownIcon className="h-4 w-4" /> :
+                                 <div className="h-4 w-4" />
+                                }
+                            </span>
+                        </button>
+                    </th>
                     <th className="py-3 px-4 font-medium text-right">
                          <button
                             onClick={() => onSortChange('pl')}
