@@ -21,6 +21,7 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({ onClose, onAddAsset, exis
   const [pricePerUnit, setPricePerUnit] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [notes, setNotes] = useState('');
+  const [fee, setFee] = useState('');
 
   useEffect(() => {
     if (searchQuery.trim().length < 2) {
@@ -56,6 +57,8 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({ onClose, onAddAsset, exis
   const handleSave = () => {
     const numericQuantity = parseFloat(quantity);
     const numericPrice = parseFloat(pricePerUnit);
+    const numericFee = fee ? parseFloat(fee) : 0;
+
     if (selectedCoin && !isNaN(numericQuantity) && numericQuantity > 0 && !isNaN(numericPrice) && numericPrice >= 0 && !!date) {
       const firstTransaction: Transaction = {
         id: uuidv4(),
@@ -64,6 +67,7 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({ onClose, onAddAsset, exis
         pricePerUnit: numericPrice,
         date: new Date(date).toISOString(),
         notes: notes.trim() ? notes.trim() : undefined,
+        fee: numericFee > 0 ? numericFee : undefined,
       };
       
       const newAsset: PortfolioAsset = {
@@ -154,6 +158,16 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({ onClose, onAddAsset, exis
                   value={pricePerUnit}
                   onChange={e => setPricePerUnit(e.target.value)}
                   className="w-full bg-slate-700 text-white placeholder-slate-400 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">Fee (USD) (Optional)</label>
+                <input
+                    type="number"
+                    placeholder="e.g., 5.00"
+                    value={fee}
+                    onChange={e => setFee(e.target.value)}
+                    className="w-full bg-slate-700 text-white placeholder-slate-400 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 />
               </div>
               <div>
