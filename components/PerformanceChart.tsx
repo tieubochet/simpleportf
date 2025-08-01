@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { HistoricalDataPoint } from '../types';
