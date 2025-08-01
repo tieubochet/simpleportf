@@ -4,7 +4,7 @@ import { PortfolioAsset, PriceData, Transaction } from '../types';
 import { TrashIcon, ReceiptIcon, ChevronDownIcon, ChevronUpIcon, ArrowUpIcon, ArrowDownIcon } from './icons';
 import { getAssetMetrics } from '../utils/calculations';
 
-type SortKey = 'rank' | 'change24h' | 'change7d' | 'pl';
+type SortKey = 'rank' | 'change24h' | 'change7d' | 'pl' | 'value';
 
 interface SortConfig {
     key: SortKey | null;
@@ -195,7 +195,21 @@ const AssetTable: React.FC<AssetTableProps> = ({ assets, prices, onRemove, onAdd
                             </span>
                         </button>
                     </th>
-                    <th className="py-3 px-4 font-medium text-right">Value</th>
+                    <th className="py-3 px-4 font-medium text-right">
+                        <button
+                            onClick={() => onSortChange('value')}
+                            className="flex items-center justify-end w-full group text-slate-400 hover:text-white transition-colors"
+                            title="Sort by Value"
+                        >
+                            Value
+                            <span className="ml-1">
+                                {sortConfig.key === 'value' && sortConfig.direction === 'asc' ? <ArrowUpIcon className="h-4 w-4" /> :
+                                 sortConfig.key === 'value' && sortConfig.direction === 'desc' ? <ArrowDownIcon className="h-4 w-4" /> :
+                                 <div className="h-4 w-4" />
+                                }
+                            </span>
+                        </button>
+                    </th>
                     <th className="py-3 px-4 font-medium text-center">Actions</th>
                 </tr>
             </thead>
