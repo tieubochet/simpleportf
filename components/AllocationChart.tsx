@@ -26,16 +26,16 @@ const CustomLegend = ({ payload, onToggleViewAll, showAll, hasOthers, hoveredIte
           >
             <div className="flex items-center truncate">
               <span className="h-2.5 w-2.5 rounded-full mr-3 flex-shrink-0" style={{ backgroundColor: entry.color }}></span>
-              <span className="text-slate-700 truncate" title={entry.value}>{entry.value}</span>
+              <span className="text-slate-300 truncate" title={entry.value}>{entry.value}</span>
             </div>
-            <span className="font-mono text-slate-600 pl-2">{`${entry.payload.percent.toFixed(2)}%`}</span>
+            <span className="font-mono text-slate-400 pl-2">{`${entry.payload.percent.toFixed(2)}%`}</span>
           </li>
         ))}
       </ul>
       {hasOthers && (
         <button
             onClick={onToggleViewAll}
-            className="text-cyan-600 hover:text-cyan-500 mt-2 text-left w-full"
+            className="text-cyan-400 hover:text-cyan-500 mt-2 text-left w-full"
             onMouseEnter={() => setHoveredItem(null)}
             onMouseLeave={() => setHoveredItem(null)}
         >
@@ -142,18 +142,18 @@ const AllocationChart: React.FC<AllocationChartProps> = ({ wallets, prices }) =>
 
   if (pieDataToShow.length === 0) {
     return (
-        <div className="bg-white p-6 rounded-lg flex flex-col items-center justify-center min-h-[300px]">
-            <h3 className="text-xl font-semibold text-slate-800 mb-4">Overall Allocation</h3>
-            <p className="text-slate-500">Not enough data to display chart.</p>
+        <div className="bg-slate-800 p-6 rounded-lg shadow-lg flex flex-col items-center justify-center min-h-[440px]">
+            <h3 className="text-xl font-semibold text-white mb-4">Overall Allocation</h3>
+            <p className="text-slate-400">Not enough data to display chart.</p>
         </div>
     );
   }
 
   return (
-    <div className="bg-white p-4 sm:p-6 rounded-lg">
-      <h3 className="text-xl font-semibold text-slate-800 mb-6">Overall Allocation</h3>
+    <div className="bg-slate-800 p-4 sm:p-6 rounded-lg shadow-lg">
+      <h3 className="text-xl font-semibold text-white mb-6">Overall Allocation</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-        <div className="h-[200px] w-full">
+        <div className="h-[250px] sm:h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
@@ -184,7 +184,7 @@ const AllocationChart: React.FC<AllocationChartProps> = ({ wallets, prices }) =>
             </PieChart>
           </ResponsiveContainer>
         </div>
-        <div>
+        <div className="max-h-[300px] overflow-y-auto pr-2">
           <CustomLegend 
             payload={legendDataToShow.map((entry, index) => ({ value: entry.name, color: COLORS[index % COLORS.length], payload: entry }))} 
             onToggleViewAll={onToggleViewAll} 
