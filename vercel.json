@@ -1,5 +1,3 @@
 {
-  "framework": null,
-  "buildCommand": "echo 'This is a static site, no build is required.'",
-  "installCommand": "echo 'Skipping installation, as this project uses CDN imports.'"
+  "framework": null
 }
