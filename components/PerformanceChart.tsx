@@ -22,13 +22,13 @@ const formatDate = (tickItem: number, range: '4h' | '24h' | '7d') => {
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     const portfolio = payload.find(p => p.dataKey === 'portfolio');
-    const btc = payload.find(p => p.dataKey === 'btc');
+    const btc = payload.find(p => p.dataKey === 'btcPrice');
 
     return (
       <div className="bg-slate-800/90 backdrop-blur-sm border border-slate-600 p-3 rounded-lg shadow-lg text-sm text-white">
         <p className="font-bold mb-2">{new Date(label).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}</p>
-        {portfolio && <p style={{ color: '#60a5fa' }}>All-time profit: {portfolio.value.toFixed(2)}%</p>}
-        {btc && <p style={{ color: '#f97316' }}>BTC trend: {btc.value.toFixed(2)}%</p>}
+        {portfolio && <p style={{ color: '#60a5fa' }}>Portfolio Performance: {portfolio.value.toFixed(2)}%</p>}
+        {btc && <p style={{ color: '#f97316' }}>BTC Price: {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(btc.value)}</p>}
       </div>
     );
   }
@@ -110,12 +110,11 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({ portfolioData, btcD
         if (alignedData.length < 2) return [];
 
         const initialAlignedPortfolioValue = alignedData[0].portfolioValue;
-        const initialAlignedBtcValue = alignedData[0].btcValue;
 
         return alignedData.map(d => ({
             timestamp: d.timestamp,
             portfolio: initialAlignedPortfolioValue > 0 ? ((d.portfolioValue - initialAlignedPortfolioValue) / initialAlignedPortfolioValue) * 100 : 0,
-            btc: initialAlignedBtcValue > 0 ? ((d.btcValue - initialAlignedBtcValue) / initialAlignedBtcValue) * 100 : 0,
+            btcPrice: d.btcValue, // Use raw BTC price
         }));
 
     }, [portfolioData, btcData, hasBtcData]);
@@ -160,11 +159,28 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({ portfolioData, btcD
                                 tick={{ fontSize: 12, fill: '#94a3b8' }}
                             />
                             <YAxis
+                                yAxisId="left"
+                                orientation="left"
                                 tickFormatter={(tick) => `${tick.toFixed(0)}%`}
                                 stroke="#94a3b8"
                                 tick={{ fontSize: 12, fill: '#94a3b8' }}
                                 domain={['auto', 'auto']}
                             />
+                             {hasBtcData && (
+                                <YAxis
+                                    yAxisId="right"
+                                    orientation="right"
+                                    tickFormatter={(value) => {
+                                        if (typeof value !== 'number') return '';
+                                        if (value >= 1000) return `$${(value / 1000).toFixed(0)}k`;
+                                        return `$${value.toFixed(0)}`;
+                                    }}
+                                    stroke="#f97316"
+                                    tick={{ fontSize: 12, fill: '#f97316' }}
+                                    domain={['auto', 'auto']}
+                                    width={50}
+                                />
+                            )}
                             <Tooltip content={<CustomTooltip />} />
                             <Legend 
                                 verticalAlign="top" 
@@ -173,12 +189,19 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({ portfolioData, btcD
                                 iconType="circle"
                                 iconSize={8}
                                 formatter={(value, entry) => {
-                                    const label = value === 'portfolio' ? 'All-time profit' : 'BTC trend';
+                                    let label;
+                                    if (value === 'portfolio') {
+                                        label = 'Portfolio Performance';
+                                    } else if (value === 'btcPrice') {
+                                        label = 'BTC Price';
+                                    } else {
+                                        label = value;
+                                    }
                                     return <span className="text-slate-200 font-medium">{label}</span>;
                                 }}
                             />
-                            <Area type="monotone" name="All-time profit" dataKey="portfolio" stroke="#60a5fa" fill="url(#colorPortfolio)" strokeWidth={2} />
-                            {hasBtcData && <Area type="monotone" name="BTC trend" dataKey="btc" stroke="#f97316" fill="transparent" strokeWidth={2} />}
+                            <Area yAxisId="left" type="monotone" name="Portfolio Performance" dataKey="portfolio" stroke="#60a5fa" fill="url(#colorPortfolio)" strokeWidth={2} />
+                            {hasBtcData && <Area yAxisId="right" type="monotone" name="BTC Price" dataKey="btcPrice" stroke="#f97316" fill="transparent" strokeWidth={2} />}
                         </AreaChart>
                     </ResponsiveContainer>
                 </div>
