@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { PerformerData } from '../types';
 import { TrophyIcon, TrendingDownIcon } from './icons';
@@ -15,9 +16,10 @@ interface PortfolioSummaryProps {
   performer: PerformerData | null;
   loser: PerformerData | null;
   isLoading: boolean;
+  isPrivacyMode: boolean;
 }
 
-const ChangeDisplay: React.FC<{ value: number; percentage: number }> = ({ value, percentage }) => {
+const ChangeDisplay: React.FC<{ value: number; percentage: number; isPrivacyMode: boolean; }> = ({ value, percentage, isPrivacyMode }) => {
     const isPositive = value >= 0;
     const colorClass = isPositive ? 'text-green-500' : 'text-red-500';
     const sign = isPositive ? '+' : '';
@@ -41,7 +43,7 @@ const ChangeDisplay: React.FC<{ value: number; percentage: number }> = ({ value,
 
     return (
         <div className={colorClass}>
-            <p className="text-base font-semibold">{formattedValue}</p>
+            <p className="text-base font-semibold">{isPrivacyMode ? '$ ****' : formattedValue}</p>
             <p className="text-sm font-mono">{formattedPercentage}</p>
         </div>
     );
@@ -54,7 +56,7 @@ const LoadingSkeletonBlock = () => (
     </>
 );
 
-const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ totalValue, changeData, plData, performer, loser, isLoading }) => {
+const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ totalValue, changeData, plData, performer, loser, isLoading, isPrivacyMode }) => {
   const formattedValue = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
@@ -72,20 +74,20 @@ const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ totalValue, changeD
           {showLoadingSkeleton ? (
             <div className="h-8 bg-slate-700 rounded-md animate-pulse w-32 mx-auto md:mx-0"></div>
           ) : (
-            <p className="text-2xl font-bold text-white tracking-tight">{formattedValue}</p>
+            <p className="text-2xl font-bold text-white tracking-tight">{isPrivacyMode ? '$ ****' : formattedValue}</p>
           )}
         </div>
         
         {/* Stat Block 2: 24h Change */}
         <div className="p-4 text-center md:text-left">
           <h2 className="text-sm font-medium text-slate-400 mb-2">24h Change</h2>
-           {showLoadingSkeleton ? <LoadingSkeletonBlock /> : <ChangeDisplay value={changeData.changeValue} percentage={changeData.changePercentage} />}
+           {showLoadingSkeleton ? <LoadingSkeletonBlock /> : <ChangeDisplay value={changeData.changeValue} percentage={changeData.changePercentage} isPrivacyMode={isPrivacyMode} />}
         </div>
 
         {/* Stat Block 3: Total P/L */}
         <div className="p-4 text-center md:text-left">
           <h2 className="text-sm font-medium text-slate-400 mb-2">Total P/L</h2>
-           {showLoadingSkeleton ? <LoadingSkeletonBlock /> : <ChangeDisplay value={plData.plValue} percentage={plData.plPercentage} />}
+           {showLoadingSkeleton ? <LoadingSkeletonBlock /> : <ChangeDisplay value={plData.plValue} percentage={plData.plPercentage} isPrivacyMode={isPrivacyMode} />}
         </div>
         
         {/* Stat Block 4: Top Gainer */}
