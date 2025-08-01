@@ -191,10 +191,8 @@ export default function App() {
   }, [addingAssetToWalletId, wallets]);
 
   const fetchAiSuggestion = useCallback(async () => {
-    // Don't fetch if data is already there on subsequent opens
-    if (aiSuggestion) return;
-
     setIsAiSuggestionLoading(true);
+    setAiSuggestion(null);
     setAiSuggestionError(null);
     try {
       const suggestion = await getRebalancingSuggestion(wallets, prices);
@@ -209,17 +207,27 @@ export default function App() {
     } finally {
       setIsAiSuggestionLoading(false);
     }
-  }, [wallets, prices, aiSuggestion]);
+  }, [wallets, prices]);
 
 
   const handleOpenAdvisor = () => {
     setIsAdvisorModalOpen(true);
-    fetchAiSuggestion();
+    // Fetch only if there is no suggestion or if there was a previous error.
+    // This prevents re-fetching a valid suggestion every time the modal opens.
+    // The user can use the refresh button for an explicit update.
+    if (!aiSuggestion || aiSuggestionError) {
+      fetchAiSuggestion();
+    }
   };
 
   const handleCloseAdvisor = () => {
     setIsAdvisorModalOpen(false);
   };
+  
+  const handleRefreshSuggestion = useCallback(() => {
+    fetchAiSuggestion();
+  }, [fetchAiSuggestion]);
+
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-200 font-sans">
@@ -300,6 +308,7 @@ export default function App() {
       <AdvisorModal 
         isOpen={isAdvisorModalOpen}
         onClose={handleCloseAdvisor}
+        onRefresh={handleRefreshSuggestion}
         suggestion={aiSuggestion}
         isLoading={isAiSuggestionLoading}
         error={aiSuggestionError}
