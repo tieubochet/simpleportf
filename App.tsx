@@ -102,11 +102,16 @@ export default function App() {
             const days = daysMap[timeRange];
 
             const promises = allAssetIds.map(id => fetchHistoricalChartData(id, days));
-            const results = await Promise.all(promises);
+            const results = await Promise.allSettled(promises);
 
             const historicalPrices: Record<string, [number, number][]> = {};
-            allAssetIds.forEach((id, index) => {
-                historicalPrices[id] = results[index];
+            results.forEach((result, index) => {
+              const id = allAssetIds[index];
+              if (result.status === 'fulfilled' && result.value) {
+                historicalPrices[id] = result.value;
+              } else if (result.status === 'rejected') {
+                console.warn(`Failed to fetch historical data for ${id}:`, result.reason);
+              }
             });
 
             let calculatedData = calculateHistoricalPortfolioValue(wallets, historicalPrices);
@@ -119,8 +124,9 @@ export default function App() {
             setHistoricalData(calculatedData);
 
         } catch (err) {
-            console.error("Failed to fetch or calculate historical chart data:", err);
-            // set an error state for the chart if needed
+            // This catch block is now less likely to be hit for single API failures,
+            // but still good for other unexpected errors.
+            console.error("An unexpected error occurred while processing historical chart data:", err);
             setHistoricalData([]); // Clear data on error
         } finally {
             setIsChartLoading(false);
