@@ -1,10 +1,9 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { PortfolioAsset, PriceData, Wallet, Transaction, HistoricalDataPoint, PerformerData, RebalancingSuggestion } from './types';
+import { PortfolioAsset, PriceData, Wallet, Transaction, HistoricalDataPoint, PerformerData } from './types';
 import { usePortfolio } from './hooks/usePortfolio';
 import { fetchPrices, fetchHistoricalChartData } from './services/coingecko';
 import { calculateTotalValue, getAssetIds, getAssetMetrics, calculatePortfolio24hChange, calculateTotalPL, calculateHistoricalPortfolioValue, findTopPerformer, findTopLoser } from './utils/calculations';
-import { getRebalancingSuggestion } from './services/gemini';
 
 import PortfolioHeader from './components/PortfolioHeader';
 import PortfolioSummary from './components/PortfolioSummary';
@@ -15,7 +14,6 @@ import WalletCard from './components/WalletCard';
 import { WalletIcon } from './components/icons';
 import PerformanceChart from './components/PerformanceChart';
 import AllocationChart from './components/AllocationChart';
-import { AdvisorModal } from './components/AdvisorModal';
 
 type AssetForTransaction = {
   walletId: string;
@@ -44,12 +42,6 @@ export default function App() {
 
   // Privacy Mode State
   const [isPrivacyMode, setIsPrivacyMode] = useState(false);
-
-  // AI Advisor State
-  const [isAdvisorModalOpen, setIsAdvisorModalOpen] = useState(false);
-  const [aiSuggestion, setAiSuggestion] = useState<RebalancingSuggestion | null>(null);
-  const [isAiSuggestionLoading, setIsAiSuggestionLoading] = useState(false);
-  const [aiSuggestionError, setAiSuggestionError] = useState<string | null>(null);
 
   const allAssetIds = useMemo(() => getAssetIds(wallets), [wallets]);
 
@@ -190,45 +182,6 @@ export default function App() {
     return wallets.find(w => w.id === addingAssetToWalletId);
   }, [addingAssetToWalletId, wallets]);
 
-  const fetchAiSuggestion = useCallback(async () => {
-    setIsAiSuggestionLoading(true);
-    setAiSuggestion(null);
-    setAiSuggestionError(null);
-    try {
-      const suggestion = await getRebalancingSuggestion(wallets, prices);
-      setAiSuggestion(suggestion);
-    } catch (err) {
-      if (err instanceof Error) {
-        setAiSuggestionError(err.message);
-      } else {
-        setAiSuggestionError("An unknown error occurred.");
-      }
-      console.error("AI Advisor error:", err);
-    } finally {
-      setIsAiSuggestionLoading(false);
-    }
-  }, [wallets, prices]);
-
-
-  const handleOpenAdvisor = () => {
-    setIsAdvisorModalOpen(true);
-    // Fetch only if there is no suggestion or if there was a previous error.
-    // This prevents re-fetching a valid suggestion every time the modal opens.
-    // The user can use the refresh button for an explicit update.
-    if (!aiSuggestion || aiSuggestionError) {
-      fetchAiSuggestion();
-    }
-  };
-
-  const handleCloseAdvisor = () => {
-    setIsAdvisorModalOpen(false);
-  };
-  
-  const handleRefreshSuggestion = useCallback(() => {
-    fetchAiSuggestion();
-  }, [fetchAiSuggestion]);
-
-
   return (
     <div className="min-h-screen bg-slate-900 text-slate-200 font-sans">
       <main className="container mx-auto p-4 md:p-8">
@@ -238,7 +191,6 @@ export default function App() {
           onExport={exportWallets}
           isPrivacyMode={isPrivacyMode}
           onTogglePrivacyMode={togglePrivacyMode}
-          onOpenAdvisor={handleOpenAdvisor}
         />
 
         <PortfolioSummary 
@@ -304,17 +256,6 @@ export default function App() {
           </div>
         )}
       </main>
-
-      <AdvisorModal 
-        isOpen={isAdvisorModalOpen}
-        onClose={handleCloseAdvisor}
-        onRefresh={handleRefreshSuggestion}
-        suggestion={aiSuggestion}
-        isLoading={isAiSuggestionLoading}
-        error={aiSuggestionError}
-        wallets={wallets}
-        prices={prices}
-      />
 
       {isAddWalletModalOpen && (
         <AddWalletModal 

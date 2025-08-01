@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { UploadIcon, DownloadIcon, WalletIcon, EyeIcon, EyeOffIcon, SparklesIcon } from './icons';
+import { UploadIcon, DownloadIcon, WalletIcon, EyeIcon, EyeOffIcon } from './icons';
 import { DailyStreak } from './DailyStreak';
 
 interface PortfolioHeaderProps {
@@ -9,10 +9,9 @@ interface PortfolioHeaderProps {
   onExport: () => void;
   isPrivacyMode: boolean;
   onTogglePrivacyMode: () => void;
-  onOpenAdvisor: () => void;
 }
 
-const PortfolioHeader: React.FC<PortfolioHeaderProps> = ({ onAddWallet, onImport, onExport, isPrivacyMode, onTogglePrivacyMode, onOpenAdvisor }) => {
+const PortfolioHeader: React.FC<PortfolioHeaderProps> = ({ onAddWallet, onImport, onExport, isPrivacyMode, onTogglePrivacyMode }) => {
 
   return (
     <header className="flex flex-col md:flex-row items-center justify-between mb-8">
@@ -20,14 +19,6 @@ const PortfolioHeader: React.FC<PortfolioHeaderProps> = ({ onAddWallet, onImport
         Crypto Portfolios
       </h1>
       <div className="flex items-center space-x-2">
-        <button 
-          onClick={onOpenAdvisor}
-          className="flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300" 
-          title="AI Portfolio Advisor"
-        >
-          <SparklesIcon className="h-5 w-5" />
-          <span className="hidden sm:inline">AI Advisor</span>
-        </button>
         <button 
           onClick={onTogglePrivacyMode} 
           className="flex items-center justify-center bg-slate-700 hover:bg-slate-600 text-white font-semibold p-2 rounded-lg transition-colors duration-300 h-10 w-10" 
@@ -37,11 +28,11 @@ const PortfolioHeader: React.FC<PortfolioHeaderProps> = ({ onAddWallet, onImport
         </button>
         <button onClick={onImport} className="flex items-center space-x-2 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300">
           <UploadIcon className="h-5 w-5" />
-          <span className="hidden sm:inline">Import</span>
+          <span>Import</span>
         </button>
         <button onClick={onExport} className="flex items-center space-x-2 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300">
           <DownloadIcon className="h-5 w-5" />
-          <span className="hidden sm:inline">Export</span>
+          <span>Export</span>
         </button>
         <button onClick={onAddWallet} className="flex items-center space-x-2 bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300">
           <WalletIcon className="h-5 w-5" />

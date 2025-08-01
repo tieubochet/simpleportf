@@ -2,10 +2,21 @@
   "name": "crypto-portfolio-tracker",
   "private": true,
   "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "build": "mkdir -p dist && cp index.html metadata.json dist/ && sed -i 's|src=\"/index.tsx\"|src=\"/index.js\"|' dist/index.html && esbuild index.tsx --bundle --outfile=dist/index.js --loader:.tsx=tsx --platform=browser --jsx=automatic --external:react --external:react/ --external:react-dom/ --external:recharts --external:uuid --external:@google/genai"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^19.1.0",
+    "recharts": "^3.1.0",
+    "react-dom": "^19.1.0",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
-    "esbuild": "^0.20.2"
+    "@types/node": "^22.14.0",
+    "typescript": "~5.7.2",
+    "vite": "^6.2.0"
   }
 }
