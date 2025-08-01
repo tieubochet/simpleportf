@@ -66,11 +66,22 @@ const TimeRangeButton: React.FC<{ label: string; range: '4h' | '24h' | '7d'; act
 }
 
 const PerformanceChart: React.FC<PerformanceChartProps> = ({ portfolioData, btcData, isLoading, timeRange, setTimeRange }) => {
+    const hasBtcData = useMemo(() => btcData && btcData.length >= 2, [btcData]);
+
     const chartData = useMemo(() => {
-        if (!portfolioData || portfolioData.length < 2 || !btcData || btcData.length < 2) {
+        if (!portfolioData || portfolioData.length < 2) {
             return [];
         }
 
+        const initialPortfolioValue = portfolioData[0][1];
+        if (!hasBtcData) {
+            return portfolioData.map(d => ({
+                timestamp: d[0],
+                portfolio: initialPortfolioValue > 0 ? ((d[1] - initialPortfolioValue) / initialPortfolioValue) * 100 : 0,
+            }));
+        }
+
+        // Both are available: run alignment logic
         const portfolioMap = new Map(portfolioData);
         const btcMap = new Map(btcData);
 
@@ -98,16 +109,16 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({ portfolioData, btcD
 
         if (alignedData.length < 2) return [];
 
-        const initialPortfolioValue = alignedData[0].portfolioValue;
-        const initialBtcValue = alignedData[0].btcValue;
+        const initialAlignedPortfolioValue = alignedData[0].portfolioValue;
+        const initialAlignedBtcValue = alignedData[0].btcValue;
 
         return alignedData.map(d => ({
             timestamp: d.timestamp,
-            portfolio: initialPortfolioValue > 0 ? ((d.portfolioValue - initialPortfolioValue) / initialPortfolioValue) * 100 : 0,
-            btc: initialBtcValue > 0 ? ((d.btcValue - initialBtcValue) / initialBtcValue) * 100 : 0,
+            portfolio: initialAlignedPortfolioValue > 0 ? ((d.portfolioValue - initialAlignedPortfolioValue) / initialAlignedPortfolioValue) * 100 : 0,
+            btc: initialAlignedBtcValue > 0 ? ((d.btcValue - initialAlignedBtcValue) / initialAlignedBtcValue) * 100 : 0,
         }));
 
-    }, [portfolioData, btcData]);
+    }, [portfolioData, btcData, hasBtcData]);
 
     if (isLoading) {
         return <LoadingSkeleton />;
@@ -167,7 +178,7 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({ portfolioData, btcD
                                 }}
                             />
                             <Area type="monotone" name="All-time profit" dataKey="portfolio" stroke="#60a5fa" fill="url(#colorPortfolio)" strokeWidth={2} />
-                            <Area type="monotone" name="BTC trend" dataKey="btc" stroke="#f97316" fill="transparent" strokeWidth={2} />
+                            {hasBtcData && <Area type="monotone" name="BTC trend" dataKey="btc" stroke="#f97316" fill="transparent" strokeWidth={2} />}
                         </AreaChart>
                     </ResponsiveContainer>
                 </div>
