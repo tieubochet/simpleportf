@@ -18,6 +18,7 @@ interface AssetTableProps {
   onAddTransaction: (asset: PortfolioAsset) => void;
   sortConfig: SortConfig;
   onSortChange: (key: SortKey) => void;
+  isPrivacyMode: boolean;
 }
 
 const formatCurrency = (value: number) => {
@@ -36,11 +37,15 @@ const formatNumber = (value: number) => {
     }).format(value);
 }
 
-const ProfitLoss: React.FC<{ value: number }> = ({ value }) => {
+const ProfitLoss: React.FC<{ value: number; isPrivacyMode: boolean }> = ({ value, isPrivacyMode }) => {
     const isProfit = value >= 0;
     const colorClass = isProfit ? 'text-green-500' : 'text-red-500';
-    const sign = isProfit ? '+' : '';
+    
+    if (isPrivacyMode) {
+      return <span className={colorClass}>$ ****</span>;
+    }
 
+    const sign = isProfit ? '+' : '';
     return (
         <span className={colorClass}>
             {sign}{formatCurrency(value)}
@@ -63,7 +68,7 @@ const ChangePercentage: React.FC<{ value: number | undefined }> = ({ value }) =>
     );
 };
 
-const TransactionHistory: React.FC<{ transactions: Transaction[] }> = ({ transactions }) => {
+const TransactionHistory: React.FC<{ transactions: Transaction[]; isPrivacyMode: boolean }> = ({ transactions, isPrivacyMode }) => {
     const sortedTransactions = [...transactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     const typeClasses: Record<string, string> = {
@@ -103,10 +108,10 @@ const TransactionHistory: React.FC<{ transactions: Transaction[] }> = ({ transac
                                 <td className="p-3 font-mono text-slate-300">{new Date(tx.date).toLocaleDateString('en-CA')}</td>
                                 <td className="p-3 font-mono text-slate-200 text-right">{tx.quantity.toLocaleString(undefined, { maximumFractionDigits: 8 })}</td>
                                 <td className="p-3 font-mono text-slate-300 text-right">
-                                    {tx.type === 'buy' || tx.type === 'sell' ? `$${tx.pricePerUnit.toLocaleString(undefined, {style: 'currency', currency: 'USD'}).replace('$', '')}` : '-'}
+                                    {tx.type === 'buy' || tx.type === 'sell' ? (isPrivacyMode ? '$ ****' : `$${tx.pricePerUnit.toLocaleString(undefined, {style: 'currency', currency: 'USD'}).replace('$', '')}`) : '-'}
                                 </td>
                                 <td className="p-3 font-mono text-slate-300 text-right">
-                                    {tx.fee ? formatCurrency(tx.fee) : <span className="text-slate-500">-</span>}
+                                    {tx.fee ? (isPrivacyMode ? '$ ****' : formatCurrency(tx.fee)) : <span className="text-slate-500">-</span>}
                                 </td>
                                 <td className="p-3 text-slate-400 max-w-[150px] whitespace-normal break-words">{tx.notes || <span className="text-slate-500">-</span>}</td>
                             </tr>
@@ -119,7 +124,7 @@ const TransactionHistory: React.FC<{ transactions: Transaction[] }> = ({ transac
 };
 
 
-const AssetTable: React.FC<AssetTableProps> = ({ assets, prices, onRemove, onAddTransaction, sortConfig, onSortChange }) => {
+const AssetTable: React.FC<AssetTableProps> = ({ assets, prices, onRemove, onAddTransaction, sortConfig, onSortChange, isPrivacyMode }) => {
     const [expandedAssetId, setExpandedAssetId] = useState<string | null>(null);
 
     const handleToggleExpand = (assetId: string) => {
@@ -247,9 +252,9 @@ const AssetTable: React.FC<AssetTableProps> = ({ assets, prices, onRemove, onAdd
                                     </div>
                                 </td>
                                 <td className="py-4 px-4 text-right font-mono text-white">{formatNumber(currentQuantity)}</td>
-                                <td className="py-4 px-4 text-right font-mono text-slate-300">{formatCurrency(avgBuyPrice)}</td>
+                                <td className="py-4 px-4 text-right font-mono text-slate-300">{isPrivacyMode ? '$ ****' : formatCurrency(avgBuyPrice)}</td>
                                 <td className="py-4 px-4 text-right font-mono text-slate-100">
-                                    {isPriceLoading ? <div className="h-5 bg-slate-700 rounded animate-pulse w-20 ml-auto"></div> : formatCurrency(currentPrice)}
+                                    {isPriceLoading ? <div className="h-5 bg-slate-700 rounded animate-pulse w-20 ml-auto"></div> : (isPrivacyMode ? '$ ****' : formatCurrency(currentPrice))}
                                 </td>
                                 <td className="py-4 px-4 text-right font-mono">
                                     {isPriceLoading ? (
@@ -266,10 +271,10 @@ const AssetTable: React.FC<AssetTableProps> = ({ assets, prices, onRemove, onAdd
                                     )}
                                 </td>
                                 <td className="py-4 px-4 text-right font-mono">
-                                    {isPriceLoading ? <div className="h-5 bg-slate-700 rounded animate-pulse w-20 ml-auto"></div> : <ProfitLoss value={unrealizedPL} />}
+                                    {isPriceLoading ? <div className="h-5 bg-slate-700 rounded animate-pulse w-20 ml-auto"></div> : <ProfitLoss value={unrealizedPL} isPrivacyMode={isPrivacyMode} />}
                                 </td>
                                 <td className="py-4 px-4 text-right font-mono text-white font-bold">
-                                    {isPriceLoading ? <div className="h-5 bg-slate-700 rounded animate-pulse w-24 ml-auto"></div> : formatCurrency(marketValue)}
+                                    {isPriceLoading ? <div className="h-5 bg-slate-700 rounded animate-pulse w-24 ml-auto"></div> : (isPrivacyMode ? '$ ****' : formatCurrency(marketValue))}
                                 </td>
                                 <td className="py-4 px-4 text-center">
                                     <div className="flex items-center justify-center space-x-1">
@@ -295,7 +300,7 @@ const AssetTable: React.FC<AssetTableProps> = ({ assets, prices, onRemove, onAdd
                             {expandedAssetId === asset.id && asset.transactions.length > 0 && (
                                 <tr className="bg-slate-800/50">
                                     <td colSpan={10} className="p-0 border-none">
-                                        <TransactionHistory transactions={asset.transactions} />
+                                        <TransactionHistory transactions={asset.transactions} isPrivacyMode={isPrivacyMode} />
                                     </td>
                                 </tr>
                             )}
