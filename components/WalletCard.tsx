@@ -19,9 +19,10 @@ interface WalletCardProps {
     onRemoveAsset: (walletId: string, assetId: string) => void;
     onRemoveWallet: (walletId:string) => void;
     onAddTransaction: (walletId: string, asset: PortfolioAsset) => void;
+    isPrivacyMode: boolean;
 }
 
-const WalletCard: React.FC<WalletCardProps> = ({ wallet, prices, onAddAsset, onRemoveAsset, onRemoveWallet, onAddTransaction }) => {
+const WalletCard: React.FC<WalletCardProps> = ({ wallet, prices, onAddAsset, onRemoveAsset, onRemoveWallet, onAddTransaction, isPrivacyMode }) => {
     
     const [visibleCount, setVisibleCount] = useState(10);
     const [sortConfig, setSortConfig] = useState<SortConfig>({ key: null, direction: 'asc' });
@@ -128,7 +129,7 @@ const WalletCard: React.FC<WalletCardProps> = ({ wallet, prices, onAddAsset, onR
             <header className="p-4 sm:p-6 border-b border-slate-700 flex justify-between items-center">
                 <div>
                     <h3 className="text-xl font-semibold text-white">{wallet.name}</h3>
-                    <p className="text-xl font-bold font-mono text-cyan-400 mt-1">{formattedValue}</p>
+                    <p className="text-xl font-bold font-mono text-cyan-400 mt-1">{isPrivacyMode ? '$ ****' : formattedValue}</p>
                 </div>
                 <div className="flex items-center space-x-2">
                     <button 
@@ -158,6 +159,7 @@ const WalletCard: React.FC<WalletCardProps> = ({ wallet, prices, onAddAsset, onR
                         onAddTransaction={(asset) => onAddTransaction(wallet.id, asset)}
                         sortConfig={sortConfig}
                         onSortChange={handleSortChange}
+                        isPrivacyMode={isPrivacyMode}
                     />
                     {(hasMore || showHideButton) && (
                         <div className="py-3 px-6 text-center border-t border-slate-700">
