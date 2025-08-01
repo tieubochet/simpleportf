@@ -1,11 +1,13 @@
+
 import React from 'react';
 import { RebalancingSuggestion, Wallet, PriceData } from '../types';
-import { XIcon, SparklesIcon } from './icons';
+import { XIcon, SparklesIcon, RefreshCwIcon } from './icons';
 import { getAssetMetrics } from '../utils/calculations';
 
 interface AdvisorModalProps {
     isOpen: boolean;
     onClose: () => void;
+    onRefresh: () => void;
     suggestion: RebalancingSuggestion | null;
     isLoading: boolean;
     error: string | null;
@@ -21,10 +23,17 @@ const LoadingState = () => (
     </div>
 );
 
-const ErrorState: React.FC<{ message: string }> = ({ message }) => (
+const ErrorState: React.FC<{ message: string; onRetry: () => void }> = ({ message, onRetry }) => (
      <div className="text-center p-8 bg-red-900/20 rounded-lg m-6">
         <p className="text-lg font-semibold text-red-400">An Error Occurred</p>
         <p className="mt-2 text-sm text-red-300">{message}</p>
+        <button
+            onClick={onRetry}
+            className="mt-6 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300 inline-flex items-center space-x-2"
+        >
+            <RefreshCwIcon className="h-5 w-5"/>
+            <span>Try Again</span>
+        </button>
     </div>
 );
 
@@ -60,12 +69,15 @@ const SuggestionDisplay: React.FC<{ suggestion: RebalancingSuggestion; wallets: 
     const allSymbols = new Set([...currentAllocation.keys(), ...suggestions.map(s => s.symbol.toUpperCase())]);
     const displayData = Array.from(allSymbols).map(symbol => {
         const current = currentAllocation.get(symbol) || 0;
-        const suggested = suggestions.find(s => s.symbol.toUpperCase() === symbol);
+        const suggestedItem = suggestions.find(s => s.symbol.toUpperCase() === symbol);
+        const suggested = suggestedItem?.suggested_percentage || 0;
+        const change = suggested - current;
         return {
             symbol,
-            name: suggested?.name || symbol, // Fallback to symbol if it's a new suggestion not in current portfolio
+            name: suggestedItem?.name || symbol, // Fallback to symbol if it's a new suggestion not in current portfolio
             current,
-            suggested: suggested?.suggested_percentage || 0,
+            suggested,
+            change,
         };
     }).sort((a,b) => b.suggested - a.suggested);
 
@@ -88,15 +100,19 @@ const SuggestionDisplay: React.FC<{ suggestion: RebalancingSuggestion; wallets: 
                                 <th className="p-3 font-medium">Asset</th>
                                 <th className="p-3 font-medium text-right">Current</th>
                                 <th className="p-3 font-medium text-right">Suggested</th>
+                                <th className="p-3 font-medium text-right">Change</th>
                             </tr>
                         </thead>
                          <tbody>
-                            {displayData.map(({ symbol, name, current, suggested }) => (
+                            {displayData.map(({ symbol, name, current, suggested, change }) => (
                                 <tr key={symbol} className="border-b border-slate-700/50">
                                     <td className="p-3 font-semibold text-white">{name} ({symbol})</td>
                                     <td className="p-3 font-mono text-slate-300 text-right">{current.toFixed(2)}%</td>
                                     <td className="p-3 font-mono text-right font-bold" style={{ color: suggested > current ? '#22c55e' : (suggested < current ? '#ef4444' : '#94a3b8') }}>
                                         {suggested.toFixed(2)}%
+                                    </td>
+                                     <td className="p-3 font-mono text-right" style={{ color: change > 0.01 ? '#22c55e' : (change < -0.01 ? '#ef4444' : '#94a3b8') }}>
+                                        {change > 0 && '+'}{change.toFixed(2)}%
                                     </td>
                                 </tr>
                             ))}
@@ -109,7 +125,7 @@ const SuggestionDisplay: React.FC<{ suggestion: RebalancingSuggestion; wallets: 
 };
 
 
-export const AdvisorModal: React.FC<AdvisorModalProps> = ({ isOpen, onClose, suggestion, isLoading, error, wallets, prices }) => {
+export const AdvisorModal: React.FC<AdvisorModalProps> = ({ isOpen, onClose, onRefresh, suggestion, isLoading, error, wallets, prices }) => {
     if (!isOpen) return null;
 
     return (
@@ -126,14 +142,24 @@ export const AdvisorModal: React.FC<AdvisorModalProps> = ({ isOpen, onClose, sug
                         <SparklesIcon className="h-6 w-6 mr-3 text-purple-400"/>
                         AI Portfolio Advisor
                     </h2>
-                    <button onClick={onClose} className="text-slate-400 hover:text-white">
-                        <XIcon className="h-6 w-6" />
-                    </button>
+                    <div className="flex items-center space-x-2">
+                         <button
+                            onClick={onRefresh}
+                            className="text-slate-400 hover:text-white disabled:text-slate-600 disabled:cursor-not-allowed p-2 rounded-full hover:bg-slate-700 transition-colors"
+                            disabled={isLoading}
+                            title="Refresh Suggestion"
+                        >
+                            <RefreshCwIcon className={`h-5 w-5 ${isLoading ? 'animate-spin' : ''}`} />
+                        </button>
+                        <button onClick={onClose} className="text-slate-400 hover:text-white p-2 rounded-full hover:bg-slate-700 transition-colors">
+                            <XIcon className="h-6 w-6" />
+                        </button>
+                    </div>
                 </div>
 
                 <div className="overflow-y-auto">
                     {isLoading && <LoadingState />}
-                    {error && <ErrorState message={error} />}
+                    {error && <ErrorState message={error} onRetry={onRefresh}/>}
                     {suggestion && !isLoading && !error && <SuggestionDisplay suggestion={suggestion} wallets={wallets} prices={prices}/>}
                 </div>
 
