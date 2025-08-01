@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { HistoricalDataPoint } from '../types';
@@ -26,8 +27,8 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     return (
       <div className="bg-slate-800/90 backdrop-blur-sm border border-slate-600 p-3 rounded-lg shadow-lg text-sm text-white">
         <p className="font-bold mb-2">{new Date(label).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}</p>
-        {portfolio && <p style={{ color: '#60a5fa' }}>Portfolio Value: {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(portfolio.value)}</p>}
         {btc && <p style={{ color: '#f97316' }}>BTC Price: {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(btc.value)}</p>}
+        {portfolio && <p style={{ color: '#60a5fa' }}>Portfolio Value: {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(portfolio.value)}</p>}
       </div>
     );
   }
@@ -145,6 +146,10 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({ portfolioData, btcD
                                     <stop offset="5%" stopColor="#60a5fa" stopOpacity={0.4}/>
                                     <stop offset="95%" stopColor="#60a5fa" stopOpacity={0}/>
                                 </linearGradient>
+                                <linearGradient id="colorBtc" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#f97316" stopOpacity={0.4}/>
+                                    <stop offset="95%" stopColor="#f97316" stopOpacity={0}/>
+                                </linearGradient>
                             </defs>
                             <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                             <XAxis
@@ -201,8 +206,8 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({ portfolioData, btcD
                                     return <span className="text-slate-200 font-medium">{label}</span>;
                                 }}
                             />
-                            <Area yAxisId="left" type="monotone" name="Portfolio Value" dataKey="portfolioValue" stroke="#60a5fa" fill="url(#colorPortfolio)" strokeWidth={2} />
-                            {hasBtcData && <Area yAxisId="right" type="monotone" name="BTC Price" dataKey="btcPrice" stroke="#f97316" fill="transparent" strokeWidth={2} />}
+                            {hasBtcData && <Area yAxisId="right" type="stepAfter" name="BTC Price" dataKey="btcPrice" stroke="#f97316" fill="url(#colorBtc)" strokeWidth={2} />}
+                            <Area yAxisId="left" type="stepAfter" name="Portfolio Value" dataKey="portfolioValue" stroke="#60a5fa" fill="url(#colorPortfolio)" strokeWidth={2} />
                         </AreaChart>
                     </ResponsiveContainer>
                 </div>
