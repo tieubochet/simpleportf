@@ -7,7 +7,6 @@ import { calculateTotalValue, getAssetIds, getAssetMetrics, calculatePortfolio24
 
 import PortfolioHeader from './components/PortfolioHeader';
 import PortfolioSummary from './components/PortfolioSummary';
-import AllocationChart from './components/AllocationChart';
 import AddAssetModal from './components/AddAssetModal';
 import AddWalletModal from './components/AddWalletModal';
 import AddTransactionModal from './components/AddTransactionModal';
@@ -37,6 +36,7 @@ export default function App() {
   // Performance Chart State
   const [timeRange, setTimeRange] = useState<'4h' | '24h' | '7d'>('7d');
   const [historicalData, setHistoricalData] = useState<HistoricalDataPoint[]>([]);
+  const [btcHistoricalData, setBtcHistoricalData] = useState<HistoricalDataPoint[]>([]);
   const [isChartLoading, setIsChartLoading] = useState(true);
 
   const allAssetIds = useMemo(() => getAssetIds(wallets), [wallets]);
@@ -92,6 +92,7 @@ export default function App() {
     const fetchAndCalculateHistoricalData = async () => {
         if (allAssetIds.length === 0) {
             setHistoricalData([]);
+            setBtcHistoricalData([]);
             setIsChartLoading(false);
             return;
         }
@@ -101,11 +102,19 @@ export default function App() {
             const daysMap: { [key: string]: string } = { '4h': '1', '24h': '1', '7d': '7' };
             const days = daysMap[timeRange];
 
-            const promises = allAssetIds.map(id => fetchHistoricalChartData(id, days));
-            const results = await Promise.allSettled(promises);
+            const portfolioPromises = allAssetIds.map(id => fetchHistoricalChartData(id, days));
+            const btcPromise = fetchHistoricalChartData('bitcoin', days);
+
+            const [portfolioResults, btcResult] = await Promise.all([
+              Promise.allSettled(portfolioPromises),
+              btcPromise.catch(e => {
+                  console.warn("Could not fetch BTC historical data", e);
+                  return null; // Return null on failure
+              })
+            ]);
 
             const historicalPrices: Record<string, [number, number][]> = {};
-            results.forEach((result, index) => {
+            portfolioResults.forEach((result, index) => {
               const id = allAssetIds[index];
               if (result.status === 'fulfilled' && result.value) {
                 historicalPrices[id] = result.value;
@@ -122,12 +131,12 @@ export default function App() {
             }
 
             setHistoricalData(calculatedData);
+            setBtcHistoricalData(btcResult || []);
 
         } catch (err) {
-            // This catch block is now less likely to be hit for single API failures,
-            // but still good for other unexpected errors.
             console.error("An unexpected error occurred while processing historical chart data:", err);
-            setHistoricalData([]); // Clear data on error
+            setHistoricalData([]);
+            setBtcHistoricalData([]);
         } finally {
             setIsChartLoading(false);
         }
@@ -187,18 +196,16 @@ export default function App() {
 
         {wallets.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 lg:grid-cols-10 gap-8 mt-8">
-              <div className="lg:col-span-7">
-                <PerformanceChart 
-                  data={historicalData} 
+            <div className="mt-8">
+               <PerformanceChart 
+                  portfolioData={historicalData} 
+                  btcData={btcHistoricalData}
+                  wallets={wallets}
+                  prices={prices}
                   isLoading={isChartLoading}
                   timeRange={timeRange}
                   setTimeRange={setTimeRange}
                 />
-              </div>
-              <div className="lg:col-span-3">
-                 <AllocationChart wallets={wallets} prices={prices} />
-              </div>
             </div>
             
             <div className="mt-8">
