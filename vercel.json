@@ -1,5 +1,3 @@
 {
-  "installCommand": "npm install esbuild",
-  "buildCommand": "bash build.sh",
   "outputDirectory": "dist"
 }
