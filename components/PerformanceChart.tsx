@@ -9,6 +9,7 @@ interface PerformanceChartProps {
   isLoading: boolean;
   timeRange: '4h' | '24h' | '7d';
   setTimeRange: (range: '4h' | '24h' | '7d') => void;
+  isPrivacyMode: boolean;
 }
 
 const formatDate = (tickItem: number, range: '4h' | '24h' | '7d') => {
@@ -19,7 +20,7 @@ const formatDate = (tickItem: number, range: '4h' | '24h' | '7d') => {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 };
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload, label, isPrivacyMode }: any) => {
   if (active && payload && payload.length) {
     const portfolio = payload.find(p => p.dataKey === 'portfolioValue');
     const btc = payload.find(p => p.dataKey === 'btcPrice');
@@ -27,8 +28,8 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     return (
       <div className="bg-slate-800/90 backdrop-blur-sm border border-slate-600 p-3 rounded-lg shadow-lg text-sm text-white">
         <p className="font-bold mb-2">{new Date(label).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}</p>
-        {btc && <p style={{ color: '#f97316' }}>BTC Price: {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(btc.value)}</p>}
-        {portfolio && <p style={{ color: '#60a5fa' }}>Portfolio Value: {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(portfolio.value)}</p>}
+        {btc && <p style={{ color: '#f97316' }}>BTC Price: {isPrivacyMode ? '$ ****' : new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(btc.value)}</p>}
+        {portfolio && <p style={{ color: '#60a5fa' }}>Portfolio Value: {isPrivacyMode ? '$ ****' : new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(portfolio.value)}</p>}
       </div>
     );
   }
@@ -65,7 +66,7 @@ const TimeRangeButton: React.FC<{ label: string; range: '4h' | '24h' | '7d'; act
     )
 }
 
-const PerformanceChart: React.FC<PerformanceChartProps> = ({ portfolioData, btcData, isLoading, timeRange, setTimeRange }) => {
+const PerformanceChart: React.FC<PerformanceChartProps> = ({ portfolioData, btcData, isLoading, timeRange, setTimeRange, isPrivacyMode }) => {
     const hasBtcData = useMemo(() => btcData && btcData.length >= 2, [btcData]);
 
     const chartData = useMemo(() => {
@@ -163,6 +164,7 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({ portfolioData, btcD
                                 yAxisId="left"
                                 orientation="left"
                                 tickFormatter={(value) => {
+                                    if (isPrivacyMode) return '$ ****';
                                     if (typeof value !== 'number') return '';
                                     if (value >= 1000) return `$${(value / 1000).toFixed(0)}k`;
                                     return `$${value.toFixed(0)}`;
@@ -177,6 +179,7 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({ portfolioData, btcD
                                     yAxisId="right"
                                     orientation="right"
                                     tickFormatter={(value) => {
+                                        if (isPrivacyMode) return '$ ****';
                                         if (typeof value !== 'number') return '';
                                         if (value >= 1000) return `$${(value / 1000).toFixed(0)}k`;
                                         return `$${value.toFixed(0)}`;
@@ -187,7 +190,7 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({ portfolioData, btcD
                                     width={50}
                                 />
                             )}
-                            <Tooltip content={<CustomTooltip />} />
+                            <Tooltip content={<CustomTooltip isPrivacyMode={isPrivacyMode} />} />
                             <Legend 
                                 verticalAlign="top" 
                                 align="left"
