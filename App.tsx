@@ -13,6 +13,7 @@ import AddTransactionModal from './components/AddTransactionModal';
 import WalletCard from './components/WalletCard';
 import { WalletIcon } from './components/icons';
 import PerformanceChart from './components/PerformanceChart';
+import AllocationChart from './components/AllocationChart';
 
 type AssetForTransaction = {
   walletId: string;
@@ -196,16 +197,22 @@ export default function App() {
 
         {wallets.length > 0 ? (
           <>
-            <div className="mt-8">
-               <PerformanceChart 
-                  portfolioData={historicalData} 
-                  btcData={btcHistoricalData}
-                  wallets={wallets}
-                  prices={prices}
-                  isLoading={isChartLoading}
-                  timeRange={timeRange}
-                  setTimeRange={setTimeRange}
+            <div className="mt-8 grid grid-cols-1 lg:grid-cols-5 gap-8">
+              <div className="lg:col-span-3">
+                <PerformanceChart 
+                    portfolioData={historicalData} 
+                    btcData={btcHistoricalData}
+                    isLoading={isChartLoading}
+                    timeRange={timeRange}
+                    setTimeRange={setTimeRange}
                 />
+              </div>
+              <div className="lg:col-span-2">
+                <AllocationChart 
+                    wallets={wallets}
+                    prices={prices}
+                />
+              </div>
             </div>
             
             <div className="mt-8">
