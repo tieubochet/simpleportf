@@ -49,3 +49,17 @@ export interface PerformerData {
 
 // Represents a data point for the historical performance chart: [timestamp, value]
 export type HistoricalDataPoint = [number, number];
+
+// Represents an asset suggestion from the AI Advisor
+export interface AssetSuggestion {
+  symbol: string;
+  name: string;
+  suggested_percentage: number;
+}
+
+// Represents the entire rebalancing suggestion from the AI
+export interface RebalancingSuggestion {
+  summary: string;
+  reasoning: string;
+  suggestions: AssetSuggestion[];
+}
