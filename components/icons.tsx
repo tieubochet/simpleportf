@@ -144,3 +144,12 @@ export const SparklesIcon: React.FC<IconProps> = (props) => (
         <path d="m17.1 8-3.1 1.9 1.9 3.1 1.2-1.9L17.1 8z"/>
     </svg>
 );
+
+export const RefreshCwIcon: React.FC<IconProps> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <path d="M3 2v6h6"/>
+        <path d="M21 12A9 9 0 0 0 6 5.3L3 8"/>
+        <path d="M21 22v-6h-6"/>
+        <path d="M3 12a9 9 0 0 0 15 6.7l3-2.7"/>
+    </svg>
+);
