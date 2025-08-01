@@ -7,6 +7,7 @@ import { getAssetMetrics } from '../utils/calculations';
 interface AllocationChartProps {
   wallets: Wallet[];
   prices: PriceData;
+  isPrivacyMode: boolean;
 }
 
 const COLORS = ['#d946ef', '#f97316', '#facc15', '#fb923c', '#e11d48', '#f472b6', '#a78bfa', '#818cf8', '#60a5fa', '#22d3ee', '#34d399', '#a3e635'];
@@ -46,7 +47,7 @@ const CustomLegend = ({ payload, onToggleViewAll, showAll, hasOthers, hoveredIte
   );
 };
 
-const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: any[] }) => {
+const CustomTooltip = ({ active, payload, isPrivacyMode }: { active?: boolean; payload?: any[], isPrivacyMode: boolean }) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     const value = data.value;
@@ -61,7 +62,7 @@ const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: any[] 
     return (
       <div className="bg-slate-800/80 backdrop-blur-sm border border-slate-600 p-3 rounded-lg shadow-lg text-sm">
         <p className="font-bold text-white mb-1">{name}</p>
-        <p className="text-slate-300">{formattedValue}</p>
+        <p className="text-slate-300">{isPrivacyMode ? '$ ****' : formattedValue}</p>
         <p className="text-slate-400">{`${percent.toFixed(2)}% of portfolio`}</p>
       </div>
     );
@@ -71,7 +72,7 @@ const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: any[] 
 };
 
 
-const AllocationChart: React.FC<AllocationChartProps> = ({ wallets, prices }) => {
+const AllocationChart: React.FC<AllocationChartProps> = ({ wallets, prices, isPrivacyMode }) => {
   const [showAll, setShowAll] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
@@ -156,7 +157,7 @@ const AllocationChart: React.FC<AllocationChartProps> = ({ wallets, prices }) =>
         <div className="h-[250px] sm:h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
-              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+              <Tooltip content={<CustomTooltip isPrivacyMode={isPrivacyMode} />} cursor={{ fill: 'transparent' }} />
               <Pie
                 data={pieDataToShow}
                 cx="50%"
