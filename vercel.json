@@ -1,0 +1,5 @@
+{
+  "installCommand": "npm install esbuild",
+  "buildCommand": "mkdir -p dist && cp index.html metadata.json dist/ && sed -i 's|src=\"/index.tsx\"|src=\"/index.js\"|' dist/index.html && ./node_modules/.bin/esbuild index.tsx --bundle --outfile=dist/index.js --jsx=automatic --external:react --external:\"react/*\" --external:react-dom --external:\"react-dom/*\" --external:recharts --external:uuid --external:@google/genai",
+  "outputDirectory": "dist"
+}
