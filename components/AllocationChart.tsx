@@ -26,16 +26,16 @@ const CustomLegend = ({ payload, onToggleViewAll, showAll, hasOthers, hoveredIte
           >
             <div className="flex items-center truncate">
               <span className="h-2.5 w-2.5 rounded-full mr-3 flex-shrink-0" style={{ backgroundColor: entry.color }}></span>
-              <span className="text-slate-200 truncate" title={entry.value}>{entry.value}</span>
+              <span className="text-slate-700 truncate" title={entry.value}>{entry.value}</span>
             </div>
-            <span className="font-mono text-slate-300 pl-2">{`${entry.payload.percent.toFixed(2)}%`}</span>
+            <span className="font-mono text-slate-600 pl-2">{`${entry.payload.percent.toFixed(2)}%`}</span>
           </li>
         ))}
       </ul>
       {hasOthers && (
         <button
             onClick={onToggleViewAll}
-            className="text-cyan-400 hover:text-cyan-300 mt-2 text-left w-full"
+            className="text-cyan-600 hover:text-cyan-500 mt-2 text-left w-full"
             onMouseEnter={() => setHoveredItem(null)}
             onMouseLeave={() => setHoveredItem(null)}
         >
@@ -59,7 +59,7 @@ const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: any[] 
     }).format(value);
 
     return (
-      <div className="bg-slate-900/80 backdrop-blur-sm border border-slate-600 p-3 rounded-lg shadow-lg text-sm">
+      <div className="bg-slate-800/80 backdrop-blur-sm border border-slate-600 p-3 rounded-lg shadow-lg text-sm">
         <p className="font-bold text-white mb-1">{name}</p>
         <p className="text-slate-300">{formattedValue}</p>
         <p className="text-slate-400">{`${percent.toFixed(2)}% of portfolio`}</p>
@@ -112,7 +112,7 @@ const AllocationChart: React.FC<AllocationChartProps> = ({ wallets, prices }) =>
       .filter(item => item.value > 0)
       .sort((a, b) => b.value - a.value);
 
-    const LEGEND_LIMIT = 10;
+    const LEGEND_LIMIT = 12;
     const mainAssets = assetsWithPercent.slice(0, LEGEND_LIMIT);
     const otherAssets = assetsWithPercent.slice(LEGEND_LIMIT);
     
@@ -142,16 +142,16 @@ const AllocationChart: React.FC<AllocationChartProps> = ({ wallets, prices }) =>
 
   if (pieDataToShow.length === 0) {
     return (
-        <div className="bg-slate-800 p-6 rounded-lg shadow-lg flex flex-col items-center justify-center min-h-[300px]">
-            <h3 className="text-xl font-semibold text-white mb-4">Overall Allocation</h3>
-            <p className="text-slate-400">Not enough data to display chart.</p>
+        <div className="bg-white p-6 rounded-lg flex flex-col items-center justify-center min-h-[300px]">
+            <h3 className="text-xl font-semibold text-slate-800 mb-4">Overall Allocation</h3>
+            <p className="text-slate-500">Not enough data to display chart.</p>
         </div>
     );
   }
 
   return (
-    <div className="bg-slate-800 p-4 sm:p-6 rounded-lg shadow-lg">
-      <h3 className="text-xl font-semibold text-white mb-6">Overall Allocation</h3>
+    <div className="bg-white p-4 sm:p-6 rounded-lg">
+      <h3 className="text-xl font-semibold text-slate-800 mb-6">Overall Allocation</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
         <div className="h-[200px] w-full">
           <ResponsiveContainer width="100%" height="100%">
