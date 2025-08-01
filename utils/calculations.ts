@@ -253,6 +253,7 @@ export const findTopLoser = (wallets: Wallet[], prices: PriceData): PerformerDat
 
 /**
  * Calculates the historical total value of a portfolio over time.
+ * This robust version creates a master timeline from all assets to handle unsynchronized data.
  * @param wallets The user's wallets with all transaction data.
  * @param historicalPrices A record mapping coin IDs to their historical price data from CoinGecko.
  * @returns An array of [timestamp, value] tuples for charting.
@@ -261,42 +262,59 @@ export const calculateHistoricalPortfolioValue = (
   wallets: Wallet[],
   historicalPrices: Record<string, [number, number][]>
 ): HistoricalDataPoint[] => {
-  const assetIds = Object.keys(historicalPrices);
-  if (assetIds.length === 0 || !historicalPrices[assetIds[0]] || historicalPrices[assetIds[0]].length === 0) {
+  const assetIdsWithData = Object.keys(historicalPrices).filter(
+    id => historicalPrices[id] && historicalPrices[id].length > 0
+  );
+
+  if (assetIdsWithData.length === 0) {
     return [];
   }
 
-  // Use the timestamps from the first asset's data as the reference timeline
-  const timeline = historicalPrices[assetIds[0]].map(p => p[0]);
-  const portfolioValues = new Array(timeline.length).fill(0);
+  // 1. Create a unified, sorted timeline from all unique timestamps.
+  const allTimestamps = new Set<number>();
+  assetIdsWithData.forEach(id => {
+    historicalPrices[id].forEach(pricePoint => allTimestamps.add(pricePoint[0]));
+  });
+  const masterTimeline = Array.from(allTimestamps).sort((a, b) => a - b);
+  
+  if (masterTimeline.length === 0) {
+    return [];
+  }
 
-  // Combine all transactions for each asset across all wallets
-  const allAssetsMap = new Map<string, Transaction[]>();
+  // 2. Combine all transactions for each asset across all wallets and create price maps.
+  const allAssetsMap = new Map<string, { transactions: Transaction[], priceMap: Map<number, number> }>();
   wallets.forEach(wallet => {
     wallet.assets.forEach(asset => {
-      const existingTxs = allAssetsMap.get(asset.id) || [];
-      allAssetsMap.set(asset.id, [...existingTxs, ...asset.transactions]);
+      if (assetIdsWithData.includes(asset.id)) {
+        let existing = allAssetsMap.get(asset.id);
+        if (!existing) {
+          existing = { 
+            transactions: [],
+            priceMap: new Map(historicalPrices[asset.id]),
+          };
+          allAssetsMap.set(asset.id, existing);
+        }
+        existing.transactions.push(...asset.transactions);
+      }
     });
   });
 
-  // For each asset we hold, calculate its value over time and add it to the total
-  allAssetsMap.forEach((transactions, assetId) => {
-    const assetPriceHistory = historicalPrices[assetId];
-    if (!assetPriceHistory || assetPriceHistory.length !== timeline.length) {
-      // Skip if data is missing or length doesn't match the timeline
-      return;
-    }
+  // 3. Initialize portfolio values for each timestamp.
+  const portfolioValues = new Map<number, number>();
+  masterTimeline.forEach(ts => portfolioValues.set(ts, 0));
 
+  // 4. For each asset, calculate its value over time and add it to the portfolio total.
+  allAssetsMap.forEach(({ transactions, priceMap }) => {
     const sortedTransactions = [...transactions].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    
     let txIndex = 0;
     let currentQuantity = 0;
+    let lastKnownPrice = 0;
 
-    // Iterate through each point in our timeline
-    for (let i = 0; i < timeline.length; i++) {
-      const currentTimestamp = timeline[i];
-      
-      // Update quantity by processing all transactions that occurred up to this point in time
-      while (txIndex < sortedTransactions.length && new Date(sortedTransactions[txIndex].date).getTime() <= currentTimestamp) {
+    // Iterate through the unified timeline
+    for (const timestamp of masterTimeline) {
+      // Update quantity based on transactions that occurred up to this point in time
+      while (txIndex < sortedTransactions.length && new Date(sortedTransactions[txIndex].date).getTime() <= timestamp) {
         const tx = sortedTransactions[txIndex];
         switch (tx.type) {
           case 'buy':
@@ -310,14 +328,20 @@ export const calculateHistoricalPortfolioValue = (
         }
         txIndex++;
       }
-      
-      // If we hold any quantity of the asset at this time, calculate its value and add to the portfolio total for that timestamp
-      if (currentQuantity > 0) {
-        const price = assetPriceHistory[i][1];
-        portfolioValues[i] += currentQuantity * price;
+
+      // Update price: if a price exists for this exact timestamp, use it. Otherwise, keep the last known price (forward-fill).
+      const priceAtTimestamp = priceMap.get(timestamp);
+      if (priceAtTimestamp !== undefined) {
+          lastKnownPrice = priceAtTimestamp;
+      }
+
+      if (currentQuantity > 0 && lastKnownPrice > 0) {
+        const value = currentQuantity * lastKnownPrice;
+        portfolioValues.set(timestamp, (portfolioValues.get(timestamp) || 0) + value);
       }
     }
   });
   
-  return timeline.map((timestamp, i) => [timestamp, portfolioValues[i]]);
+  // 5. Convert the final values map to the required array format.
+  return Array.from(portfolioValues.entries());
 };
