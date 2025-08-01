@@ -40,6 +40,9 @@ export default function App() {
   const [btcHistoricalData, setBtcHistoricalData] = useState<HistoricalDataPoint[]>([]);
   const [isChartLoading, setIsChartLoading] = useState(true);
 
+  // Privacy Mode State
+  const [isPrivacyMode, setIsPrivacyMode] = useState(false);
+
   const allAssetIds = useMemo(() => getAssetIds(wallets), [wallets]);
 
   const totalValue = useMemo(() => {
@@ -61,6 +64,10 @@ export default function App() {
   const topLoser = useMemo(() => {
     return findTopLoser(wallets, prices);
   }, [wallets, prices]);
+
+  const togglePrivacyMode = useCallback(() => {
+    setIsPrivacyMode(prev => !prev);
+  }, []);
 
   const updatePrices = useCallback(async () => {
     if (allAssetIds.length === 0) {
@@ -182,6 +189,8 @@ export default function App() {
           onAddWallet={() => setIsAddWalletModalOpen(true)}
           onImport={importWallets}
           onExport={exportWallets}
+          isPrivacyMode={isPrivacyMode}
+          onTogglePrivacyMode={togglePrivacyMode}
         />
 
         <PortfolioSummary 
@@ -191,6 +200,7 @@ export default function App() {
           performer={topPerformer}
           loser={topLoser}
           isLoading={isLoading && wallets.length > 0}
+          isPrivacyMode={isPrivacyMode}
         />
 
         {error && <div className="text-center text-red-400 bg-red-900/50 p-3 rounded-lg my-4">{error}</div>}
@@ -205,12 +215,14 @@ export default function App() {
                     isLoading={isChartLoading}
                     timeRange={timeRange}
                     setTimeRange={setTimeRange}
+                    isPrivacyMode={isPrivacyMode}
                 />
               </div>
               <div className="lg:col-span-2">
                 <AllocationChart 
                     wallets={wallets}
                     prices={prices}
+                    isPrivacyMode={isPrivacyMode}
                 />
               </div>
             </div>
@@ -225,6 +237,7 @@ export default function App() {
                       onRemoveAsset={removeAssetFromWallet}
                       onRemoveWallet={removeWallet}
                       onAddTransaction={handleOpenAddTransactionModal}
+                      isPrivacyMode={isPrivacyMode}
                   />
               ))}
             </div>
