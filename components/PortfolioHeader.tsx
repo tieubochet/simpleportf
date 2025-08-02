@@ -28,11 +28,11 @@ const PortfolioHeader: React.FC<PortfolioHeaderProps> = ({ onAddWallet, onImport
         </button>
         <button onClick={onImport} className="flex items-center space-x-2 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300">
           <UploadIcon className="h-5 w-5" />
-          <span>Import</span>
+          <span className="hidden sm:inline">Import</span>
         </button>
         <button onClick={onExport} className="flex items-center space-x-2 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300">
           <DownloadIcon className="h-5 w-5" />
-          <span>Export</span>
+          <span className="hidden sm:inline">Export</span>
         </button>
         <button onClick={onAddWallet} className="flex items-center space-x-2 bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300">
           <WalletIcon className="h-5 w-5" />
