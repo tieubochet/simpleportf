@@ -3,7 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { Wallet, PriceData, PortfolioAsset } from '../types';
 import AssetTable from './AssetTable';
 import { PlusIcon, TrashIcon } from './icons';
-import { calculateTotalValue, getAssetMetrics } from '../utils/calculations';
+import { calculateTotalValue, getAssetMetrics, calculateWallet24hChange } from '../utils/calculations';
 
 type SortKey = 'rank' | 'change24h' | 'change7d' | 'pl' | 'value';
 
@@ -21,6 +21,41 @@ interface WalletCardProps {
     onAddTransaction: (walletId: string, asset: PortfolioAsset) => void;
     isPrivacyMode: boolean;
 }
+
+const WalletChangeDisplay: React.FC<{ value: number; percentage: number; isPrivacyMode: boolean }> = ({ value, percentage, isPrivacyMode }) => {
+    const isPositive = value >= 0;
+    const colorClass = isPositive ? 'text-green-400' : 'text-red-400';
+    const sign = isPositive ? '+' : '';
+
+    if (isNaN(value) || isNaN(percentage) || Math.abs(value) < 0.01) {
+        return <p className="text-sm font-mono text-slate-500"><span className="text-slate-400">24h:</span> -</p>;
+    }
+
+    if (isPrivacyMode) {
+        return (
+            <p className={`text-sm font-mono ${colorClass}`}>
+                <span className="text-slate-400 mr-2">24h:</span> 
+                {`$ **** (${sign}**.**%)`}
+            </p>
+        );
+    }
+    
+    const formattedValue = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+    }).format(value);
+
+    const formattedPercentage = `(${sign}${Math.abs(percentage || 0).toFixed(2)}%)`;
+
+    return (
+        <p className={`text-sm font-mono ${colorClass}`}>
+            <span className="text-slate-400 mr-2">24h:</span> 
+            {formattedValue}
+            <span className="ml-2">{formattedPercentage}</span>
+        </p>
+    );
+};
+
 
 const WalletCard: React.FC<WalletCardProps> = ({ wallet, prices, onAddAsset, onRemoveAsset, onRemoveWallet, onAddTransaction, isPrivacyMode }) => {
     
@@ -43,7 +78,8 @@ const WalletCard: React.FC<WalletCardProps> = ({ wallet, prices, onAddAsset, onR
         });
     };
 
-    const walletTotalValue = calculateTotalValue([wallet], prices);
+    const walletTotalValue = useMemo(() => calculateTotalValue([wallet], prices), [wallet, prices]);
+    const wallet24hChange = useMemo(() => calculateWallet24hChange(wallet, prices), [wallet, prices]);
     
     const formattedValue = new Intl.NumberFormat('en-US', {
         style: 'currency',
@@ -130,6 +166,13 @@ const WalletCard: React.FC<WalletCardProps> = ({ wallet, prices, onAddAsset, onR
                 <div>
                     <h3 className="text-xl font-semibold text-white">{wallet.name}</h3>
                     <p className="text-xl font-bold font-mono text-cyan-400 mt-1">{isPrivacyMode ? '$ ****' : formattedValue}</p>
+                    <div className="mt-1">
+                        <WalletChangeDisplay
+                            value={wallet24hChange.changeValue}
+                            percentage={wallet24hChange.changePercentage}
+                            isPrivacyMode={isPrivacyMode}
+                        />
+                    </div>
                 </div>
                 <div className="flex items-center space-x-2">
                     <button 
