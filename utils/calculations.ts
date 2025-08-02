@@ -118,6 +118,47 @@ export const calculatePortfolio24hChange = (wallets: Wallet[], prices: PriceData
 };
 
 /**
+ * Calculates a single wallet's change in value over the last 24 hours.
+ * @param wallet A single wallet.
+ * @param prices An object with current prices and 24h change data.
+ * @returns An object with the change in value and percentage.
+ */
+export const calculateWallet24hChange = (wallet: Wallet, prices: PriceData): { changeValue: number; changePercentage: number } => {
+  let totalValueNow = 0;
+  let totalValue24hAgo = 0;
+
+  wallet.assets.forEach(asset => {
+    const priceInfo = prices[asset.id];
+    if (!priceInfo) return; // Skip if no price data
+
+    const { usd: currentPrice, usd_24h_change: changePercent } = priceInfo;
+    const { currentQuantity } = getAssetMetrics(asset.transactions, currentPrice);
+
+    if (currentQuantity > 0) {
+      const marketValueNow = currentQuantity * currentPrice;
+      totalValueNow += marketValueNow;
+
+      if (typeof changePercent === 'number') {
+        const price24hAgo = currentPrice / (1 + (changePercent / 100));
+        const marketValue24hAgo = currentQuantity * price24hAgo;
+        totalValue24hAgo += marketValue24hAgo;
+      } else {
+        totalValue24hAgo += marketValueNow;
+      }
+    }
+  });
+
+  if (totalValue24hAgo === 0) {
+    return { changeValue: 0, changePercentage: 0 };
+  }
+
+  const changeValue = totalValueNow - totalValue24hAgo;
+  const changePercentage = (changeValue / totalValue24hAgo) * 100;
+
+  return { changeValue, changePercentage };
+};
+
+/**
  * Calculates the total profit/loss for the entire portfolio.
  * @param wallets - An array of wallets.
  * @param prices - An object mapping asset IDs to their current prices.
