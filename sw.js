@@ -19,7 +19,8 @@ const URLS_TO_CACHE = [
   '/components/WalletCard.tsx',
   '/components/AddTransactionModal.tsx',
   '/components/PerformanceChart.tsx',
-  '/components/DailyStreak.tsx'
+  '/components/DailyStreak.tsx',
+  '/components/BackToTopButton.tsx'
 ];
 
 self.addEventListener('install', event => {
