@@ -14,6 +14,7 @@ import WalletCard from './components/WalletCard';
 import { WalletIcon } from './components/icons';
 import PerformanceChart from './components/PerformanceChart';
 import AllocationChart from './components/AllocationChart';
+import BackToTopButton from './components/BackToTopButton';
 
 type AssetForTransaction = {
   walletId: string;
@@ -283,6 +284,8 @@ export default function App() {
           onAddTransaction={handleAddTransaction}
         />
       )}
+
+      <BackToTopButton />
     </div>
   );
 }
