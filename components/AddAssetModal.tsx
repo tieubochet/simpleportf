@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Coin, PortfolioAsset, Transaction } from '../types';
-import { searchCoins } from '../services/coingecko';
+import { searchCoins, fetchPrices } from '../services/coingecko';
 import { SearchIcon, XIcon } from './icons';
 
 interface AddAssetModalProps {
@@ -22,6 +22,10 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({ onClose, onAddAsset, exis
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [notes, setNotes] = useState('');
   const [fee, setFee] = useState('');
+
+  // State for fetching current price
+  const [currentPrice, setCurrentPrice] = useState<number | null>(null);
+  const [isPriceLoading, setIsPriceLoading] = useState(false);
 
   useEffect(() => {
     if (searchQuery.trim().length < 2) {
@@ -49,9 +53,21 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({ onClose, onAddAsset, exis
     return () => clearTimeout(timerId);
   }, [searchQuery, existingAssetIds]);
 
-  const handleSelectCoin = (coin: Coin) => {
+  const handleSelectCoin = async (coin: Coin) => {
     setSelectedCoin(coin);
     setStep(2);
+    setIsPriceLoading(true);
+    setCurrentPrice(null);
+    try {
+        const prices = await fetchPrices([coin.id]);
+        if (prices[coin.id]) {
+            setCurrentPrice(prices[coin.id].usd);
+        }
+    } catch (error) {
+        console.error("Failed to fetch price for selected coin:", error);
+    } finally {
+        setIsPriceLoading(false);
+    }
   };
 
   const handleSave = () => {
@@ -151,7 +167,21 @@ const AddAssetModal: React.FC<AddAssetModalProps> = ({ onClose, onAddAsset, exis
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">Price Per Coin (USD)</label>
+                <div className="flex justify-between items-center mb-1">
+                    <label className="block text-sm font-medium text-slate-300">Price Per Coin (USD)</label>
+                     {isPriceLoading ? (
+                        <span className="text-xs text-slate-400 font-mono">Loading price...</span>
+                    ) : currentPrice !== null && (
+                        <button
+                            type="button"
+                            onClick={() => setPricePerUnit(String(currentPrice))}
+                            className="text-xs text-cyan-400 hover:text-cyan-300 font-mono"
+                            title="Use current market price"
+                        >
+                            Current: ${currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
+                        </button>
+                    )}
+                </div>
                 <input
                   type="number"
                   placeholder="e.g., 50000.00"
