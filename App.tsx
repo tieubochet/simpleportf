@@ -20,6 +20,7 @@ type AssetForTransaction = {
   walletId: string;
   asset: PortfolioAsset;
   currentQuantity: number;
+  currentPrice: number;
 }
 
 export default function App() {
@@ -174,8 +175,9 @@ export default function App() {
   };
   
   const handleOpenAddTransactionModal = (walletId: string, asset: PortfolioAsset) => {
-    const { currentQuantity } = getAssetMetrics(asset.transactions, 0); // Price is not needed for quantity
-    setAssetForTransaction({ walletId, asset, currentQuantity });
+    const currentPrice = prices[asset.id]?.usd ?? 0;
+    const { currentQuantity } = getAssetMetrics(asset.transactions, currentPrice);
+    setAssetForTransaction({ walletId, asset, currentQuantity, currentPrice });
   };
 
   const walletToAddAssetTo = useMemo(() => {
@@ -280,6 +282,7 @@ export default function App() {
         <AddTransactionModal
           asset={assetForTransaction.asset}
           currentQuantity={assetForTransaction.currentQuantity}
+          currentPrice={assetForTransaction.currentPrice}
           onClose={() => setAssetForTransaction(null)}
           onAddTransaction={handleAddTransaction}
         />
