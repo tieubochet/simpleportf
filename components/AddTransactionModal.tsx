@@ -7,6 +7,7 @@ import { XIcon } from './icons';
 interface AddTransactionModalProps {
   asset: PortfolioAsset;
   currentQuantity: number;
+  currentPrice: number;
   onClose: () => void;
   onAddTransaction: (transaction: Transaction) => void;
 }
@@ -18,7 +19,7 @@ const formatNumber = (value: number) => {
     }).format(value);
 };
 
-const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ asset, currentQuantity, onClose, onAddTransaction }) => {
+const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ asset, currentQuantity, currentPrice, onClose, onAddTransaction }) => {
   const [type, setType] = useState<'buy' | 'sell' | 'transfer_in' | 'transfer_out'>('buy');
   const [quantity, setQuantity] = useState('');
   const [pricePerUnit, setPricePerUnit] = useState('');
@@ -132,8 +133,21 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ asset, curren
             </div>
              {!isTransfer && (
                 <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-1">Price Per Coin (USD)</label>
+                    <div className="flex justify-between items-center mb-1">
+                        <label htmlFor="tx-price" className="block text-sm font-medium text-slate-300">Price Per Coin (USD)</label>
+                        {currentPrice > 0 && (
+                            <button
+                                type="button"
+                                onClick={() => setPricePerUnit(String(currentPrice))}
+                                className="text-xs text-cyan-400 hover:text-cyan-300 font-mono"
+                                title="Use current market price"
+                            >
+                                Current: ${currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
+                            </button>
+                        )}
+                    </div>
                     <input
+                        id="tx-price"
                         type="number"
                         placeholder="e.g., 60000.00"
                         value={pricePerUnit}
