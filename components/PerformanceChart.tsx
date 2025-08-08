@@ -3,21 +3,30 @@ import React, { useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { HistoricalDataPoint } from '../types';
 
+type TimeRange = '24h' | '7d' | '30d' | '1y';
+
 interface PerformanceChartProps {
   portfolioData: HistoricalDataPoint[];
   btcData: HistoricalDataPoint[];
   isLoading: boolean;
-  timeRange: '4h' | '24h' | '7d';
-  setTimeRange: (range: '4h' | '24h' | '7d') => void;
+  timeRange: TimeRange;
+  setTimeRange: (range: TimeRange) => void;
   isPrivacyMode: boolean;
 }
 
-const formatDate = (tickItem: number, range: '4h' | '24h' | '7d') => {
+const formatDate = (tickItem: number, range: TimeRange) => {
     const date = new Date(tickItem);
-    if (range === '4h' || range === '24h') {
-        return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: false });
+    switch (range) {
+        case '24h':
+            return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: false });
+        case '7d':
+        case '30d':
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        case '1y':
+            return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+        default:
+            return date.toLocaleDateString('en-US');
     }
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 };
 
 const CustomTooltip = ({ active, payload, label, isPrivacyMode }: any) => {
@@ -44,13 +53,14 @@ const LoadingSkeleton = () => (
                 <div className="h-7 w-12 bg-slate-700 rounded-md"></div>
                 <div className="h-7 w-12 bg-slate-700 rounded-md"></div>
                 <div className="h-7 w-12 bg-slate-700 rounded-md"></div>
+                <div className="h-7 w-12 bg-slate-700 rounded-md"></div>
             </div>
         </div>
         <div className="h-[350px] w-full bg-slate-700 rounded-md"></div>
     </div>
 );
 
-const TimeRangeButton: React.FC<{ label: string; range: '4h' | '24h' | '7d'; activeRange: string; onClick: (range: '4h' | '24h' | '7d') => void }> = ({ label, range, activeRange, onClick }) => {
+const TimeRangeButton: React.FC<{ label: string; range: TimeRange; activeRange: string; onClick: (range: TimeRange) => void }> = ({ label, range, activeRange, onClick }) => {
     const isActive = range === activeRange;
     return (
         <button
@@ -128,9 +138,10 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({ portfolioData, btcD
             <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
                 <h3 className="text-xl font-semibold text-white mb-3 sm:mb-0">Performance</h3>
                 <div className="flex items-center space-x-2">
-                    <TimeRangeButton label="4H" range="4h" activeRange={timeRange} onClick={setTimeRange} />
                     <TimeRangeButton label="24H" range="24h" activeRange={timeRange} onClick={setTimeRange} />
                     <TimeRangeButton label="7D" range="7d" activeRange={timeRange} onClick={setTimeRange} />
+                    <TimeRangeButton label="30D" range="30d" activeRange={timeRange} onClick={setTimeRange} />
+                    <TimeRangeButton label="1Y" range="1y" activeRange={timeRange} onClick={setTimeRange} />
                 </div>
             </header>
 
