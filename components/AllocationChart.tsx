@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { Wallet, PriceData } from '../types';
@@ -151,9 +150,9 @@ const AllocationChart: React.FC<AllocationChartProps> = ({ wallets, prices, isPr
   }
 
   return (
-    <div className="bg-slate-800 p-4 sm:p-6 rounded-lg shadow-lg">
+    <div className="bg-slate-800 p-4 sm:p-6 rounded-lg shadow-lg min-h-[440px] flex flex-col">
       <h3 className="text-xl font-semibold text-white mb-6">Overall Allocation</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center flex-grow">
         <div className="h-[250px] sm:h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
