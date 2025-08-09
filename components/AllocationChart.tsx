@@ -3,10 +3,12 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { Wallet, PriceData } from '../types';
 import { getAssetMetrics } from '../utils/calculations';
 
+type Theme = 'light' | 'dark';
 interface AllocationChartProps {
   wallets: Wallet[];
   prices: PriceData;
   isPrivacyMode: boolean;
+  theme: Theme;
 }
 
 const COLORS = ['#d946ef', '#f97316', '#facc15', '#fb923c', '#e11d48', '#f472b6', '#a78bfa', '#818cf8', '#60a5fa', '#22d3ee', '#34d399', '#a3e635'];
@@ -26,16 +28,16 @@ const CustomLegend = ({ payload, onToggleViewAll, showAll, hasOthers, hoveredIte
           >
             <div className="flex items-center truncate">
               <span className="h-2.5 w-2.5 rounded-full mr-3 flex-shrink-0" style={{ backgroundColor: entry.color }}></span>
-              <span className="text-slate-300 truncate" title={entry.value}>{entry.value}</span>
+              <span className="text-slate-700 dark:text-slate-300 truncate" title={entry.value}>{entry.value}</span>
             </div>
-            <span className="font-mono text-slate-400 pl-2">{`${entry.payload.percent.toFixed(2)}%`}</span>
+            <span className="font-mono text-slate-500 dark:text-slate-400 pl-2">{`${entry.payload.percent.toFixed(2)}%`}</span>
           </li>
         ))}
       </ul>
       {hasOthers && (
         <button
             onClick={onToggleViewAll}
-            className="text-cyan-400 hover:text-cyan-500 mt-2 text-left w-full"
+            className="text-cyan-500 hover:text-cyan-600 dark:text-cyan-400 dark:hover:text-cyan-500 mt-2 text-left w-full"
             onMouseEnter={() => setHoveredItem(null)}
             onMouseLeave={() => setHoveredItem(null)}
         >
@@ -59,10 +61,10 @@ const CustomTooltip = ({ active, payload, isPrivacyMode }: { active?: boolean; p
     }).format(value);
 
     return (
-      <div className="bg-slate-800/80 backdrop-blur-sm border border-slate-600 p-3 rounded-lg shadow-lg text-sm">
-        <p className="font-bold text-white mb-1">{name}</p>
-        <p className="text-slate-300">{isPrivacyMode ? '$ ****' : formattedValue}</p>
-        <p className="text-slate-400">{`${percent.toFixed(2)}% of portfolio`}</p>
+      <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border border-slate-200 dark:border-slate-600 p-3 rounded-lg shadow-lg text-sm">
+        <p className="font-bold text-slate-900 dark:text-white mb-1">{name}</p>
+        <p className="text-slate-700 dark:text-slate-300">{isPrivacyMode ? '$ ****' : formattedValue}</p>
+        <p className="text-slate-500 dark:text-slate-400">{`${percent.toFixed(2)}% of portfolio`}</p>
       </div>
     );
   }
@@ -71,7 +73,7 @@ const CustomTooltip = ({ active, payload, isPrivacyMode }: { active?: boolean; p
 };
 
 
-const AllocationChart: React.FC<AllocationChartProps> = ({ wallets, prices, isPrivacyMode }) => {
+const AllocationChart: React.FC<AllocationChartProps> = ({ wallets, prices, isPrivacyMode, theme }) => {
   const [showAll, setShowAll] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
@@ -142,16 +144,16 @@ const AllocationChart: React.FC<AllocationChartProps> = ({ wallets, prices, isPr
 
   if (pieDataToShow.length === 0) {
     return (
-        <div className="bg-slate-800 p-6 rounded-lg shadow-lg flex flex-col items-center justify-center min-h-[440px]">
-            <h3 className="text-xl font-semibold text-white mb-4">Overall Allocation</h3>
-            <p className="text-slate-400">Not enough data to display chart.</p>
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-md flex flex-col items-center justify-center min-h-[440px]">
+            <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">Overall Allocation</h3>
+            <p className="text-slate-500 dark:text-slate-400">Not enough data to display chart.</p>
         </div>
     );
   }
 
   return (
-    <div className="bg-slate-800 p-4 sm:p-6 rounded-lg shadow-lg min-h-[440px] flex flex-col">
-      <h3 className="text-xl font-semibold text-white mb-6">Overall Allocation</h3>
+    <div className="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-lg shadow-md min-h-[440px] flex flex-col">
+      <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-6">Overall Allocation</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center flex-grow">
         <div className="h-[250px] sm:h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">

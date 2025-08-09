@@ -3,6 +3,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { HistoricalDataPoint } from '../types';
 
 type TimeRange = '24h' | '7d' | '30d' | '1y';
+type Theme = 'light' | 'dark';
 
 interface PerformanceChartProps {
   portfolioData: HistoricalDataPoint[];
@@ -11,6 +12,7 @@ interface PerformanceChartProps {
   timeRange: TimeRange;
   setTimeRange: (range: TimeRange) => void;
   isPrivacyMode: boolean;
+  theme: Theme;
 }
 
 const formatDate = (tickItem: number, range: TimeRange) => {
@@ -34,8 +36,8 @@ const CustomTooltip = ({ active, payload, label, isPrivacyMode }: any) => {
     const btc = payload.find(p => p.dataKey === 'btcPrice');
 
     return (
-      <div className="bg-slate-800/90 backdrop-blur-sm border border-slate-600 p-3 rounded-lg shadow-lg text-sm text-white">
-        <p className="font-bold mb-2">{new Date(label).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}</p>
+      <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border border-slate-200 dark:border-slate-600 p-3 rounded-lg shadow-lg text-sm">
+        <p className="font-bold mb-2 text-slate-900 dark:text-white">{new Date(label).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}</p>
         {btc && <p style={{ color: '#f97316' }}>BTC Price: {isPrivacyMode ? '$ ****' : new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(btc.value)}</p>}
         {portfolio && <p style={{ color: '#60a5fa' }}>Portfolio Value: {isPrivacyMode ? '$ ****' : new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(portfolio.value)}</p>}
       </div>
@@ -45,17 +47,17 @@ const CustomTooltip = ({ active, payload, label, isPrivacyMode }: any) => {
 };
 
 const LoadingSkeleton = () => (
-    <div className="bg-slate-800 p-6 rounded-lg shadow-lg min-h-[440px] animate-pulse">
+    <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-md min-h-[440px] animate-pulse">
         <div className="flex justify-between items-center mb-6">
-            <div className="h-7 w-32 bg-slate-700 rounded-md"></div>
+            <div className="h-7 w-32 bg-slate-200 dark:bg-slate-700 rounded-md"></div>
             <div className="flex space-x-2">
-                <div className="h-7 w-12 bg-slate-700 rounded-md"></div>
-                <div className="h-7 w-12 bg-slate-700 rounded-md"></div>
-                <div className="h-7 w-12 bg-slate-700 rounded-md"></div>
-                <div className="h-7 w-12 bg-slate-700 rounded-md"></div>
+                <div className="h-7 w-12 bg-slate-200 dark:bg-slate-700 rounded-md"></div>
+                <div className="h-7 w-12 bg-slate-200 dark:bg-slate-700 rounded-md"></div>
+                <div className="h-7 w-12 bg-slate-200 dark:bg-slate-700 rounded-md"></div>
+                <div className="h-7 w-12 bg-slate-200 dark:bg-slate-700 rounded-md"></div>
             </div>
         </div>
-        <div className="h-[350px] w-full bg-slate-700 rounded-md"></div>
+        <div className="h-[350px] w-full bg-slate-200 dark:bg-slate-700 rounded-md"></div>
     </div>
 );
 
@@ -67,7 +69,7 @@ const TimeRangeButton: React.FC<{ label: string; range: TimeRange; activeRange: 
             className={`px-3 py-1 text-xs font-semibold rounded-md transition-colors duration-200 ${
                 isActive
                     ? 'bg-cyan-500 text-white'
-                    : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                    : 'bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
             }`}
         >
             {label}
@@ -75,7 +77,7 @@ const TimeRangeButton: React.FC<{ label: string; range: TimeRange; activeRange: 
     )
 }
 
-const PerformanceChart: React.FC<PerformanceChartProps> = ({ portfolioData, btcData, isLoading, timeRange, setTimeRange, isPrivacyMode }) => {
+const PerformanceChart: React.FC<PerformanceChartProps> = ({ portfolioData, btcData, isLoading, timeRange, setTimeRange, isPrivacyMode, theme }) => {
     const hasBtcData = useMemo(() => btcData && btcData.length >= 2, [btcData]);
 
     const chartData = useMemo(() => {
@@ -125,6 +127,12 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({ portfolioData, btcD
         }));
 
     }, [portfolioData, btcData, hasBtcData]);
+    
+    const chartColors = {
+        grid: theme === 'dark' ? '#334155' : '#e2e8f0',
+        tick: theme === 'dark' ? '#94a3b8' : '#64748b',
+        legend: theme === 'dark' ? '#cbd5e1' : '#334155',
+    };
 
     if (isLoading) {
         return <LoadingSkeleton />;
@@ -133,9 +141,9 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({ portfolioData, btcD
     const hasData = chartData.length > 0;
 
     return (
-        <div className="bg-slate-800 p-4 sm:p-6 rounded-lg shadow-lg min-h-[440px] flex flex-col">
+        <div className="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-lg shadow-md min-h-[440px] flex flex-col">
             <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-                <h3 className="text-xl font-semibold text-white mb-3 sm:mb-0">Performance</h3>
+                <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-3 sm:mb-0">Performance</h3>
                 <div className="flex items-center space-x-2">
                     <TimeRangeButton label="24H" range="24h" activeRange={timeRange} onClick={setTimeRange} />
                     <TimeRangeButton label="7D" range="7d" activeRange={timeRange} onClick={setTimeRange} />
@@ -145,7 +153,7 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({ portfolioData, btcD
             </header>
 
             {!hasData ? (
-                 <div className="flex flex-grow justify-center items-center text-slate-500">
+                 <div className="flex flex-grow justify-center items-center text-slate-400 dark:text-slate-500">
                     <p>Not enough historical data to display chart.</p>
                 </div>
             ) : (
@@ -162,13 +170,13 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({ portfolioData, btcD
                                     <stop offset="95%" stopColor="#f97316" stopOpacity={0}/>
                                 </linearGradient>
                             </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                            <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
                             <XAxis
                                 dataKey="timestamp"
                                 tickFormatter={(tick) => formatDate(tick, timeRange)}
-                                stroke="#94a3b8"
+                                stroke={chartColors.tick}
                                 dy={10}
-                                tick={{ fontSize: 12, fill: '#94a3b8' }}
+                                tick={{ fontSize: 12, fill: chartColors.tick }}
                             />
                             <YAxis
                                 yAxisId="left"
@@ -216,7 +224,7 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({ portfolioData, btcD
                                     } else {
                                         label = value;
                                     }
-                                    return <span className="text-slate-200 font-medium">{label}</span>;
+                                    return <span style={{ color: chartColors.legend }} className="font-medium">{label}</span>;
                                 }}
                             />
                             {hasBtcData && <Area yAxisId="right" type="stepAfter" name="BTC Price" dataKey="btcPrice" stroke="#f97316" fill="url(#colorBtc)" strokeWidth={2} />}
