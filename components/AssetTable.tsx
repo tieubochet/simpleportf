@@ -246,10 +246,18 @@ const AssetTable: React.FC<AssetTableProps> = ({ assets, prices, onRemove, onAdd
                                     </div>
                                 </td>
                                 <td className="py-4 px-4">
-                                    <div className="flex flex-col">
-                                        <span className="font-bold text-base text-white">{asset.name}</span>
-                                        <span className="text-xs text-slate-400 uppercase">{asset.symbol}</span>
-                                    </div>
+                                    <a
+                                        href={`https://www.coingecko.com/en/coins/${asset.id}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="group"
+                                        title={`View ${asset.name} on CoinGecko`}
+                                    >
+                                        <div className="flex flex-col">
+                                            <span className="font-bold text-base text-white group-hover:text-cyan-400 transition-colors">{asset.name}</span>
+                                            <span className="text-xs text-slate-400 uppercase">{asset.symbol}</span>
+                                        </div>
+                                    </a>
                                 </td>
                                 <td className="py-4 px-4 text-right font-mono text-white">{formatNumber(currentQuantity)}</td>
                                 <td className="py-4 px-4 text-right font-mono text-slate-300">{isPrivacyMode ? '$ ****' : formatCurrency(avgBuyPrice)}</td>
