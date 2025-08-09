@@ -119,14 +119,25 @@ const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ totalValue, changeD
           {showLoadingSkeleton ? (
             <LoadingSkeletonBlock />
           ) : performer ? (
-            <div>
-              <p className="text-base font-semibold text-white truncate" title={performer.name}>{performer.name}</p>
-              <p className={`text-sm font-mono ${performer.change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                {performer.change >= 0 ? '+' : ''}{performer.change.toFixed(2)}%
-              </p>
-            </div>
+            <a 
+              href={`https://www.coingecko.com/en/coins/${performer.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group"
+              title={`View ${performer.name} on CoinGecko`}
+            >
+              <div>
+                <p className="text-base font-semibold text-white truncate group-hover:text-cyan-400 transition-colors" title={performer.name}>{performer.name}</p>
+                <p className={`text-sm font-mono ${performer.change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                  {performer.change >= 0 ? '+' : ''}{performer.change.toFixed(2)}%
+                </p>
+              </div>
+            </a>
           ) : (
-            <p className="text-base font-semibold text-slate-300">-</p>
+            <div>
+              <p className="text-base font-semibold text-slate-300">-</p>
+              <p className="text-sm font-mono invisible">0%</p>
+            </div>
           )}
         </div>
 
@@ -139,14 +150,25 @@ const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ totalValue, changeD
           {showLoadingSkeleton ? (
             <LoadingSkeletonBlock />
           ) : loser ? (
-            <div>
-              <p className="text-base font-semibold text-white truncate" title={loser.name}>{loser.name}</p>
-              <p className="text-sm font-mono text-red-500">
-                {loser.change.toFixed(2)}%
-              </p>
-            </div>
+            <a 
+              href={`https://www.coingecko.com/en/coins/${loser.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group"
+              title={`View ${loser.name} on CoinGecko`}
+            >
+              <div>
+                <p className="text-base font-semibold text-white truncate group-hover:text-cyan-400 transition-colors" title={loser.name}>{loser.name}</p>
+                <p className="text-sm font-mono text-red-500">
+                  {loser.change.toFixed(2)}%
+                </p>
+              </div>
+            </a>
           ) : (
-            <p className="text-base font-semibold text-slate-300">-</p>
+            <div>
+              <p className="text-base font-semibold text-slate-300">-</p>
+              <p className="text-sm font-mono invisible">0%</p>
+            </div>
           )}
         </div>
       </div>
