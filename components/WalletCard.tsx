@@ -24,17 +24,17 @@ interface WalletCardProps {
 
 const WalletChangeDisplay: React.FC<{ value: number; percentage: number; isPrivacyMode: boolean }> = ({ value, percentage, isPrivacyMode }) => {
     const isPositive = value >= 0;
-    const colorClass = isPositive ? 'text-green-400' : 'text-red-400';
+    const colorClass = isPositive ? 'text-green-500 dark:text-green-400' : 'text-red-500 dark:text-red-400';
     const sign = isPositive ? '+' : '';
 
     if (isNaN(value) || isNaN(percentage) || Math.abs(value) < 0.01) {
-        return <p className="text-sm font-mono text-slate-500"><span className="text-slate-400">24h:</span> -</p>;
+        return <p className="text-sm font-mono text-slate-500 dark:text-slate-500"><span className="text-slate-500 dark:text-slate-400">24h:</span> -</p>;
     }
 
     if (isPrivacyMode) {
         return (
             <p className={`text-sm font-mono ${colorClass}`}>
-                <span className="text-slate-400 mr-2">24h:</span> 
+                <span className="text-slate-500 dark:text-slate-400 mr-2">24h:</span> 
                 {`$ **** (${sign}**.**%)`}
             </p>
         );
@@ -49,7 +49,7 @@ const WalletChangeDisplay: React.FC<{ value: number; percentage: number; isPriva
 
     return (
         <p className={`text-sm font-mono ${colorClass}`}>
-            <span className="text-slate-400 mr-2">24h:</span> 
+            <span className="text-slate-500 dark:text-slate-400 mr-2">24h:</span> 
             {formattedValue}
             <span className="ml-2">{formattedPercentage}</span>
         </p>
@@ -98,7 +98,12 @@ const WalletCard: React.FC<WalletCardProps> = ({ wallet, prices, onAddAsset, onR
         const { key, direction } = sortConfig;
 
         if (key === null) {
-            return assetsToSort; // Default sort is by insertion order
+            // Default sort by market value desc
+            return assetsToSort.sort((a,b) => {
+                 const metricsA = getAssetMetrics(a.transactions, prices[a.id]?.usd ?? 0);
+                 const metricsB = getAssetMetrics(b.transactions, prices[b.id]?.usd ?? 0);
+                 return metricsB.marketValue - metricsA.marketValue;
+            });
         }
 
         assetsToSort.sort((a, b) => {
@@ -161,11 +166,11 @@ const WalletCard: React.FC<WalletCardProps> = ({ wallet, prices, onAddAsset, onR
     const showHideButton = displayableAssets.length > 10 && !hasMore;
 
     return (
-        <div className="bg-slate-800 rounded-lg shadow-lg mb-8">
-            <header className="p-4 sm:p-6 border-b border-slate-700 flex justify-between items-center">
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md mb-8">
+            <header className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
                 <div>
-                    <h3 className="text-xl font-semibold text-white">{wallet.name}</h3>
-                    <p className="text-xl font-bold font-mono text-cyan-400 mt-1">{isPrivacyMode ? '$ ****' : formattedValue}</p>
+                    <h3 className="text-xl font-semibold text-slate-900 dark:text-white">{wallet.name}</h3>
+                    <p className="text-xl font-bold font-mono text-cyan-500 dark:text-cyan-400 mt-1">{isPrivacyMode ? '$ ****' : formattedValue}</p>
                     <div className="mt-1">
                         <WalletChangeDisplay
                             value={wallet24hChange.changeValue}
@@ -177,7 +182,7 @@ const WalletCard: React.FC<WalletCardProps> = ({ wallet, prices, onAddAsset, onR
                 <div className="flex items-center space-x-2">
                     <button 
                         onClick={() => onAddAsset(wallet.id)} 
-                        className="flex items-center space-x-2 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 font-semibold py-2 px-3 rounded-lg transition-colors duration-200"
+                        className="flex items-center space-x-2 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-500 dark:text-cyan-400 font-semibold py-2 px-3 rounded-lg transition-colors duration-200"
                         aria-label={`Add asset to ${wallet.name}`}
                     >
                         <PlusIcon className="h-5 w-5" />
@@ -185,7 +190,7 @@ const WalletCard: React.FC<WalletCardProps> = ({ wallet, prices, onAddAsset, onR
                     </button>
                     <button 
                         onClick={() => onRemoveWallet(wallet.id)}
-                        className="p-2 text-slate-400 hover:bg-red-500/20 hover:text-red-400 rounded-full transition-colors duration-200"
+                        className="p-2 text-slate-500 dark:text-slate-400 hover:bg-red-500/20 hover:text-red-400 rounded-full transition-colors duration-200"
                         aria-label={`Delete wallet ${wallet.name}`}
                     >
                         <TrashIcon className="h-5 w-5" />
@@ -205,11 +210,11 @@ const WalletCard: React.FC<WalletCardProps> = ({ wallet, prices, onAddAsset, onR
                         isPrivacyMode={isPrivacyMode}
                     />
                     {(hasMore || showHideButton) && (
-                        <div className="py-3 px-6 text-center border-t border-slate-700">
+                        <div className="py-3 px-6 text-center border-t border-slate-200 dark:border-slate-700">
                             {hasMore && (
                                 <button
                                     onClick={handleShowMore}
-                                    className="bg-slate-700 hover:bg-slate-600 text-slate-300 font-semibold py-2 px-5 rounded-lg transition-colors duration-300 w-full sm:w-auto"
+                                    className="bg-slate-200 hover:bg-slate-300 text-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-300 font-semibold py-2 px-5 rounded-lg transition-colors duration-300 w-full sm:w-auto"
                                 >
                                     Show More
                                 </button>
@@ -217,7 +222,7 @@ const WalletCard: React.FC<WalletCardProps> = ({ wallet, prices, onAddAsset, onR
                             {showHideButton && (
                                 <button
                                     onClick={handleHide}
-                                    className="bg-slate-700 hover:bg-slate-600 text-slate-300 font-semibold py-2 px-5 rounded-lg transition-colors duration-300 w-full sm:w-auto"
+                                    className="bg-slate-200 hover:bg-slate-300 text-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-300 font-semibold py-2 px-5 rounded-lg transition-colors duration-300 w-full sm:w-auto"
                                 >
                                     Hide
                                 </button>
@@ -226,7 +231,7 @@ const WalletCard: React.FC<WalletCardProps> = ({ wallet, prices, onAddAsset, onR
                     )}
                 </>
             ) : (
-                <div className="p-6 text-center text-slate-400">
+                <div className="p-6 text-center text-slate-500 dark:text-slate-400">
                     <p>This wallet is empty.</p>
                     <p>Click 'Add Asset' to get started.</p>
                 </div>

@@ -50,8 +50,11 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ asset, curren
     onClose();
   };
 
-  const commonButtonClasses = 'relative inline-flex items-center justify-center w-full px-4 py-2 border text-sm font-medium focus:z-10 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-colors';
-  const inactiveButtonClasses = 'bg-slate-700 text-slate-300 hover:bg-slate-600 border-slate-600';
+  const commonButtonClasses = 'relative inline-flex items-center justify-center w-full px-4 py-2 border text-sm font-medium focus:z-10 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-slate-800 focus:ring-cyan-500 transition-colors';
+  const inactiveButtonClasses = 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 border-slate-300 dark:border-slate-600';
+  const inputClasses = "w-full bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-400 border border-slate-300 dark:border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-cyan-500";
+  const labelClasses = "block text-sm font-medium text-slate-600 dark:text-slate-300";
+  const cancelButtonClasses = "bg-slate-200 hover:bg-slate-300 text-slate-800 dark:bg-slate-600 dark:hover:bg-slate-500 dark:text-white font-bold py-2 px-4 rounded-lg transition-colors";
 
   return (
     <div 
@@ -59,19 +62,19 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ asset, curren
       onClick={onClose}
     >
       <div 
-        className="bg-slate-800 rounded-lg shadow-2xl w-full max-w-md"
+        className="bg-white dark:bg-slate-800 rounded-lg shadow-2xl w-full max-w-md"
         onClick={e => e.stopPropagation()}
       >
-        <div className="p-6 border-b border-slate-700 flex justify-between items-center">
-          <h2 className="text-xl font-bold text-white">Add Transaction for {asset.name}</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-white">
+        <div className="p-6 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white">Add Transaction for {asset.name}</h2>
+          <button onClick={onClose} className="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white">
             <XIcon className="h-6 w-6" />
           </button>
         </div>
 
         <div className="p-6 space-y-4">
             <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Transaction Type</label>
+                <label className={`${labelClasses} mb-2`}>Transaction Type</label>
                 <div className="grid grid-cols-2 rounded-md shadow-sm">
                     <button
                         type="button"
@@ -106,12 +109,12 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ asset, curren
 
             <div>
                 <div className="flex justify-between items-center mb-1">
-                    <label htmlFor="tx-quantity" className="block text-sm font-medium text-slate-300">Quantity</label>
+                    <label htmlFor="tx-quantity" className={labelClasses}>Quantity</label>
                     {isDebit && (
                         <button 
                             type="button"
                             onClick={() => setQuantity(String(currentQuantity))}
-                            className="text-xs text-cyan-400 hover:text-cyan-300 font-mono"
+                            className="text-xs text-cyan-500 dark:text-cyan-400 hover:text-cyan-600 dark:hover:text-cyan-300 font-mono"
                             title="Set to max available amount"
                         >
                             Available: {formatNumber(currentQuantity)}
@@ -125,7 +128,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ asset, curren
                     value={quantity}
                     onChange={e => setQuantity(e.target.value)}
                     autoFocus
-                    className="w-full bg-slate-700 text-white placeholder-slate-400 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                    className={inputClasses}
                 />
                 {exceedsBalance && (
                     <p className="text-red-500 text-xs mt-1">Amount exceeds available balance.</p>
@@ -134,12 +137,12 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ asset, curren
              {!isTransfer && (
                 <div>
                     <div className="flex justify-between items-center mb-1">
-                        <label htmlFor="tx-price" className="block text-sm font-medium text-slate-300">Price Per Coin (USD)</label>
+                        <label htmlFor="tx-price" className={labelClasses}>Price Per Coin (USD)</label>
                         {currentPrice > 0 && (
                             <button
                                 type="button"
                                 onClick={() => setPricePerUnit(String(currentPrice))}
-                                className="text-xs text-cyan-400 hover:text-cyan-300 font-mono"
+                                className="text-xs text-cyan-500 dark:text-cyan-400 hover:text-cyan-600 dark:hover:text-cyan-300 font-mono"
                                 title="Use current market price"
                             >
                                 Current: ${currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
@@ -152,49 +155,49 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ asset, curren
                         placeholder="e.g., 60000.00"
                         value={pricePerUnit}
                         onChange={e => setPricePerUnit(e.target.value)}
-                        className="w-full bg-slate-700 text-white placeholder-slate-400 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                        className={inputClasses}
                     />
                 </div>
              )}
             <div>
-              <label htmlFor="tx-fee" className="block text-sm font-medium text-slate-300 mb-1">Fee (USD) (Optional)</label>
+              <label htmlFor="tx-fee" className={`${labelClasses} mb-1`}>Fee (USD) (Optional)</label>
               <input
                   id="tx-fee"
                   type="number"
                   placeholder="e.g., 1.49"
                   value={fee}
                   onChange={e => setFee(e.target.value)}
-                  className="w-full bg-slate-700 text-white placeholder-slate-400 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  className={inputClasses}
               />
             </div>
             <div>
-                <label htmlFor="tx-date" className="block text-sm font-medium text-slate-300 mb-1">Date</label>
+                <label htmlFor="tx-date" className={`${labelClasses} mb-1`}>Date</label>
                 <input
                     id="tx-date"
                     type="date"
                     value={date}
                     onChange={e => setDate(e.target.value)}
-                    className="w-full bg-slate-700 text-white placeholder-slate-400 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                    className={inputClasses}
                 />
             </div>
              <div>
-                <label htmlFor="notes" className="block text-sm font-medium text-slate-300 mb-1">Notes (Optional)</label>
+                <label htmlFor="notes" className={`${labelClasses} mb-1`}>Notes (Optional)</label>
                 <textarea
                   id="notes"
                   placeholder="e.g., Taking profits"
                   value={notes}
                   onChange={e => setNotes(e.target.value)}
                   rows={2}
-                  className="w-full bg-slate-700 text-white placeholder-slate-400 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  className={inputClasses}
                 />
               </div>
         </div>
 
-        <div className="p-6 bg-slate-800/50 border-t border-slate-700 rounded-b-lg flex justify-end space-x-4">
-          <button onClick={onClose} className="bg-slate-600 hover:bg-slate-500 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+        <div className="p-6 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-700 rounded-b-lg flex justify-end space-x-4">
+          <button onClick={onClose} className={cancelButtonClasses}>
             Cancel
           </button>
-          <button onClick={handleSave} disabled={!canSave} className="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg transition-colors disabled:bg-slate-700 disabled:text-slate-500 disabled:cursor-not-allowed">
+          <button onClick={handleSave} disabled={!canSave} className="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg transition-colors disabled:bg-slate-300 dark:disabled:bg-slate-700 disabled:text-slate-500 dark:disabled:text-slate-500 disabled:cursor-not-allowed">
             Save Transaction
           </button>
         </div>
