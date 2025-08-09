@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { PerformerData } from '../types';
 import { TrophyIcon, TrendingDownIcon, EyeIcon, EyeOffIcon, ClockIcon } from './icons';
@@ -57,7 +56,7 @@ const LoadingSkeletonBlock = () => (
 );
 
 const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ totalValue, changeData, plData, performer, loser, isLoading, isPrivacyMode }) => {
-  const [isLocalValueHidden, setIsLocalValueHidden] = useState(false);
+  const [isLocalValueHidden, setIsLocalValueHidden] = useState(true);
   
   const toggleLocalVisibility = () => {
     if(isPrivacyMode) return;
