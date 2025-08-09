@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { HistoricalDataPoint } from '../types';
@@ -134,7 +133,7 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({ portfolioData, btcD
     const hasData = chartData.length > 0;
 
     return (
-        <div className="bg-slate-800 p-4 sm:p-6 rounded-lg shadow-lg min-h-[440px]">
+        <div className="bg-slate-800 p-4 sm:p-6 rounded-lg shadow-lg min-h-[440px] flex flex-col">
             <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
                 <h3 className="text-xl font-semibold text-white mb-3 sm:mb-0">Performance</h3>
                 <div className="flex items-center space-x-2">
@@ -146,11 +145,11 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({ portfolioData, btcD
             </header>
 
             {!hasData ? (
-                 <div className="flex h-[350px] justify-center items-center text-slate-500">
+                 <div className="flex flex-grow justify-center items-center text-slate-500">
                     <p>Not enough historical data to display chart.</p>
                 </div>
             ) : (
-                <div className="h-[350px] w-full">
+                <div className="flex-grow w-full">
                     <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 0 }}>
                              <defs>
