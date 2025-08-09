@@ -1,48 +1,50 @@
-
 import { useState, useEffect, useCallback } from 'react';
 
 type Theme = 'light' | 'dark';
 
-export function useTheme() {
-  const [theme, setTheme] = useState<Theme>('light');
-
-  // Effect to set initial theme based on localStorage or system preference.
-  // This runs once on mount.
-  useEffect(() => {
-    const storedTheme = localStorage.getItem('theme') as Theme | null;
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
-    if (storedTheme) {
-      setTheme(storedTheme);
-    } else {
-      setTheme(systemPrefersDark ? 'dark' : 'light');
+const getInitialTheme = (): Theme => {
+    if (typeof window === 'undefined') {
+        return 'dark';
     }
-  }, []);
-  
-  const toggleTheme = useCallback(() => {
-    setTheme(prevTheme => {
-        const newTheme = prevTheme === 'light' ? 'dark' : 'light';
-        localStorage.setItem('theme', newTheme);
-        
-        if (newTheme === 'dark') {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
+    try {
+        const storedTheme = window.localStorage.getItem('theme');
+        if (storedTheme === 'light' || storedTheme === 'dark') {
+            return storedTheme;
         }
-        return newTheme;
-    });
-  }, []);
-
-  // This effect synchronizes the `dark` class on the `<html>` element
-  // whenever the theme state changes. This is important for when the
-  // initial state is set from localStorage.
-  useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            return 'dark';
+        }
+    } catch (e) {
+      // ignore
     }
-  }, [theme]);
+    return 'dark'; // Default to dark
+};
 
-  return { theme, toggleTheme };
+export function useTheme() {
+    const [theme, setTheme] = useState<Theme>(getInitialTheme);
+
+    useEffect(() => {
+        const root = window.document.documentElement;
+        const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+        
+        if (theme === 'dark') {
+            root.classList.add('dark');
+            if (metaThemeColor) metaThemeColor.setAttribute('content', '#0f172a');
+        } else {
+            root.classList.remove('dark');
+            if (metaThemeColor) metaThemeColor.setAttribute('content', '#f1f5f9');
+        }
+
+        try {
+            localStorage.setItem('theme', theme);
+        } catch (e) {
+            // ignore
+        }
+    }, [theme]);
+
+    const toggleTheme = useCallback(() => {
+        setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
+    }, []);
+
+    return { theme, toggleTheme };
 }
