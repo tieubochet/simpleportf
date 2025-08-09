@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { PortfolioAsset, PriceData, Wallet, Transaction, HistoricalDataPoint, PerformerData } from './types';
 import { usePortfolio } from './hooks/usePortfolio';
+import { useTheme } from './hooks/useTheme';
 import { fetchPrices, fetchHistoricalChartData } from './services/coingecko';
 import { calculateTotalValue, getAssetIds, getAssetMetrics, calculatePortfolio24hChange, calculateTotalPL, calculateHistoricalPortfolioValue, findTopPerformer, findTopLoser } from './utils/calculations';
 
@@ -24,6 +25,7 @@ type AssetForTransaction = {
 }
 
 export default function App() {
+  const { theme, toggleTheme } = useTheme();
   const { wallets, addWallet, removeWallet, addAssetToWallet, removeAssetFromWallet, addTransactionToAsset, importWallets, exportWallets } = usePortfolio();
   
   const [prices, setPrices] = useState<PriceData>({});
@@ -181,7 +183,7 @@ export default function App() {
   }, [addingAssetToWalletId, wallets]);
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-200 font-sans">
+    <div className="min-h-screen bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-sans transition-colors duration-300">
       <main className="container mx-auto p-4 md:p-8">
         <PortfolioHeader
           onAddWallet={() => setIsAddWalletModalOpen(true)}
@@ -189,6 +191,8 @@ export default function App() {
           onExport={exportWallets}
           isPrivacyMode={isPrivacyMode}
           onTogglePrivacyMode={togglePrivacyMode}
+          theme={theme}
+          onToggleTheme={toggleTheme}
         />
 
         <PortfolioSummary 
@@ -214,6 +218,7 @@ export default function App() {
                     timeRange={timeRange}
                     setTimeRange={setTimeRange}
                     isPrivacyMode={isPrivacyMode}
+                    theme={theme}
                 />
               </div>
               <div className="lg:col-span-2">
@@ -221,6 +226,7 @@ export default function App() {
                     wallets={wallets}
                     prices={prices}
                     isPrivacyMode={isPrivacyMode}
+                    theme={theme}
                 />
               </div>
             </div>
@@ -241,9 +247,9 @@ export default function App() {
             </div>
           </>
         ) : (
-          <div className="text-center py-20 px-6 bg-slate-800 rounded-lg mt-8">
-            <h2 className="text-2xl font-semibold text-white mb-2">Your Portfolio is Empty</h2>
-            <p className="text-slate-400 mb-6">Create a wallet to start tracking your assets.</p>
+          <div className="text-center py-20 px-6 bg-white dark:bg-slate-800 rounded-lg mt-8 shadow-md">
+            <h2 className="text-2xl font-semibold text-slate-900 dark:text-white mb-2">Your Portfolio is Empty</h2>
+            <p className="text-slate-500 dark:text-slate-400 mb-6">Create a wallet to start tracking your assets.</p>
             <button
               onClick={() => setIsAddWalletModalOpen(true)}
               className="bg-cyan-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-cyan-600 transition-colors duration-300 inline-flex items-center space-x-2"
