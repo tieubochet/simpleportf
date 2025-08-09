@@ -1,7 +1,7 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { PerformerData } from '../types';
-import { TrophyIcon, TrendingDownIcon } from './icons';
+import { TrophyIcon, TrendingDownIcon, EyeIcon, EyeOffIcon } from './icons';
 
 interface PortfolioSummaryProps {
   totalValue: number;
@@ -57,6 +57,15 @@ const LoadingSkeletonBlock = () => (
 );
 
 const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ totalValue, changeData, plData, performer, loser, isLoading, isPrivacyMode }) => {
+  const [isLocalValueHidden, setIsLocalValueHidden] = useState(false);
+  
+  const toggleLocalVisibility = () => {
+    if(isPrivacyMode) return;
+    setIsLocalValueHidden(prev => !prev);
+  };
+
+  const isTotalValueHidden = isPrivacyMode || isLocalValueHidden;
+  
   const formattedValue = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
@@ -70,11 +79,22 @@ const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ totalValue, changeD
         
         {/* Stat Block 1: Total Value */}
         <div className="p-4 text-center md:text-left">
-          <h2 className="text-sm font-medium text-slate-400 mb-2">Total Portfolio Value</h2>
+          <h2 className="text-sm font-medium text-slate-400 mb-2 flex items-center justify-center md:justify-start gap-2">
+            <span>Total Portfolio Value</span>
+            <button
+                onClick={toggleLocalVisibility}
+                disabled={isPrivacyMode}
+                className="text-slate-500 hover:text-slate-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                title={isPrivacyMode ? "Global privacy mode is ON" : (isTotalValueHidden ? "Show value" : "Hide value")}
+                aria-label={isTotalValueHidden ? "Show total portfolio value" : "Hide total portfolio value"}
+              >
+                {isTotalValueHidden ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
+              </button>
+          </h2>
           {showLoadingSkeleton ? (
             <div className="h-8 bg-slate-700 rounded-md animate-pulse w-32 mx-auto md:mx-0"></div>
           ) : (
-            <p className="text-2xl font-bold text-white tracking-tight">{isPrivacyMode ? '$ ****' : formattedValue}</p>
+            <p className="text-2xl font-bold text-white tracking-tight">{isTotalValueHidden ? '$ ****' : formattedValue}</p>
           )}
         </div>
         
