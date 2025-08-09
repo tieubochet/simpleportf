@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PerformerData } from '../types';
-import { TrophyIcon, TrendingDownIcon, EyeIcon, EyeOffIcon, ClockIcon } from './icons';
+import { TrophyIcon, TrendingDownIcon, EyeIcon, EyeOffIcon, ClockIcon, ReceiptIcon } from './icons';
 
 interface PortfolioSummaryProps {
   totalValue: number;
@@ -108,7 +108,10 @@ const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ totalValue, changeD
 
         {/* Stat Block 3: Total P/L */}
         <div className="p-4 text-center md:text-left">
-          <h2 className="text-sm font-medium text-slate-400 mb-2">Total P/L</h2>
+          <h2 className="text-sm font-medium text-slate-400 mb-2 flex items-center justify-center md:justify-start gap-2">
+            <ReceiptIcon className="h-4 w-4 text-emerald-400" />
+            <span>Total P/L</span>
+          </h2>
            {showLoadingSkeleton ? <LoadingSkeletonBlock /> : <ChangeDisplay value={plData.plValue} percentage={plData.plPercentage} isPrivacyMode={isPrivacyMode} />}
         </div>
         
