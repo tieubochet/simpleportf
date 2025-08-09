@@ -1,4 +1,4 @@
-const CACHE_NAME = 'crypto-portfolio-cache-v1';
+const CACHE_NAME = 'crypto-portfolio-cache-v2';
 const URLS_TO_CACHE = [
   '/',
   '/index.html',
@@ -39,7 +39,8 @@ self.addEventListener('fetch', event => {
       return;
   }
 
-  if (event.request.url.includes('api.coingecko.com') || event.request.url.includes('esm.sh')) {
+  if (event.request.url.includes('api.coingecko.com') || event.request.url.includes('esm.sh') || event.request.url.includes('cdn.tailwindcss.com')) {
+    // Let the browser handle these requests, bypassing the cache.
     return;
   }
   
@@ -56,7 +57,7 @@ self.addEventListener('fetch', event => {
               return response;
             }
             
-            // Only cache local app shell files, not opaque responses from CDNs
+            // Only cache local app shell files (basic responses)
             if (response.type === 'basic') {
                 const responseToCache = response.clone();
                 caches.open(CACHE_NAME)
