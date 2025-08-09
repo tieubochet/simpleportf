@@ -7,9 +7,13 @@
     <meta name="theme-color" content="#0f172a" />
     <title>Crypto Portfolio Tracker</title>
     <script>
-      tailwind.config = {
-        darkMode: 'class',
-      }
+      // Define Tailwind CSS configuration before loading the script
+      // to enable 'class' strategy for dark mode and avoid ReferenceError.
+      window.tailwind = {
+        config: {
+          darkMode: 'class',
+        }
+      };
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
