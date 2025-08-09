@@ -7,6 +7,7 @@ const URLS_TO_CACHE = [
   '/types.ts',
   '/hooks/usePortfolio.ts',
   '/hooks/useStreak.ts',
+  '/hooks/useTheme.ts',
   '/services/coingecko.ts',
   '/utils/calculations.ts',
   '/components/icons.tsx',
