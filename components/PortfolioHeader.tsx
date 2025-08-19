@@ -47,17 +47,17 @@ const PortfolioHeader: React.FC<PortfolioHeaderProps> = ({ onAddWallet, onImport
         >
           <RefreshCwIcon className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
         </button>
-        <button onClick={onImport} className={`flex items-center space-x-2 py-2 px-4 ${commonButtonStyles}`}>
+        <button onClick={onImport} className={`flex items-center justify-center h-10 w-10 sm:w-auto sm:px-4 sm:space-x-2 ${commonButtonStyles}`}>
           <UploadIcon className="h-5 w-5" />
           <span className="hidden sm:inline">Import</span>
         </button>
-        <button onClick={onExport} className={`flex items-center space-x-2 py-2 px-4 ${commonButtonStyles}`}>
+        <button onClick={onExport} className={`flex items-center justify-center h-10 w-10 sm:w-auto sm:px-4 sm:space-x-2 ${commonButtonStyles}`}>
           <DownloadIcon className="h-5 w-5" />
           <span className="hidden sm:inline">Export</span>
         </button>
-        <button onClick={onAddWallet} className="flex items-center space-x-2 bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300">
+        <button onClick={onAddWallet} className="flex items-center justify-center h-10 w-10 sm:w-auto sm:px-4 sm:space-x-2 bg-cyan-500 hover:bg-cyan-600 text-white font-bold rounded-lg transition-colors duration-300">
           <WalletIcon className="h-5 w-5" />
-          <span>Add Wallet</span>
+          <span className="hidden sm:inline">Add Wallet</span>
         </button>
         <DailyStreak />
       </div>
