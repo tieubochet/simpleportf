@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { UploadIcon, DownloadIcon, WalletIcon, EyeIcon, EyeOffIcon, SunIcon, MoonIcon } from './icons';
+import { UploadIcon, DownloadIcon, WalletIcon, EyeIcon, EyeOffIcon, SunIcon, MoonIcon, RefreshCwIcon } from './icons';
 import { DailyStreak } from './DailyStreak';
 
 interface PortfolioHeaderProps {
@@ -11,11 +11,13 @@ interface PortfolioHeaderProps {
   onTogglePrivacyMode: () => void;
   theme: 'light' | 'dark';
   onToggleTheme: () => void;
+  onRefresh: () => void;
+  isRefreshing: boolean;
 }
 
-const PortfolioHeader: React.FC<PortfolioHeaderProps> = ({ onAddWallet, onImport, onExport, isPrivacyMode, onTogglePrivacyMode, theme, onToggleTheme }) => {
+const PortfolioHeader: React.FC<PortfolioHeaderProps> = ({ onAddWallet, onImport, onExport, isPrivacyMode, onTogglePrivacyMode, theme, onToggleTheme, onRefresh, isRefreshing }) => {
 
-  const commonButtonStyles = "bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-white font-semibold rounded-lg transition-colors duration-300";
+  const commonButtonStyles = "bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-white font-semibold rounded-lg transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed";
 
   return (
     <header className="flex flex-col md:flex-row items-center justify-between mb-8">
@@ -36,6 +38,14 @@ const PortfolioHeader: React.FC<PortfolioHeaderProps> = ({ onAddWallet, onImport
           title={isPrivacyMode ? "Show values" : "Hide values (Privacy Mode)"}
         >
           {isPrivacyMode ? <EyeOffIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+        </button>
+         <button 
+          onClick={onRefresh} 
+          disabled={isRefreshing}
+          className={`flex items-center justify-center p-2 h-10 w-10 ${commonButtonStyles}`} 
+          title="Refresh prices"
+        >
+          <RefreshCwIcon className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
         </button>
         <button onClick={onImport} className={`flex items-center space-x-2 py-2 px-4 ${commonButtonStyles}`}>
           <UploadIcon className="h-5 w-5" />
