@@ -87,6 +87,8 @@ export default function App() {
     } catch (err) {
       console.error("Failed to fetch prices:", err);
       setError("Could not update prices. Please try again later.");
+      // Clear the error after 5 seconds
+      setTimeout(() => setError(null), 5000);
     } finally {
       setIsLoading(false);
     }
@@ -94,7 +96,7 @@ export default function App() {
 
   useEffect(() => {
     updatePrices();
-    const interval = setInterval(updatePrices, 60000); // Update every 60 seconds
+    const interval = setInterval(updatePrices, 90000); // Update every 90 seconds to avoid rate limiting
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allAssetIds.join(',')]); // Rerun when the list of assets changes
@@ -193,6 +195,8 @@ export default function App() {
           onTogglePrivacyMode={togglePrivacyMode}
           theme={theme}
           onToggleTheme={toggleTheme}
+          onRefresh={updatePrices}
+          isRefreshing={isLoading}
         />
 
         <PortfolioSummary 
