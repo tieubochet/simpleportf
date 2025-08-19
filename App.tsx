@@ -41,7 +41,6 @@ export default function App() {
   // Performance Chart State
   const [timeRange, setTimeRange] = useState<'24h' | '7d' | '30d' | '1y'>('7d');
   const [historicalData, setHistoricalData] = useState<HistoricalDataPoint[]>([]);
-  const [btcHistoricalData, setBtcHistoricalData] = useState<HistoricalDataPoint[]>([]);
   const [isChartLoading, setIsChartLoading] = useState(true);
 
   // Privacy Mode State
@@ -106,7 +105,6 @@ export default function App() {
     const fetchAndCalculateHistoricalData = async () => {
         if (allAssetIds.length === 0) {
             setHistoricalData([]);
-            setBtcHistoricalData([]);
             setIsChartLoading(false);
             return;
         }
@@ -117,15 +115,8 @@ export default function App() {
             const days = daysMap[timeRange];
 
             const portfolioPromises = allAssetIds.map(id => fetchHistoricalChartData(id, days));
-            const btcPromise = fetchHistoricalChartData('bitcoin', days);
-
-            const [portfolioResults, btcResult] = await Promise.all([
-              Promise.allSettled(portfolioPromises),
-              btcPromise.catch(e => {
-                  console.warn("Could not fetch BTC historical data", e);
-                  return null; // Return null on failure
-              })
-            ]);
+            
+            const portfolioResults = await Promise.allSettled(portfolioPromises);
 
             const historicalPrices: Record<string, [number, number][]> = {};
             portfolioResults.forEach((result, index) => {
@@ -140,12 +131,10 @@ export default function App() {
             let calculatedData = calculateHistoricalPortfolioValue(wallets, historicalPrices);
             
             setHistoricalData(calculatedData);
-            setBtcHistoricalData(btcResult || []);
 
         } catch (err) {
             console.error("An unexpected error occurred while processing historical chart data:", err);
             setHistoricalData([]);
-            setBtcHistoricalData([]);
         } finally {
             setIsChartLoading(false);
         }
@@ -217,7 +206,6 @@ export default function App() {
               <div className="lg:col-span-3">
                 <PerformanceChart 
                     portfolioData={historicalData} 
-                    btcData={btcHistoricalData}
                     isLoading={isChartLoading}
                     timeRange={timeRange}
                     setTimeRange={setTimeRange}
