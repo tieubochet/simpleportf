@@ -1,4 +1,3 @@
-
 import { Wallet, PriceData, Transaction, PortfolioAsset, HistoricalDataPoint, PerformerData } from '../types';
 
 /**
@@ -383,6 +382,31 @@ export const calculateHistoricalPortfolioValue = (
     }
   });
   
-  // 5. Convert the final values map to the required array format.
-  return Array.from(portfolioValues.entries());
+  // 5. Convert map to sorted array
+  const sortedValues = Array.from(portfolioValues.entries()).sort((a, b) => a[0] - b[0]);
+
+  // 6. Find the first point in time where the portfolio had actual value.
+  const firstMeaningfulPointIndex = sortedValues.findIndex(point => point[1] > 0.01);
+
+  // If the portfolio never had value, return empty.
+  if (firstMeaningfulPointIndex === -1) {
+    return [];
+  }
+
+  // 7. Get all data from that first meaningful point onwards.
+  const finalData = sortedValues.slice(firstMeaningfulPointIndex);
+
+  // 8. To ensure a line is drawn from zero, prepend a zero-value point.
+  // This point is either the one right before the first meaningful one, or a synthetic one if the meaningful one is the very first.
+  if (firstMeaningfulPointIndex > 0) {
+    // Use the timestamp of the point right before value appeared, but set its value to 0.
+    const precedingTimestamp = sortedValues[firstMeaningfulPointIndex - 1][0];
+    finalData.unshift([precedingTimestamp, 0]);
+  } else if (finalData.length > 0) {
+    // If the portfolio had value from the very first timestamp, create a synthetic starting point an hour before.
+    const firstTimestamp = finalData[0][0];
+    finalData.unshift([firstTimestamp - 3600000, 0]);
+  }
+
+  return finalData;
 };
