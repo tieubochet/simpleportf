@@ -343,6 +343,9 @@ export const calculateHistoricalPortfolioValue = (
   const portfolioValues = new Map<number, number>();
   masterTimeline.forEach(ts => portfolioValues.set(ts, 0));
 
+  // A small epsilon to guard against floating point inaccuracies
+  const VIRTUAL_ZERO = 1e-9;
+
   // 4. For each asset, calculate its value over time and add it to the portfolio total.
   allAssetsMap.forEach(({ transactions, priceMap }) => {
     const sortedTransactions = [...transactions].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
@@ -375,7 +378,7 @@ export const calculateHistoricalPortfolioValue = (
           lastKnownPrice = priceAtTimestamp;
       }
 
-      if (currentQuantity > 0 && lastKnownPrice > 0) {
+      if (currentQuantity > VIRTUAL_ZERO && lastKnownPrice > 0) {
         const value = currentQuantity * lastKnownPrice;
         portfolioValues.set(timestamp, (portfolioValues.get(timestamp) || 0) + value);
       }
