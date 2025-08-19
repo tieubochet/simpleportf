@@ -227,8 +227,8 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({ portfolioData, btcD
                                     return <span style={{ color: chartColors.legend }} className="font-medium">{label}</span>;
                                 }}
                             />
-                            {hasBtcData && <Area yAxisId="right" type="stepAfter" name="BTC Price" dataKey="btcPrice" stroke="#f97316" fill="url(#colorBtc)" strokeWidth={2} />}
-                            <Area yAxisId="left" type="stepAfter" name="Portfolio Value" dataKey="portfolioValue" stroke="#60a5fa" fill="url(#colorPortfolio)" strokeWidth={2} />
+                            {hasBtcData && <Area yAxisId="right" type="monotone" name="BTC Price" dataKey="btcPrice" stroke="#f97316" fill="url(#colorBtc)" strokeWidth={2} />}
+                            <Area yAxisId="left" type="monotone" name="Portfolio Value" dataKey="portfolioValue" stroke="#60a5fa" fill="url(#colorPortfolio)" strokeWidth={2} />
                         </AreaChart>
                     </ResponsiveContainer>
                 </div>
