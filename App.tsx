@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { PortfolioAsset, PriceData, Wallet, Transaction, PerformerData } from './types';
+import { PortfolioAsset, PriceData, Wallet, Transaction, PerformerData, HeatmapDataPoint } from './types';
 import { usePortfolio } from './hooks/usePortfolio';
 import { useTheme } from './hooks/useTheme';
 import { fetchPrices } from './services/coingecko';
@@ -14,6 +14,7 @@ import AddTransactionModal from './components/AddTransactionModal';
 import WalletCard from './components/WalletCard';
 import { WalletIcon } from './components/icons';
 import AllocationChart from './components/AllocationChart';
+import Heatmap from './components/Heatmap';
 import BackToTopButton from './components/BackToTopButton';
 
 type AssetForTransaction = {
@@ -60,6 +61,38 @@ export default function App() {
   
   const topLoser = useMemo(() => {
     return findTopLoser(wallets, prices);
+  }, [wallets, prices]);
+
+  const heatmapData = useMemo((): HeatmapDataPoint[] => {
+    const allAssetsMap = new Map<string, { symbol: string; transactions: Transaction[] }>();
+
+    wallets.forEach(wallet => {
+        wallet.assets.forEach(asset => {
+            const existing = allAssetsMap.get(asset.id);
+            if (existing) {
+                existing.transactions.push(...asset.transactions);
+            } else {
+                allAssetsMap.set(asset.id, {
+                    symbol: asset.symbol,
+                    transactions: [...asset.transactions]
+                });
+            }
+        });
+    });
+
+    return Array.from(allAssetsMap.entries()).map(([id, data]) => {
+        const priceInfo = prices[id];
+        const currentPrice = priceInfo?.usd ?? 0;
+        const { marketValue } = getAssetMetrics(data.transactions, currentPrice);
+        const change24h = priceInfo?.usd_24h_change ?? 0;
+
+        return {
+            name: data.symbol.toUpperCase(),
+            value: marketValue,
+            change: change24h,
+        };
+    }).filter(item => item.value > 0.01); // Only include assets with meaningful value
+
   }, [wallets, prices]);
 
   const togglePrivacyMode = useCallback(() => {
@@ -153,15 +186,14 @@ export default function App() {
 
         {wallets.length > 0 ? (
           <>
-            <div className="mt-8">
-              <div className="max-w-4xl mx-auto">
-                <AllocationChart 
-                    wallets={wallets}
-                    prices={prices}
-                    isPrivacyMode={isPrivacyMode}
-                    theme={theme}
-                />
-              </div>
+            <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <AllocationChart 
+                  wallets={wallets}
+                  prices={prices}
+                  isPrivacyMode={isPrivacyMode}
+                  theme={theme}
+              />
+              <Heatmap data={heatmapData} />
             </div>
 
             <div className="mt-8">
