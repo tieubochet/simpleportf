@@ -140,9 +140,24 @@ export default function App() {
         }
     };
 
-    fetchAndCalculateHistoricalData();
+    // This logic ensures that the main summary data loads first for better perceived performance.
+    // The chart data fetching, which can be slower, is initiated only after the primary price data is available.
+    if (isLoading) {
+      // If primary data is loading, the chart should also be in a loading state.
+      setIsChartLoading(true);
+      return;
+    }
+    
+    if (wallets.length > 0) {
+      // Primary data is loaded and we have assets, so fetch chart data.
+      fetchAndCalculateHistoricalData();
+    } else {
+      // No wallets, so clear chart data and set loading to false.
+      setHistoricalData([]);
+      setIsChartLoading(false);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wallets, timeRange, allAssetIds.join(',')]);
+  }, [isLoading, wallets, timeRange]);
 
   const handleAddAsset = (asset: PortfolioAsset) => {
     if (addingAssetToWalletId) {
@@ -202,6 +217,21 @@ export default function App() {
 
         {wallets.length > 0 ? (
           <>
+            <div className="mt-8">
+              {wallets.map(wallet => (
+                  <WalletCard 
+                      key={wallet.id}
+                      wallet={wallet}
+                      prices={prices}
+                      onAddAsset={handleOpenAddAssetModal}
+                      onRemoveAsset={removeAssetFromWallet}
+                      onRemoveWallet={removeWallet}
+                      onAddTransaction={handleOpenAddTransactionModal}
+                      isPrivacyMode={isPrivacyMode}
+                  />
+              ))}
+            </div>
+
             <div className="mt-8 grid grid-cols-1 lg:grid-cols-5 gap-8">
               <div className="lg:col-span-3">
                 <PerformanceChart 
@@ -221,21 +251,6 @@ export default function App() {
                     theme={theme}
                 />
               </div>
-            </div>
-            
-            <div className="mt-8">
-              {wallets.map(wallet => (
-                  <WalletCard 
-                      key={wallet.id}
-                      wallet={wallet}
-                      prices={prices}
-                      onAddAsset={handleOpenAddAssetModal}
-                      onRemoveAsset={removeAssetFromWallet}
-                      onRemoveWallet={removeWallet}
-                      onAddTransaction={handleOpenAddTransactionModal}
-                      isPrivacyMode={isPrivacyMode}
-                  />
-              ))}
             </div>
           </>
         ) : (
