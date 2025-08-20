@@ -19,7 +19,6 @@ const URLS_TO_CACHE = [
   '/components/AddWalletModal.tsx',
   '/components/WalletCard.tsx',
   '/components/AddTransactionModal.tsx',
-  '/components/PerformanceChart.tsx',
   '/components/DailyStreak.tsx',
   '/components/BackToTopButton.tsx'
 ];
