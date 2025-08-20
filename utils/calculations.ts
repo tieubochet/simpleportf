@@ -293,9 +293,11 @@ export const findTopLoser = (wallets: Wallet[], prices: PriceData): PerformerDat
 
 /**
  * Calculates the historical total value of a portfolio over time.
- * This robust version creates a master timeline and iterates through it once for better accuracy with multiple assets.
+ * This robust version iterates through a master timeline and calculates the precise quantity
+ * and forward-filled price for each asset at each timestamp, ensuring accuracy even with
+ * assets that have non-aligned price histories.
  * @param wallets The user's wallets with all transaction data.
- * @param historicalPrices A record mapping coin IDs to their historical price data from CoinGecko.
+ * @param historicalPrices A record mapping coin IDs to their historical price data.
  * @returns An array of [timestamp, value] tuples for charting.
  */
 export const calculateHistoricalPortfolioValue = (
@@ -316,92 +318,94 @@ export const calculateHistoricalPortfolioValue = (
   const masterTimeline = Array.from(allTimestamps).sort((a, b) => a - b);
   if (masterTimeline.length === 0) return [];
 
-  // 2. Combine transactions and create price maps for each asset.
-  const allAssetsMap = new Map<string, { transactions: Transaction[], priceMap: Map<number, number> }>();
+  // 2. Combine all transactions for each asset and sort them by date once.
+  const allAssetsMap = new Map<string, { transactions: Transaction[] }>();
   wallets.forEach(wallet => {
     wallet.assets.forEach(asset => {
-      if (assetIdsWithData.includes(asset.id)) {
-        let existing = allAssetsMap.get(asset.id);
-        if (!existing) {
-          existing = { 
-            transactions: [],
-            priceMap: new Map(historicalPrices[asset.id]),
-          };
-          allAssetsMap.set(asset.id, existing);
-        }
-        existing.transactions.push(...asset.transactions);
+      if (!assetIdsWithData.includes(asset.id)) return;
+
+      if (!allAssetsMap.has(asset.id)) {
+        allAssetsMap.set(asset.id, { transactions: [] });
       }
+      allAssetsMap.get(asset.id)!.transactions.push(...asset.transactions);
     });
   });
 
-  // Sort transactions for each asset once for efficiency.
   allAssetsMap.forEach(data => {
     data.transactions.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   });
 
-  // 3. Keep track of the state (quantity, price) for each asset as we iterate through time.
-  const assetStates = new Map<string, { txIndex: number, quantity: number, lastPrice: number }>();
-  allAssetsMap.forEach((_, assetId) => {
-    assetStates.set(assetId, { txIndex: 0, quantity: 0, lastPrice: 0 });
-  });
+  // 3. Helper function to get the latest price at or before a given timestamp (forward-fill).
+  const getPriceAt = (priceHistory: [number, number][], timestamp: number): number => {
+    let lastKnownPrice = 0;
+    // Price history is sorted, so we can iterate and stop when we pass the timestamp.
+    for (const pricePoint of priceHistory) {
+      if (pricePoint[0] <= timestamp) {
+        lastKnownPrice = pricePoint[1];
+      } else {
+        break;
+      }
+    }
+    return lastKnownPrice;
+  };
 
-  const VIRTUAL_ZERO = 1e-9;
   const portfolioHistory: HistoricalDataPoint[] = [];
+  const VIRTUAL_ZERO = 1e-9;
 
-  // 4. Iterate through the master timeline ONCE.
+  // 4. Iterate through the master timeline. For each point, calculate the total portfolio value.
   for (const timestamp of masterTimeline) {
     let portfolioValueAtTimestamp = 0;
 
-    // For each asset, update its state and add its value to the portfolio total for this timestamp.
-    allAssetsMap.forEach(({ transactions, priceMap }, assetId) => {
-      const state = assetStates.get(assetId)!;
-
-      // Update quantity based on transactions that occurred up to this point in time.
-      while (state.txIndex < transactions.length && new Date(transactions[state.txIndex].date).getTime() <= timestamp) {
-        const tx = transactions[state.txIndex];
+    // For each asset, determine its value at this specific timestamp.
+    allAssetsMap.forEach(({ transactions }, assetId) => {
+      // a) Calculate quantity held at this timestamp.
+      let quantity = 0;
+      for (const tx of transactions) {
+        if (new Date(tx.date).getTime() > timestamp) {
+          break; // Transactions are sorted, no need to check further.
+        }
         switch (tx.type) {
           case 'buy':
           case 'transfer_in':
-            state.quantity += tx.quantity;
+            quantity += tx.quantity;
             break;
           case 'sell':
           case 'transfer_out':
-            state.quantity -= tx.quantity;
+            quantity -= tx.quantity;
             break;
         }
-        state.txIndex++;
       }
 
-      // Update price using forward-fill.
-      const priceAtTimestamp = priceMap.get(timestamp);
-      if (priceAtTimestamp !== undefined) {
-        state.lastPrice = priceAtTimestamp;
-      }
-
-      // Calculate the asset's value and add to the total for this timestamp.
-      if (state.quantity > VIRTUAL_ZERO && state.lastPrice > 0) {
-        portfolioValueAtTimestamp += state.quantity * state.lastPrice;
+      // b) Find the asset's price at this timestamp.
+      if (quantity > VIRTUAL_ZERO) {
+        const price = getPriceAt(historicalPrices[assetId], timestamp);
+        if (price > 0) {
+          portfolioValueAtTimestamp += quantity * price;
+        }
       }
     });
 
     portfolioHistory.push([timestamp, portfolioValueAtTimestamp]);
   }
   
-  // 5. Post-processing: find the first meaningful point and prepend a zero-value point for a clean chart start.
+  // 5. Post-processing: Find the first point with a non-trivial value to start the chart cleanly.
   const firstMeaningfulPointIndex = portfolioHistory.findIndex(point => point[1] > 0.01);
 
   if (firstMeaningfulPointIndex === -1) {
-    return []; // Portfolio never had significant value in this timeframe.
+    // Portfolio never had significant value, or not enough data.
+    return []; 
   }
 
   const finalData = portfolioHistory.slice(firstMeaningfulPointIndex);
 
+  // Prepend a zero-value point just before the first real data point to make the chart rise from the axis.
   if (firstMeaningfulPointIndex > 0) {
     const precedingTimestamp = portfolioHistory[firstMeaningfulPointIndex - 1][0];
     finalData.unshift([precedingTimestamp, 0]);
   } else if (finalData.length > 0) {
+    // If the very first point has value, create a synthetic start point 1 hour before.
     const firstTimestamp = finalData[0][0];
-    finalData.unshift([firstTimestamp - 3600000, 0]); // Synthetic start 1hr before
+    finalData.unshift([firstTimestamp - 3600000, 0]);
   }
 
   return finalData;
