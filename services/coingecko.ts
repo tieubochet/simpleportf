@@ -52,19 +52,3 @@ export async function fetchPrices(coinIds: string[]): Promise<PriceData> {
     throw error;
   }
 }
-
-export async function fetchHistoricalChartData(coinId: string, days: string): Promise<[number, number][]> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/coins/${coinId}/market_chart?vs_currency=usd&days=${days}`);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch historical data for ${coinId}`);
-    }
-    const data = await response.json();
-    // The API returns price, market_caps, and total_volumes. We only need prices.
-    return data.prices;
-  } catch (error) {
-    console.error(`Error fetching historical data for ${coinId}:`, error);
-    // Re-throw to be handled by the caller, so it can set loading/error states
-    throw error;
-  }
-}
