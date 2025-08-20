@@ -186,14 +186,18 @@ export default function App() {
 
         {wallets.length > 0 ? (
           <>
-            <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <AllocationChart 
-                  wallets={wallets}
-                  prices={prices}
-                  isPrivacyMode={isPrivacyMode}
-                  theme={theme}
-              />
-              <Heatmap data={heatmapData} />
+            <div className="mt-8 grid grid-cols-1 lg:grid-cols-10 gap-8">
+              <div className="lg:col-span-6">
+                <Heatmap data={heatmapData} />
+              </div>
+              <div className="lg:col-span-4">
+                <AllocationChart 
+                    wallets={wallets}
+                    prices={prices}
+                    isPrivacyMode={isPrivacyMode}
+                    theme={theme}
+                />
+              </div>
             </div>
 
             <div className="mt-8">
