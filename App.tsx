@@ -217,21 +217,6 @@ export default function App() {
 
         {wallets.length > 0 ? (
           <>
-            <div className="mt-8">
-              {wallets.map(wallet => (
-                  <WalletCard 
-                      key={wallet.id}
-                      wallet={wallet}
-                      prices={prices}
-                      onAddAsset={handleOpenAddAssetModal}
-                      onRemoveAsset={removeAssetFromWallet}
-                      onRemoveWallet={removeWallet}
-                      onAddTransaction={handleOpenAddTransactionModal}
-                      isPrivacyMode={isPrivacyMode}
-                  />
-              ))}
-            </div>
-
             <div className="mt-8 grid grid-cols-1 lg:grid-cols-5 gap-8">
               <div className="lg:col-span-3">
                 <PerformanceChart 
@@ -251,6 +236,21 @@ export default function App() {
                     theme={theme}
                 />
               </div>
+            </div>
+
+            <div className="mt-8">
+              {wallets.map(wallet => (
+                  <WalletCard 
+                      key={wallet.id}
+                      wallet={wallet}
+                      prices={prices}
+                      onAddAsset={handleOpenAddAssetModal}
+                      onRemoveAsset={removeAssetFromWallet}
+                      onRemoveWallet={removeWallet}
+                      onAddTransaction={handleOpenAddTransactionModal}
+                      isPrivacyMode={isPrivacyMode}
+                  />
+              ))}
             </div>
           </>
         ) : (
