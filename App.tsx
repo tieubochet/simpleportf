@@ -1,10 +1,10 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { PortfolioAsset, PriceData, Wallet, Transaction, HistoricalDataPoint, PerformerData } from './types';
+import { PortfolioAsset, PriceData, Wallet, Transaction, PerformerData } from './types';
 import { usePortfolio } from './hooks/usePortfolio';
 import { useTheme } from './hooks/useTheme';
-import { fetchPrices, fetchHistoricalChartData } from './services/coingecko';
-import { calculateTotalValue, getAssetIds, getAssetMetrics, calculatePortfolio24hChange, calculateTotalPL, calculateHistoricalPortfolioValue, findTopPerformer, findTopLoser } from './utils/calculations';
+import { fetchPrices } from './services/coingecko';
+import { calculateTotalValue, getAssetIds, getAssetMetrics, calculatePortfolio24hChange, calculateTotalPL, findTopPerformer, findTopLoser } from './utils/calculations';
 
 import PortfolioHeader from './components/PortfolioHeader';
 import PortfolioSummary from './components/PortfolioSummary';
@@ -13,7 +13,6 @@ import AddWalletModal from './components/AddWalletModal';
 import AddTransactionModal from './components/AddTransactionModal';
 import WalletCard from './components/WalletCard';
 import { WalletIcon } from './components/icons';
-import PerformanceChart from './components/PerformanceChart';
 import AllocationChart from './components/AllocationChart';
 import BackToTopButton from './components/BackToTopButton';
 
@@ -38,11 +37,6 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Performance Chart State
-  const [timeRange, setTimeRange] = useState<'24h' | '7d' | '30d' | '1y'>('7d');
-  const [historicalData, setHistoricalData] = useState<HistoricalDataPoint[]>([]);
-  const [isChartLoading, setIsChartLoading] = useState(true);
-
   // Privacy Mode State
   const [isPrivacyMode, setIsPrivacyMode] = useState(false);
 
@@ -100,64 +94,6 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allAssetIds.join(',')]); // Rerun when the list of assets changes
   
-  // Effect for fetching historical data for the chart
-  useEffect(() => {
-    const fetchAndCalculateHistoricalData = async () => {
-        if (allAssetIds.length === 0) {
-            setHistoricalData([]);
-            setIsChartLoading(false);
-            return;
-        }
-
-        setIsChartLoading(true);
-        try {
-            const daysMap: { [key: string]: string } = { '24h': '1', '7d': '7', '30d': '30', '1y': '365' };
-            const days = daysMap[timeRange];
-
-            const portfolioPromises = allAssetIds.map(id => fetchHistoricalChartData(id, days));
-            
-            const portfolioResults = await Promise.allSettled(portfolioPromises);
-
-            const historicalPrices: Record<string, [number, number][]> = {};
-            portfolioResults.forEach((result, index) => {
-              const id = allAssetIds[index];
-              if (result.status === 'fulfilled' && result.value) {
-                historicalPrices[id] = result.value;
-              } else if (result.status === 'rejected') {
-                console.warn(`Failed to fetch historical data for ${id}:`, result.reason);
-              }
-            });
-
-            let calculatedData = calculateHistoricalPortfolioValue(wallets, historicalPrices);
-            
-            setHistoricalData(calculatedData);
-
-        } catch (err) {
-            console.error("An unexpected error occurred while processing historical chart data:", err);
-            setHistoricalData([]);
-        } finally {
-            setIsChartLoading(false);
-        }
-    };
-
-    // This logic ensures that the main summary data loads first for better perceived performance.
-    // The chart data fetching, which can be slower, is initiated only after the primary price data is available.
-    if (isLoading) {
-      // If primary data is loading, the chart should also be in a loading state.
-      setIsChartLoading(true);
-      return;
-    }
-    
-    if (wallets.length > 0) {
-      // Primary data is loaded and we have assets, so fetch chart data.
-      fetchAndCalculateHistoricalData();
-    } else {
-      // No wallets, so clear chart data and set loading to false.
-      setHistoricalData([]);
-      setIsChartLoading(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading, wallets, timeRange]);
 
   const handleAddAsset = (asset: PortfolioAsset) => {
     if (addingAssetToWalletId) {
@@ -217,18 +153,8 @@ export default function App() {
 
         {wallets.length > 0 ? (
           <>
-            <div className="mt-8 grid grid-cols-1 lg:grid-cols-5 gap-8">
-              <div className="lg:col-span-3">
-                <PerformanceChart 
-                    portfolioData={historicalData} 
-                    isLoading={isChartLoading}
-                    timeRange={timeRange}
-                    setTimeRange={setTimeRange}
-                    isPrivacyMode={isPrivacyMode}
-                    theme={theme}
-                />
-              </div>
-              <div className="lg:col-span-2">
+            <div className="mt-8">
+              <div className="max-w-4xl mx-auto">
                 <AllocationChart 
                     wallets={wallets}
                     prices={prices}
