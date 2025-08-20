@@ -46,3 +46,10 @@ export interface PerformerData {
   symbol: string;
   change: number; // The 24h percentage change
 }
+
+// Represents the data for a single cell in the heatmap
+export interface HeatmapDataPoint {
+  name: string; // Asset symbol
+  value: number; // Market value for sizing
+  change: number; // 24h percentage change for color
+}
