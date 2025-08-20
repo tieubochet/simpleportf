@@ -46,6 +46,3 @@ export interface PerformerData {
   symbol: string;
   change: number; // The 24h percentage change
 }
-
-// Represents a data point for the historical performance chart: [timestamp, value]
-export type HistoricalDataPoint = [number, number];
