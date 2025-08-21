@@ -183,10 +183,12 @@ const Heatmap: React.FC<HeatmapProps> = ({ data }) => {
                 <h3 className="text-xl font-semibold text-slate-900 dark:text-white">Market Cap Treemap</h3>
                 <p className="text-sm text-slate-500 dark:text-slate-400">Block size represents asset market value in your portfolio.</p>
             </div>
-            <div ref={containerRef} className="relative flex-1 w-full overflow-hidden">
-                {layout.map(item => (
-                    <Block key={item.name} item={item} />
-                ))}
+            <div className="flex-1 w-full overflow-hidden">
+                <div ref={containerRef} className="relative w-full h-full">
+                    {layout.map(item => (
+                        <Block key={item.name} item={item} />
+                    ))}
+                </div>
             </div>
         </div>
     );
