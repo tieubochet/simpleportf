@@ -20,11 +20,14 @@
       (function() {
         try {
           const theme = localStorage.getItem('theme');
-          if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          if (theme === 'dim') {
+            document.documentElement.classList.add('dark', 'dim');
+            document.querySelector('meta[name="theme-color"]').setAttribute('content', '#1e293b');
+          } else if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
             document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0f172a');
           } else {
-            document.documentElement.classList.remove('dark');
+            document.documentElement.classList.remove('dark', 'dim');
             document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f1f5f9');
           }
         } catch (e) {}
@@ -57,6 +60,35 @@
       }
       html.dark ::-webkit-scrollbar-thumb:hover {
         background: #64748b; /* slate-500 */
+      }
+
+      /* Dim theme scrollbar & color overrides */
+      html.dark.dim ::-webkit-scrollbar-track {
+        background: #334155; /* slate-700 */
+      }
+      html.dark.dim .dark\:bg-slate-900 {
+        background-color: #1e293b; /* slate-800 */
+      }
+      html.dark.dim .dark\:bg-slate-800 {
+        background-color: #334155; /* slate-700 */
+      }
+      html.dark.dim .dark\:bg-slate-800\/50 {
+        background-color: rgba(51, 65, 85, 0.5); /* slate-700/50 */
+      }
+       html.dark.dim .dark\:bg-slate-900\/50 {
+        background-color: rgba(30, 41, 59, 0.5); /* slate-800/50 */
+      }
+      html.dark.dim .dark\:text-slate-200 {
+        color: #cbd5e1; /* slate-300 */
+      }
+      html.dark.dim .dark\:text-white {
+        color: #f1f5f9; /* slate-100 */
+      }
+      html.dark.dim .dark\:border-slate-700 {
+        border-color: #475569; /* slate-600 */
+      }
+       html.dark.dim .dark\:divide-slate-700 > :not([hidden]) ~ :not([hidden]) {
+        border-color: #475569; /* slate-600 */
       }
     </style>
   <script type="importmap">
