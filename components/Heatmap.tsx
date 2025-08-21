@@ -41,18 +41,17 @@ const Heatmap: React.FC<HeatmapProps> = ({ data }) => {
         <h3 className="text-xl font-semibold text-slate-900 dark:text-white">24h Performance Heatmap</h3>
         <p className="text-sm text-slate-500 dark:text-slate-400">Block size represents magnitude of price change.</p>
       </div>
-      <div className="flex flex-wrap flex-grow content-start gap-1 p-1 bg-slate-100 dark:bg-slate-900 rounded-md">
+      <div className="flex flex-wrap flex-grow content-stretch gap-1 p-1 bg-slate-100 dark:bg-slate-900 rounded-md">
         {sortedData.map(item => (
           <div
             key={item.name}
             className={`flex flex-col justify-center items-center text-white font-bold p-2 rounded transition-colors duration-200 text-center break-words ${getDynamicColor(item.change)}`}
             style={{
-              // Size is now proportional to the absolute percentage change.
-              // Add a small base value to ensure items with 0% change are still visible.
-              flexGrow: Math.abs(item.change) + 0.1,
-              flexBasis: '80px', // Minimum base width before growing
-              minWidth: '50px', // Prevent extreme shrinking
-              minHeight: '50px',
+              // Using flex-grow with a basis of 0 makes block width proportional to its change magnitude within its row.
+              // A base value is added to ensure items with small/zero change are still visible.
+              flexGrow: Math.abs(item.change) + 0.2,
+              flexBasis: 0,
+              minWidth: 0, // ensure flex-basis is respected
             }}
             title={`${item.name}: ${item.change.toFixed(2)}%`}
           >
