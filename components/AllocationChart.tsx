@@ -2,8 +2,8 @@ import React, { useMemo, useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { Wallet, PriceData } from '../types';
 import { getAssetMetrics } from '../utils/calculations';
+import type { Theme } from '../hooks/useTheme';
 
-type Theme = 'light' | 'dark';
 interface AllocationChartProps {
   wallets: Wallet[];
   prices: PriceData;
