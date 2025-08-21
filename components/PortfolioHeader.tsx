@@ -1,7 +1,8 @@
 
 import React from 'react';
-import { UploadIcon, DownloadIcon, WalletIcon, EyeIcon, EyeOffIcon, SunIcon, MoonIcon, RefreshCwIcon } from './icons';
+import { UploadIcon, DownloadIcon, WalletIcon, EyeIcon, EyeOffIcon, SunIcon, MoonIcon, RefreshCwIcon, ContrastIcon } from './icons';
 import { DailyStreak } from './DailyStreak';
+import type { Theme } from '../hooks/useTheme';
 
 interface PortfolioHeaderProps {
   onAddWallet: () => void;
@@ -9,7 +10,7 @@ interface PortfolioHeaderProps {
   onExport: () => void;
   isPrivacyMode: boolean;
   onTogglePrivacyMode: () => void;
-  theme: 'light' | 'dark';
+  theme: Theme;
   onToggleTheme: () => void;
   onRefresh: () => void;
   isRefreshing: boolean;
@@ -18,6 +19,9 @@ interface PortfolioHeaderProps {
 const PortfolioHeader: React.FC<PortfolioHeaderProps> = ({ onAddWallet, onImport, onExport, isPrivacyMode, onTogglePrivacyMode, theme, onToggleTheme, onRefresh, isRefreshing }) => {
 
   const commonButtonStyles = "bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-white font-semibold rounded-lg transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed";
+
+  const ThemeIcon = theme === 'light' ? MoonIcon : theme === 'dim' ? ContrastIcon : SunIcon;
+  const nextTheme = theme === 'light' ? 'dim' : theme === 'dim' ? 'dark' : 'light';
 
   return (
     <header className="flex flex-col md:flex-row items-center justify-between mb-8">
@@ -28,9 +32,9 @@ const PortfolioHeader: React.FC<PortfolioHeaderProps> = ({ onAddWallet, onImport
         <button
           onClick={onToggleTheme}
           className={`flex items-center justify-center p-2 h-10 w-10 ${commonButtonStyles}`}
-          title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+          title={`Switch to ${nextTheme} mode`}
         >
-          {theme === 'light' ? <MoonIcon className="h-5 w-5" /> : <SunIcon className="h-5 w-5" />}
+          <ThemeIcon className="h-5 w-5" />
         </button>
         <button 
           onClick={onTogglePrivacyMode} 
