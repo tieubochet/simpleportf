@@ -50,6 +50,7 @@ export interface PerformerData {
 // Represents the data for a single cell in the heatmap
 export interface HeatmapDataPoint {
   name: string; // Asset symbol
-  value: number; // Market value for sizing
+  value: number; // Value for sizing (can be performance or market value)
   change: number; // 24h percentage change for color
+  marketValue: number; // Raw market value, used for fallback display
 }
