@@ -4,6 +4,7 @@ import { HeatmapDataPoint } from '../types';
 
 interface HeatmapProps {
   data: HeatmapDataPoint[];
+  sizingMetric: 'performance' | 'marketValue';
 }
 
 interface LayoutItem extends HeatmapDataPoint {
@@ -88,9 +89,23 @@ const squarify = (
     }
 }
 
+const formatCurrencyShorthand = (value: number) => {
+    if (value >= 1_000_000_000) {
+        return `$${(value / 1_000_000_000).toFixed(2)}B`;
+    }
+    if (value >= 1_000_000) {
+        return `$${(value / 1_000_000).toFixed(2)}M`;
+    }
+    if (value >= 1_000) {
+        return `$${(value / 1_000).toFixed(1)}K`;
+    }
+    return `$${value.toFixed(2)}`;
+};
+
+
 // A memoized component for rendering a single block in the treemap.
-const Block: React.FC<{ item: LayoutItem }> = React.memo(({ item }) => {
-    const { name, change, x, y, width, height } = item;
+const Block: React.FC<{ item: LayoutItem; sizingMetric: 'performance' | 'marketValue' }> = React.memo(({ item, sizingMetric }) => {
+    const { name, change, marketValue, x, y, width, height } = item;
 
     const color = change >= 0 ? 'bg-green-500' : 'bg-red-500';
     
@@ -101,8 +116,19 @@ const Block: React.FC<{ item: LayoutItem }> = React.memo(({ item }) => {
     // Hide text if the block is too small to be legible.
     const showText = width > 40 && height > 35;
 
-    const sign = change >= 0 ? '+' : '';
-    const formattedChange = `${sign}${change.toFixed(2)}%`;
+    let displayValue: string;
+    let titleText: string;
+
+    if (sizingMetric === 'marketValue') {
+        displayValue = formatCurrencyShorthand(marketValue);
+        const sign = change >= 0 ? '+' : '';
+        titleText = `${name}: ${displayValue} (${sign}${change.toFixed(2)}%)`;
+    } else { // performance
+        const sign = change >= 0 ? '+' : '';
+        displayValue = `${sign}${change.toFixed(2)}%`;
+        titleText = `${name}: ${displayValue}`;
+    }
+
 
     return (
         <div
@@ -113,7 +139,7 @@ const Block: React.FC<{ item: LayoutItem }> = React.memo(({ item }) => {
                 width: `${width}px`,
                 height: `${height}px`,
             }}
-            title={`${name}: ${formattedChange}`}
+            title={titleText}
         >
             {showText && (
                 <>
@@ -127,7 +153,7 @@ const Block: React.FC<{ item: LayoutItem }> = React.memo(({ item }) => {
                         className="font-normal tracking-tight opacity-90"
                         style={{ fontSize: `${fontSize * 0.65}px`, marginTop: `${fontSize * 0.1}px` }}
                     >
-                        {formattedChange}
+                        {displayValue}
                     </span>
                 </>
             )}
@@ -136,9 +162,22 @@ const Block: React.FC<{ item: LayoutItem }> = React.memo(({ item }) => {
 });
 
 
-const Heatmap: React.FC<HeatmapProps> = ({ data }) => {
+const Heatmap: React.FC<HeatmapProps> = ({ data, sizingMetric }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+
+    const { title, description } = useMemo(() => {
+        if (sizingMetric === 'marketValue') {
+            return {
+                title: 'Portfolio Allocation Treemap',
+                description: 'Block size represents market value. (Fallback due to missing 24h performance data)',
+            };
+        }
+        return {
+            title: '24h Performance Treemap',
+            description: 'Block size represents the magnitude of the 24h price change.',
+        };
+    }, [sizingMetric]);
 
     useEffect(() => {
         const resizeObserver = new ResizeObserver(entries => {
@@ -168,8 +207,8 @@ const Heatmap: React.FC<HeatmapProps> = ({ data }) => {
     if (!data || data.length === 0) {
         return (
             <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-md flex flex-col items-center justify-center min-h-[440px]">
-                <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">24h Performance Treemap</h3>
-                <p className="text-slate-500 dark:text-slate-400">Add assets to see your performance treemap.</p>
+                <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">{title}</h3>
+                <p className="text-slate-500 dark:text-slate-400">Add assets to see your treemap.</p>
             </div>
         );
     }
@@ -177,13 +216,13 @@ const Heatmap: React.FC<HeatmapProps> = ({ data }) => {
     return (
         <div className="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-lg shadow-md min-h-[440px] flex flex-col">
             <div className="mb-4">
-                <h3 className="text-xl font-semibold text-slate-900 dark:text-white">24h Performance Treemap</h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400">Block size represents the magnitude of the 24h price change.</p>
+                <h3 className="text-xl font-semibold text-slate-900 dark:text-white">{title}</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400">{description}</p>
             </div>
             <div className="flex-1 w-full overflow-hidden">
                 <div ref={containerRef} className="relative w-full h-full">
                     {layout.map(item => (
-                        <Block key={item.name} item={item} />
+                        <Block key={item.name} item={item} sizingMetric={sizingMetric} />
                     ))}
                 </div>
             </div>
