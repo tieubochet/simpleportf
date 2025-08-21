@@ -1,3 +1,4 @@
+
 import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { HeatmapDataPoint } from '../types';
 
@@ -11,13 +12,6 @@ interface LayoutItem extends HeatmapDataPoint {
   width: number;
   height: number;
 }
-
-const formatMarketCap = (value: number) => {
-    if (value >= 1e9) return `$${(value / 1e9).toFixed(2)}B`;
-    if (value >= 1e6) return `$${(value / 1e6).toFixed(2)}M`;
-    if (value >= 1e3) return `$${Math.round(value / 1e3)}K`;
-    return `$${value.toFixed(0)}`;
-};
 
 // Helper function to calculate the "worst" aspect ratio of a row of items.
 // The goal is to keep this value low, meaning items are closer to squares.
@@ -96,41 +90,44 @@ const squarify = (
 
 // A memoized component for rendering a single block in the treemap.
 const Block: React.FC<{ item: LayoutItem }> = React.memo(({ item }) => {
-    const { name, value, change, x, y, width, height } = item;
+    const { name, change, x, y, width, height } = item;
 
-    const color = change > 0 ? 'bg-green-500' : change < 0 ? 'bg-red-500' : 'bg-slate-500';
+    const color = change >= 0 ? 'bg-green-500' : 'bg-red-500';
     
     // Determine font size based on block area, with constraints.
     const area = width * height;
-    const fontSize = Math.max(12, Math.min(Math.sqrt(area) * 0.15, 48));
+    const fontSize = Math.max(12, Math.min(Math.sqrt(area) * 0.15, 36));
 
     // Hide text if the block is too small to be legible.
-    const showText = width > 40 && height > 30;
+    const showText = width > 40 && height > 35;
+
+    const sign = change >= 0 ? '+' : '';
+    const formattedChange = `${sign}${change.toFixed(2)}%`;
 
     return (
         <div
-            className={`absolute flex flex-col justify-center items-center text-white p-2 box-border overflow-hidden transition-all duration-300 ease-in-out border-2 border-white dark:border-slate-800 ${color}`}
+            className={`absolute flex flex-col justify-center items-center text-white p-2 box-border overflow-hidden transition-all duration-300 ease-in-out border border-white dark:border-slate-800 ${color}`}
             style={{
                 left: `${x}px`,
                 top: `${y}px`,
                 width: `${width}px`,
                 height: `${height}px`,
             }}
-            title={`${name}: ${formatMarketCap(value)} (${change.toFixed(2)}%)`}
+            title={`${name}: ${formattedChange}`}
         >
             {showText && (
                 <>
                     <span
-                        className="font-bold tracking-tighter"
-                        style={{ fontSize: `${fontSize}px`, lineHeight: 1 }}
+                        className="font-semibold tracking-tight"
+                        style={{ fontSize: `${fontSize}px`, lineHeight: 1.1 }}
                     >
                         {name}
                     </span>
                     <span
                         className="font-normal tracking-tight opacity-90"
-                        style={{ fontSize: `${fontSize * 0.5}px`, marginTop: `${fontSize * 0.1}px` }}
+                        style={{ fontSize: `${fontSize * 0.65}px`, marginTop: `${fontSize * 0.1}px` }}
                     >
-                        {formatMarketCap(value)}
+                        {formattedChange}
                     </span>
                 </>
             )}
@@ -171,8 +168,8 @@ const Heatmap: React.FC<HeatmapProps> = ({ data }) => {
     if (!data || data.length === 0) {
         return (
             <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-md flex flex-col items-center justify-center min-h-[440px]">
-                <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">Market Cap Treemap</h3>
-                <p className="text-slate-500 dark:text-slate-400">Add assets to see your portfolio treemap.</p>
+                <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">24h Performance Treemap</h3>
+                <p className="text-slate-500 dark:text-slate-400">Add assets to see your performance treemap.</p>
             </div>
         );
     }
@@ -180,8 +177,8 @@ const Heatmap: React.FC<HeatmapProps> = ({ data }) => {
     return (
         <div className="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-lg shadow-md min-h-[440px] flex flex-col">
             <div className="mb-4">
-                <h3 className="text-xl font-semibold text-slate-900 dark:text-white">Market Cap Treemap</h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400">Block size represents asset market value in your portfolio.</p>
+                <h3 className="text-xl font-semibold text-slate-900 dark:text-white">24h Performance Treemap</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400">Block size represents the magnitude of the 24h price change.</p>
             </div>
             <div className="flex-1 w-full overflow-hidden">
                 <div ref={containerRef} className="relative w-full h-full">
