@@ -63,7 +63,7 @@ export default function App() {
     return findTopLoser(wallets, prices);
   }, [wallets, prices]);
 
-  const heatmapData = useMemo((): HeatmapDataPoint[] => {
+  const heatmapInfo = useMemo(() => {
     const allAssetsMap = new Map<string, { symbol: string; transactions: Transaction[] }>();
 
     wallets.forEach(wallet => {
@@ -80,7 +80,6 @@ export default function App() {
         });
     });
 
-    // Create a temporary array with all data needed for filtering and mapping
     const processedAssets = Array.from(allAssetsMap.entries()).map(([id, data]) => {
         const priceInfo = prices[id];
         const currentPrice = priceInfo?.usd ?? 0;
@@ -89,24 +88,31 @@ export default function App() {
 
         return {
             name: data.symbol.toUpperCase(),
-            // Use absolute change for sizing, default to 0 if undefined
-            value: typeof change24h === 'number' ? Math.abs(change24h) : 0,
-            // Keep original change for coloring, default to 0
+            performanceValue: typeof change24h === 'number' ? Math.abs(change24h) : 0,
             change: typeof change24h === 'number' ? change24h : 0,
             marketValue,
         };
-    });
+    }).filter(item => item.marketValue > 0.01);
 
-    // Filter out assets with no holdings and then map to the final structure
-    return processedAssets
-        .filter(item => item.marketValue > 0.01)
-        .map(({ name, value, change }) => ({
-            name,
-            // Add a small constant value to ensure even 0% changes are visible in the treemap
-            value: value + 0.01,
-            change,
-        }));
+    const totalPerformanceValue = processedAssets.reduce((sum, asset) => sum + asset.performanceValue, 0);
+    
+    // If total change is negligible, fall back to market value for sizing.
+    const useMarketCapSizing = totalPerformanceValue < 0.01;
+    const sizingMetric: 'performance' | 'marketValue' = useMarketCapSizing ? 'marketValue' : 'performance';
 
+    const dataPoints: HeatmapDataPoint[] = processedAssets.map(item => ({
+        name: item.name,
+        // Use market value for sizing if performance data is absent, otherwise use performance.
+        // Also add a small constant to ensure visibility even for 0% changes.
+        value: (sizingMetric === 'marketValue' ? item.marketValue : item.performanceValue) + 0.01,
+        change: item.change,
+        marketValue: item.marketValue,
+    }));
+
+    return {
+        data: dataPoints,
+        sizingMetric,
+    };
   }, [wallets, prices]);
 
   const togglePrivacyMode = useCallback(() => {
@@ -202,7 +208,7 @@ export default function App() {
           <>
             <div className="mt-8 grid grid-cols-1 lg:grid-cols-10 gap-8">
               <div className="lg:col-span-6">
-                <Heatmap data={heatmapData} />
+                <Heatmap data={heatmapInfo.data} sizingMetric={heatmapInfo.sizingMetric} />
               </div>
               <div className="lg:col-span-4">
                 <AllocationChart 
