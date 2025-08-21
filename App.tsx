@@ -80,18 +80,32 @@ export default function App() {
         });
     });
 
-    return Array.from(allAssetsMap.entries()).map(([id, data]) => {
+    // Create a temporary array with all data needed for filtering and mapping
+    const processedAssets = Array.from(allAssetsMap.entries()).map(([id, data]) => {
         const priceInfo = prices[id];
         const currentPrice = priceInfo?.usd ?? 0;
         const { marketValue } = getAssetMetrics(data.transactions, currentPrice);
-        const change24h = priceInfo?.usd_24h_change ?? 0;
+        const change24h = priceInfo?.usd_24h_change;
 
         return {
             name: data.symbol.toUpperCase(),
-            value: marketValue,
-            change: change24h,
+            // Use absolute change for sizing, default to 0 if undefined
+            value: typeof change24h === 'number' ? Math.abs(change24h) : 0,
+            // Keep original change for coloring, default to 0
+            change: typeof change24h === 'number' ? change24h : 0,
+            marketValue,
         };
-    }).filter(item => item.value > 0.01); // Only include assets with meaningful value
+    });
+
+    // Filter out assets with no holdings and then map to the final structure
+    return processedAssets
+        .filter(item => item.marketValue > 0.01)
+        .map(({ name, value, change }) => ({
+            name,
+            // Add a small constant value to ensure even 0% changes are visible in the treemap
+            value: value + 0.01,
+            change,
+        }));
 
   }, [wallets, prices]);
 
