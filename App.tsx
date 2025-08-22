@@ -1,9 +1,10 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { PortfolioAsset, PriceData, Wallet, Transaction, PerformerData } from './types';
+import { PortfolioAsset, PriceData, Wallet, Transaction, PerformerData, MarketIndicesData } from './types';
 import { usePortfolio } from './hooks/usePortfolio';
 import { useTheme } from './hooks/useTheme';
 import { fetchPrices } from './services/coingecko';
+import { fetchMarketIndices } from './services/marketData';
 import { calculateTotalValue, getAssetIds, getAssetMetrics, calculatePortfolio24hChange, calculateTotalPL, findTopPerformer, findTopLoser } from './utils/calculations';
 
 import PortfolioHeader from './components/PortfolioHeader';
@@ -14,6 +15,7 @@ import AddTransactionModal from './components/AddTransactionModal';
 import WalletCard from './components/WalletCard';
 import { WalletIcon } from './components/icons';
 import AllocationChart from './components/AllocationChart';
+import MarketIndices from './components/MarketIndices';
 import BackToTopButton from './components/BackToTopButton';
 
 type AssetForTransaction = {
@@ -28,6 +30,7 @@ export default function App() {
   const { wallets, addWallet, removeWallet, addAssetToWallet, removeAssetFromWallet, addTransactionToAsset, importWallets, exportWallets } = usePortfolio();
   
   const [prices, setPrices] = useState<PriceData>({});
+  const [marketIndices, setMarketIndices] = useState<MarketIndicesData | null>(null);
   
   // Modal states
   const [addingAssetToWalletId, setAddingAssetToWalletId] = useState<string | null>(null);
@@ -35,6 +38,7 @@ export default function App() {
   const [assetForTransaction, setAssetForTransaction] = useState<AssetForTransaction | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);
+  const [isIndicesLoading, setIsIndicesLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
   // Privacy Mode State
@@ -85,7 +89,19 @@ export default function App() {
     } finally {
       setIsLoading(false);
     }
-  }, [allAssetIds, isLoading]);
+  }, [allAssetIds.join(','), isLoading]);
+  
+  const updateMarketIndices = useCallback(async () => {
+      setIsIndicesLoading(true);
+      try {
+          const indices = await fetchMarketIndices();
+          setMarketIndices(indices);
+      } catch (err) {
+          console.error("Failed to fetch market indices:", err);
+      } finally {
+          setIsIndicesLoading(false);
+      }
+  }, []);
 
   useEffect(() => {
     updatePrices();
@@ -93,6 +109,12 @@ export default function App() {
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allAssetIds.join(',')]); // Rerun when the list of assets changes
+  
+  useEffect(() => {
+      updateMarketIndices();
+      const interval = setInterval(updateMarketIndices, 300000); // Update every 5 minutes
+      return () => clearInterval(interval);
+  }, [updateMarketIndices]);
   
 
   const handleAddAsset = (asset: PortfolioAsset) => {
@@ -153,14 +175,17 @@ export default function App() {
 
         {wallets.length > 0 ? (
           <>
-            <div className="mt-8">
-              <div className="max-w-3xl mx-auto">
+            <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+              <div className="lg:col-span-2">
                 <AllocationChart 
                     wallets={wallets}
                     prices={prices}
                     isPrivacyMode={isPrivacyMode}
                     theme={theme}
                 />
+              </div>
+              <div className="lg:col-span-1">
+                <MarketIndices data={marketIndices} isLoading={isIndicesLoading} />
               </div>
             </div>
 
