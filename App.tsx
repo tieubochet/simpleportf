@@ -15,7 +15,6 @@ import AddAssetModal from './components/AddAssetModal';
 import AddTransactionModal from './components/AddTransactionModal';
 import BackToTopButton from './components/BackToTopButton';
 import MarketIndices from './components/MarketIndices';
-import AdvancedMarketStats from './components/AdvancedMarketStats';
 
 export default function App() {
   const { theme, toggleTheme } = useTheme();
@@ -146,13 +145,8 @@ export default function App() {
           />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 my-8">
-          <div className="lg:col-span-3">
-            <MarketIndices data={marketIndices} isLoading={isIndicesLoading} />
-          </div>
-          <div className="lg:col-span-2">
-            <AdvancedMarketStats data={marketIndices} isLoading={isIndicesLoading} />
-          </div>
+        <div className="my-8">
+          <MarketIndices data={marketIndices} isLoading={isIndicesLoading} />
         </div>
         
         {wallets.length > 0 && (
