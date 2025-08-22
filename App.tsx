@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { PortfolioAsset, PriceData, Wallet, Transaction, PerformerData, HeatmapDataPoint } from './types';
+import { PortfolioAsset, PriceData, Wallet, Transaction, PerformerData } from './types';
 import { usePortfolio } from './hooks/usePortfolio';
 import { useTheme } from './hooks/useTheme';
 import { fetchPrices } from './services/coingecko';
@@ -14,7 +14,6 @@ import AddTransactionModal from './components/AddTransactionModal';
 import WalletCard from './components/WalletCard';
 import { WalletIcon } from './components/icons';
 import AllocationChart from './components/AllocationChart';
-import Heatmap from './components/Heatmap';
 import BackToTopButton from './components/BackToTopButton';
 
 type AssetForTransaction = {
@@ -61,58 +60,6 @@ export default function App() {
   
   const topLoser = useMemo(() => {
     return findTopLoser(wallets, prices);
-  }, [wallets, prices]);
-
-  const heatmapInfo = useMemo(() => {
-    const allAssetsMap = new Map<string, { symbol: string; transactions: Transaction[] }>();
-
-    wallets.forEach(wallet => {
-        wallet.assets.forEach(asset => {
-            const existing = allAssetsMap.get(asset.id);
-            if (existing) {
-                existing.transactions.push(...asset.transactions);
-            } else {
-                allAssetsMap.set(asset.id, {
-                    symbol: asset.symbol,
-                    transactions: [...asset.transactions]
-                });
-            }
-        });
-    });
-
-    const processedAssets = Array.from(allAssetsMap.entries()).map(([id, data]) => {
-        const priceInfo = prices[id];
-        const currentPrice = priceInfo?.usd ?? 0;
-        const { marketValue } = getAssetMetrics(data.transactions, currentPrice);
-        const change24h = priceInfo?.usd_24h_change;
-
-        return {
-            name: data.symbol.toUpperCase(),
-            performanceValue: typeof change24h === 'number' ? Math.abs(change24h) : 0,
-            change: typeof change24h === 'number' ? change24h : 0,
-            marketValue,
-        };
-    }).filter(item => item.marketValue > 0.01);
-
-    const totalPerformanceValue = processedAssets.reduce((sum, asset) => sum + asset.performanceValue, 0);
-    
-    // If total change is negligible, fall back to market value for sizing.
-    const useMarketCapSizing = totalPerformanceValue < 0.01;
-    const sizingMetric: 'performance' | 'marketValue' = useMarketCapSizing ? 'marketValue' : 'performance';
-
-    const dataPoints: HeatmapDataPoint[] = processedAssets.map(item => ({
-        name: item.name,
-        // Use market value for sizing if performance data is absent, otherwise use performance.
-        // Also add a small constant to ensure visibility even for 0% changes.
-        value: (sizingMetric === 'marketValue' ? item.marketValue : item.performanceValue) + 0.01,
-        change: item.change,
-        marketValue: item.marketValue,
-    }));
-
-    return {
-        data: dataPoints,
-        sizingMetric,
-    };
   }, [wallets, prices]);
 
   const togglePrivacyMode = useCallback(() => {
@@ -206,11 +153,8 @@ export default function App() {
 
         {wallets.length > 0 ? (
           <>
-            <div className="mt-8 grid grid-cols-1 lg:grid-cols-10 gap-8">
-              <div className="lg:col-span-6">
-                <Heatmap data={heatmapInfo.data} sizingMetric={heatmapInfo.sizingMetric} />
-              </div>
-              <div className="lg:col-span-4">
+            <div className="mt-8">
+              <div className="max-w-3xl mx-auto">
                 <AllocationChart 
                     wallets={wallets}
                     prices={prices}
