@@ -20,24 +20,24 @@ const ChangeDisplay: React.FC<{ change: string | number | undefined }> = ({ chan
     const colorClass = isPositive ? 'text-green-500' : 'text-red-500';
     const sign = isPositive ? '+' : '';
 
-    return <span className={`w-16 text-right font-mono ${colorClass}`}>{`${sign}${numericChange.toFixed(2)}%`}</span>;
+    return <span className={`w-20 text-right font-mono ${colorClass}`}>{`${sign}${numericChange.toFixed(2)}%`}</span>;
 };
 
 
 const IndexRow: React.FC<{ item: MarketIndex }> = ({ item }) => {
     return (
-        <div className="flex items-center justify-between py-3">
-            <span className="text-slate-700 dark:text-slate-300">{item.name}</span>
+        <div className="flex items-start justify-between py-4">
+            <span className="text-slate-600 dark:text-slate-400 flex-1 pr-4">{item.name}</span>
             <div className="flex items-baseline space-x-4 text-right">
                 {item.change_24h_btc && (
-                    <span className={`w-16 text-right font-mono ${parseFloat(String(item.change_24h_btc)) >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    <span className={`w-20 text-right font-mono ${parseFloat(String(item.change_24h_btc)) >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                         {item.change_24h_btc}
                     </span>
                 )}
                 {item.change && <ChangeDisplay change={item.change} />}
-                <span className="w-20 text-right font-semibold text-slate-800 dark:text-slate-200">{item.value}</span>
+                <span className="w-24 text-right font-semibold text-slate-800 dark:text-slate-200">{item.value}</span>
                 {item.sentiment && (
-                    <span className="w-20 text-right font-semibold text-slate-800 dark:text-slate-200">{item.sentiment}</span>
+                    <span className="w-24 text-right font-semibold text-slate-800 dark:text-slate-200">{item.sentiment}</span>
                 )}
             </div>
         </div>
@@ -46,11 +46,11 @@ const IndexRow: React.FC<{ item: MarketIndex }> = ({ item }) => {
 
 
 const LoadingSkeletonRow = () => (
-    <div className="flex items-center justify-between py-3 animate-pulse">
+    <div className="flex items-center justify-between py-4 animate-pulse">
         <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded-md w-32"></div>
         <div className="flex items-center space-x-4">
-            <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded-md w-16"></div>
             <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded-md w-20"></div>
+            <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded-md w-24"></div>
         </div>
     </div>
 );
@@ -67,8 +67,8 @@ const MarketIndices: React.FC<MarketIndicesProps> = ({ data, isLoading }) => {
     ];
     
     return (
-        <div className="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-lg shadow-md min-h-[440px]">
-            <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">Chỉ số</h3>
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-lg">
+            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Chỉ số</h3>
             <div className="text-sm divide-y divide-slate-200 dark:divide-slate-700">
                 {isLoading ? (
                     Array.from({ length: 5 }).map((_, index) => <LoadingSkeletonRow key={index} />)
