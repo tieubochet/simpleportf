@@ -20,7 +20,7 @@ const ChangeDisplay: React.FC<{ change: string | number | undefined }> = ({ chan
     const colorClass = isPositive ? 'text-green-500' : 'text-red-500';
     const sign = isPositive ? '+' : '';
 
-    return <span className={`w-16 text-right font-mono ${colorClass}`}>{`${sign}${change}%`}</span>;
+    return <span className={`w-16 text-right font-mono ${colorClass}`}>{`${sign}${numericChange.toFixed(2)}%`}</span>;
 };
 
 
