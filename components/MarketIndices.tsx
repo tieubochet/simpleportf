@@ -63,7 +63,11 @@ const MarketIndices: React.FC<MarketIndicesProps> = ({ data, isLoading }) => {
         'dxy',
         'btc_dominance',
         'btc_exchange_balance',
-        'fear_and_greed'
+        'fear_and_greed',
+        'open_interest',
+        'liquidations',
+        'avg_rsi',
+        'altcoin_season_index'
     ];
     
     return (
@@ -71,7 +75,7 @@ const MarketIndices: React.FC<MarketIndicesProps> = ({ data, isLoading }) => {
             <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">Chỉ số</h3>
             <div className="text-sm divide-y divide-slate-200 dark:divide-slate-800">
                 {isLoading ? (
-                    Array.from({ length: 5 }).map((_, index) => <LoadingSkeletonRow key={index} />)
+                    Array.from({ length: 9 }).map((_, index) => <LoadingSkeletonRow key={index} />)
                 ) : data ? (
                     indicesOrder.map(key => data[key] && <IndexRow key={key} item={data[key]} />)
                 ) : (
