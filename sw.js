@@ -22,7 +22,8 @@ const URLS_TO_CACHE = [
   '/components/AddTransactionModal.tsx',
   '/components/DailyStreak.tsx',
   '/components/BackToTopButton.tsx',
-  '/components/MarketIndices.tsx'
+  '/components/MarketIndices.tsx',
+  '/components/AdvancedMarketStats.tsx'
 ];
 
 self.addEventListener('install', event => {
