@@ -46,3 +46,21 @@ export interface PerformerData {
   symbol: string;
   change: number; // The 24h percentage change
 }
+
+// Represents a single market index
+export interface MarketIndex {
+  name: string;
+  value: string | number;
+  change?: string | number;
+  change_24h_btc?: string | number; // For exchange balance
+  sentiment?: string; // For Fear & Greed
+}
+
+// Represents the collection of all market indices data
+export interface MarketIndicesData {
+  gold_future: MarketIndex;
+  dxy: MarketIndex;
+  btc_dominance: MarketIndex;
+  btc_exchange_balance: MarketIndex;
+  fear_and_greed: MarketIndex;
+}
