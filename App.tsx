@@ -172,41 +172,53 @@ export default function App() {
           isPrivacyMode={isPrivacyMode}
         />
         
-        <AdvancedMarketStats data={marketIndices} isLoading={isIndicesLoading} />
-
         {error && <div className="text-center text-red-400 bg-red-900/50 p-3 rounded-lg my-4">{error}</div>}
 
-        {wallets.length > 0 ? (
-          <>
-            <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-              <div className="lg:col-span-2">
+        {/* Main 3-column dashboard layout */}
+        <div className="mt-8 grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
+          {/* Col 1: Indices */}
+          <div className="lg:col-span-1">
+            <MarketIndices data={marketIndices} isLoading={isIndicesLoading} />
+          </div>
+          
+          {/* Col 2: Advanced Stats (stacked) */}
+          <div className="lg:col-span-2">
+            <AdvancedMarketStats data={marketIndices} isLoading={isIndicesLoading} />
+          </div>
+
+          {/* Col 3: Allocation */}
+          <div className="lg:col-span-2">
+            {wallets.length > 0 ? (
                 <AllocationChart 
                     wallets={wallets}
                     prices={prices}
                     isPrivacyMode={isPrivacyMode}
                     theme={theme}
                 />
-              </div>
-              <div className="lg:col-span-1">
-                <MarketIndices data={marketIndices} isLoading={isIndicesLoading} />
-              </div>
-            </div>
+            ) : (
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-md flex flex-col items-center justify-center min-h-[440px]">
+                    <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">Overall Allocation</h3>
+                    <p className="text-slate-500 dark:text-slate-400">Add assets to see allocation.</p>
+                </div>
+            )}
+          </div>
+        </div>
 
-            <div className="mt-8">
-              {wallets.map(wallet => (
-                  <WalletCard 
-                      key={wallet.id}
-                      wallet={wallet}
-                      prices={prices}
-                      onAddAsset={handleOpenAddAssetModal}
-                      onRemoveAsset={removeAssetFromWallet}
-                      onRemoveWallet={removeWallet}
-                      onAddTransaction={handleOpenAddTransactionModal}
-                      isPrivacyMode={isPrivacyMode}
-                  />
-              ))}
-            </div>
-          </>
+        {wallets.length > 0 ? (
+          <div className="mt-8">
+            {wallets.map(wallet => (
+                <WalletCard 
+                    key={wallet.id}
+                    wallet={wallet}
+                    prices={prices}
+                    onAddAsset={handleOpenAddAssetModal}
+                    onRemoveAsset={removeAssetFromWallet}
+                    onRemoveWallet={removeWallet}
+                    onAddTransaction={handleOpenAddTransactionModal}
+                    isPrivacyMode={isPrivacyMode}
+                />
+            ))}
+          </div>
         ) : (
           <div className="text-center py-20 px-6 bg-white dark:bg-slate-800 rounded-lg mt-8 shadow-md">
             <h2 className="text-2xl font-semibold text-slate-900 dark:text-white mb-2">Your Portfolio is Empty</h2>
