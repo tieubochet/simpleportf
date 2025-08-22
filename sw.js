@@ -9,6 +9,7 @@ const URLS_TO_CACHE = [
   '/hooks/useStreak.ts',
   '/hooks/useTheme.ts',
   '/services/coingecko.ts',
+  '/services/marketData.ts',
   '/utils/calculations.ts',
   '/components/icons.tsx',
   '/components/PortfolioHeader.tsx',
@@ -20,7 +21,8 @@ const URLS_TO_CACHE = [
   '/components/WalletCard.tsx',
   '/components/AddTransactionModal.tsx',
   '/components/DailyStreak.tsx',
-  '/components/BackToTopButton.tsx'
+  '/components/BackToTopButton.tsx',
+  '/components/MarketIndices.tsx'
 ];
 
 self.addEventListener('install', event => {
@@ -38,7 +40,7 @@ self.addEventListener('fetch', event => {
       return;
   }
 
-  if (event.request.url.includes('api.coingecko.com') || event.request.url.includes('esm.sh') || event.request.url.includes('cdn.tailwindcss.com')) {
+  if (event.request.url.includes('api.coingecko.com') || event.request.url.includes('api.alternative.me') || event.request.url.includes('esm.sh') || event.request.url.includes('cdn.tailwindcss.com')) {
     // Let the browser handle these requests, bypassing the cache.
     return;
   }
