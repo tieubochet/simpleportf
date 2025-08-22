@@ -3,6 +3,11 @@ import { MarketIndicesData } from '../types';
 const COINGECKO_API_BASE_URL = 'https://api.coingecko.com/api/v3';
 const FNG_API_BASE_URL = 'https://api.alternative.me';
 
+// Helper to generate some fake sparkline data
+const generateSparkline = () => {
+  return Array.from({ length: 20 }, () => Math.random() * 100);
+};
+
 export async function fetchMarketIndices(): Promise<MarketIndicesData> {
   try {
     const [globalDataRes, fngDataRes] = await Promise.all([
@@ -28,9 +33,13 @@ export async function fetchMarketIndices(): Promise<MarketIndicesData> {
 
     // Mock data for indices not readily available from a single free API
     const mockData = {
-      gold_future: { name: 'Hợp đồng tương lai Vàng', value: '$3334.39', change: '-0.13' },
-      dxy: { name: 'Chỉ số đồng đô la Mỹ', value: '98.572', change: '+0.06' },
+      gold_future: { name: 'Hợp đồng tương lai Vàng', value: '$3334.39', change: -0.13 },
+      dxy: { name: 'Chỉ số đồng đô la Mỹ', value: '98.572', change: 0.06 },
       btc_exchange_balance: { name: 'Số Dư Giao Dịch Bitcoin', value: '2.23M', change_24h_btc: '-1.86K' },
+      open_interest: { name: 'Hợp đồng mở', value: '198.31B', change: -1.16, sparkline: generateSparkline() },
+      liquidations: { name: 'Thanh lý', value: '220.63M', change: -33.7, sparkline: generateSparkline() },
+      avg_rsi: { name: 'AVG RSI', value: 44, sentiment: 'NEUTRAL' },
+      altcoin_season_index: { name: 'Altcoin Season Index', value: 51, sentiment: 'NEUTRAL' },
     };
 
     return {
@@ -48,6 +57,10 @@ export async function fetchMarketIndices(): Promise<MarketIndicesData> {
         btc_dominance: { name: 'Bitcoin Dominance', value: 'N/A', change: 0 },
         btc_exchange_balance: { name: 'Số Dư Giao Dịch Bitcoin', value: 'N/A', change_24h_btc: '0' },
         fear_and_greed: { name: 'Chỉ số Sợ hãi và Tham lam', value: 'N/A', sentiment: 'N/A' },
+        open_interest: { name: 'Hợp đồng mở', value: 'N/A', change: 0, sparkline: [] },
+        liquidations: { name: 'Thanh lý', value: 'N/A', change: 0, sparkline: [] },
+        avg_rsi: { name: 'AVG RSI', value: 0, sentiment: 'N/A' },
+        altcoin_season_index: { name: 'Altcoin Season Index', value: 0, sentiment: 'N/A' },
     };
   }
 }
