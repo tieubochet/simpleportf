@@ -15,7 +15,6 @@ const URLS_TO_CACHE = [
   '/components/PortfolioSummary.tsx',
   '/components/AssetTable.tsx',
   '/components/AllocationChart.tsx',
-  '/components/Heatmap.tsx',
   '/components/AddAssetModal.tsx',
   '/components/AddWalletModal.tsx',
   '/components/WalletCard.tsx',
