@@ -144,14 +144,19 @@ export default function App() {
             isPrivacyMode={isPrivacyMode}
           />
         </div>
-
-        <div className="my-8">
-          <MarketIndices data={marketIndices} isLoading={isIndicesLoading} />
-        </div>
         
-        {wallets.length > 0 && (
-          <div className="mb-8">
-            <AllocationChart wallets={wallets} prices={prices} isPrivacyMode={isPrivacyMode} theme={theme} />
+        {wallets.length > 0 ? (
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 my-8">
+            <div className="lg:col-span-2">
+              <MarketIndices data={marketIndices} isLoading={isIndicesLoading} />
+            </div>
+            <div className="lg:col-span-3">
+              <AllocationChart wallets={wallets} prices={prices} isPrivacyMode={isPrivacyMode} theme={theme} />
+            </div>
+          </div>
+        ) : (
+          <div className="my-8">
+            <MarketIndices data={marketIndices} isLoading={isIndicesLoading} />
           </div>
         )}
 
