@@ -16,6 +16,7 @@ import WalletCard from './components/WalletCard';
 import { WalletIcon } from './components/icons';
 import AllocationChart from './components/AllocationChart';
 import MarketIndices from './components/MarketIndices';
+import AdvancedMarketStats from './components/AdvancedMarketStats';
 import BackToTopButton from './components/BackToTopButton';
 
 type AssetForTransaction = {
@@ -170,6 +171,8 @@ export default function App() {
           isLoading={isLoading && wallets.length > 0}
           isPrivacyMode={isPrivacyMode}
         />
+        
+        <AdvancedMarketStats data={marketIndices} isLoading={isIndicesLoading} />
 
         {error && <div className="text-center text-red-400 bg-red-900/50 p-3 rounded-lg my-4">{error}</div>}
 
