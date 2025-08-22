@@ -146,7 +146,7 @@ export default function App() {
         </div>
         
         {wallets.length > 0 ? (
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 my-8">
+          <div className="grid grid-cols-1 lg:grid-cols-5 lg:items-stretch gap-8 my-8">
             <div className="lg:col-span-2">
               <MarketIndices data={marketIndices} isLoading={isIndicesLoading} />
             </div>

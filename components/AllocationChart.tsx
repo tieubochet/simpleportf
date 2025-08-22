@@ -11,7 +11,7 @@ interface AllocationChartProps {
   theme: Theme;
 }
 
-const COLORS = ['#d946ef', '#f97316', '#facc15', '#fb923c', '#e11d48', '#f472b6', '#a78bfa', '#818cf8', '#60a5fa', '#22d3ee', '#34d399', '#a3e635'];
+const COLORS = ['#d946ef', '#f97316', '#facc15', '#fb923c', '#e11d48', '#f472b6', '#a78bfa', '#818cf8', '#60a5fa', '#22d3ee', '#34d399', '#a3e635', '#4ade80', '#2dd4bf', '#38bdf8', '#a855f7', '#ec4899', '#ef4444'];
 
 // Custom legend component
 const CustomLegend = ({ payload, onToggleViewAll, showAll, hasOthers, hoveredItem, setHoveredItem }: any) => {
@@ -114,7 +114,7 @@ const AllocationChart: React.FC<AllocationChartProps> = ({ wallets, prices, isPr
       .filter(item => item.value > 0)
       .sort((a, b) => b.value - a.value);
 
-    const LEGEND_LIMIT = 12;
+    const LEGEND_LIMIT = 18;
     const mainAssets = assetsWithPercent.slice(0, LEGEND_LIMIT);
     const otherAssets = assetsWithPercent.slice(LEGEND_LIMIT);
     
@@ -144,16 +144,16 @@ const AllocationChart: React.FC<AllocationChartProps> = ({ wallets, prices, isPr
 
   if (pieDataToShow.length === 0) {
     return (
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-md flex flex-col items-center justify-center min-h-[440px]">
-            <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">Overall Allocation</h3>
+        <div className="bg-white dark:bg-slate-900 h-full p-6 rounded-lg flex flex-col items-center justify-center">
+            <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">Overall Allocation</h3>
             <p className="text-slate-500 dark:text-slate-400">Not enough data to display chart.</p>
         </div>
     );
   }
 
   return (
-    <div className="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-lg shadow-md min-h-[440px] flex flex-col">
-      <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-6">Overall Allocation</h3>
+    <div className="bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-lg h-full flex flex-col">
+      <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-6">Overall Allocation</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center flex-grow">
         <div className="h-[250px] sm:h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
