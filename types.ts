@@ -54,6 +54,7 @@ export interface MarketIndex {
   change?: string | number;
   change_24h_btc?: string | number; // For exchange balance
   sentiment?: string; // For Fear & Greed
+  sparkline?: number[]; // For sparkline charts
 }
 
 // Represents the collection of all market indices data
@@ -63,4 +64,8 @@ export interface MarketIndicesData {
   btc_dominance: MarketIndex;
   btc_exchange_balance: MarketIndex;
   fear_and_greed: MarketIndex;
+  open_interest: MarketIndex;
+  liquidations: MarketIndex;
+  avg_rsi: MarketIndex;
+  altcoin_season_index: MarketIndex;
 }
