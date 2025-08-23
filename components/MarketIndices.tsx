@@ -72,7 +72,7 @@ const MarketIndices: React.FC<MarketIndicesProps> = ({ data, isLoading }) => {
     
     return (
         <div className="bg-white dark:bg-slate-900 p-6 rounded-lg h-full">
-            <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">Chỉ số</h3>
+            <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">Market Indices</h3>
             <div className="text-sm divide-y divide-slate-200 dark:divide-slate-800">
                 {isLoading ? (
                     Array.from({ length: 9 }).map((_, index) => <LoadingSkeletonRow key={index} />)
