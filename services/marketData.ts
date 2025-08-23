@@ -33,11 +33,11 @@ export async function fetchMarketIndices(): Promise<MarketIndicesData> {
 
     // Mock data for indices not readily available from a single free API
     const mockData = {
-      gold_future: { name: 'Hợp đồng tương lai Vàng', value: '$3334.39', change: -0.13 },
-      dxy: { name: 'Chỉ số đồng đô la Mỹ', value: '98.572', change: 0.06 },
-      btc_exchange_balance: { name: 'Số Dư Giao Dịch Bitcoin', value: '2.23M', change_24h_btc: '-1.86K' },
-      open_interest: { name: 'Hợp đồng mở', value: '198.31B', change: -1.16, sparkline: generateSparkline() },
-      liquidations: { name: 'Thanh lý', value: '220.63M', change: -33.7, sparkline: generateSparkline() },
+      gold_future: { name: 'Gold Future', value: '$2334.30', change: -0.13 },
+      dxy: { name: 'US Dollar Index', value: '105.572', change: 0.06 },
+      btc_exchange_balance: { name: 'BTC Exchange Balance', value: '2.33M', change_24h_btc: '-1.86K' },
+      open_interest: { name: 'Open Interest', value: '18.31B', change: -1.16, sparkline: generateSparkline() },
+      liquidations: { name: 'Liquidations', value: '20.63M', change: -33.7, sparkline: generateSparkline() },
       avg_rsi: { name: 'AVG RSI', value: 44, sentiment: 'NEUTRAL' },
       altcoin_season_index: { name: 'Altcoin Season Index', value: 51, sentiment: 'NEUTRAL' },
     };
@@ -45,20 +45,20 @@ export async function fetchMarketIndices(): Promise<MarketIndicesData> {
     return {
       ...mockData,
       btc_dominance: { name: 'Bitcoin Dominance', value: `${btcDominance}%`, change: btcDominanceChange },
-      fear_and_greed: { name: 'Chỉ số Sợ hãi và Tham lam', value: fngValue, sentiment: fngSentiment },
+      fear_and_greed: { name: 'Fear & Greed Index', value: fngValue, sentiment: fngSentiment },
     };
 
   } catch (error) {
     console.error('Failed to fetch market indices:', error);
     // Return a default/error state object so the UI doesn't completely break
      return {
-        gold_future: { name: 'Hợp đồng tương lai Vàng', value: 'N/A', change: 0 },
-        dxy: { name: 'Chỉ số đồng đô la Mỹ', value: 'N/A', change: 0 },
+        gold_future: { name: 'Gold Future', value: 'N/A', change: 0 },
+        dxy: { name: 'US Dollar Index', value: 'N/A', change: 0 },
         btc_dominance: { name: 'Bitcoin Dominance', value: 'N/A', change: 0 },
-        btc_exchange_balance: { name: 'Số Dư Giao Dịch Bitcoin', value: 'N/A', change_24h_btc: '0' },
-        fear_and_greed: { name: 'Chỉ số Sợ hãi và Tham lam', value: 'N/A', sentiment: 'N/A' },
-        open_interest: { name: 'Hợp đồng mở', value: 'N/A', change: 0, sparkline: [] },
-        liquidations: { name: 'Thanh lý', value: 'N/A', change: 0, sparkline: [] },
+        btc_exchange_balance: { name: 'BTC Exchange Balance', value: 'N/A', change_24h_btc: '0' },
+        fear_and_greed: { name: 'Fear & Greed Index', value: 'N/A', sentiment: 'N/A' },
+        open_interest: { name: 'Open Interest', value: 'N/A', change: 0, sparkline: [] },
+        liquidations: { name: 'Liquidations', value: 'N/A', change: 0, sparkline: [] },
         avg_rsi: { name: 'AVG RSI', value: 0, sentiment: 'N/A' },
         altcoin_season_index: { name: 'Altcoin Season Index', value: 0, sentiment: 'N/A' },
     };
