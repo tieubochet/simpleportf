@@ -69,3 +69,9 @@ export interface MarketIndicesData {
   avg_rsi: MarketIndex;
   altcoin_season_index: MarketIndex;
 }
+
+// Represents a snapshot of portfolio value at a point in time
+export interface PortfolioSnapshot {
+  date: string; // ISO date string (YYYY-MM-DD)
+  totalValue: number;
+}
