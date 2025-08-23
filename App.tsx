@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Wallet, PriceData, PortfolioAsset, Transaction, Coin, MarketIndicesData } from './types';
 import { usePortfolio } from './hooks/usePortfolio';
@@ -155,7 +156,7 @@ export default function App() {
           />
         </div>
         
-        {wallets.length > 0 && history.length > 1 && (
+        {wallets.length > 0 && history.length > 0 && (
             <div className="my-8">
                 <PortfolioHistoryChart history={history} isPrivacyMode={isPrivacyMode} theme={theme} />
             </div>
