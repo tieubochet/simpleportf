@@ -74,4 +74,5 @@ export interface MarketIndicesData {
 export interface PortfolioSnapshot {
   date: string; // ISO date string (YYYY-MM-DD)
   totalValue: number; // The total portfolio value on that day in USD
+  totalUnrealizedPL: number; // The total unrealized Profit/Loss on that day
 }

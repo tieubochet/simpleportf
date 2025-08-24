@@ -9,7 +9,11 @@ const getInitialHistory = (): PortfolioSnapshot[] => {
     if (stored) {
       const parsed = JSON.parse(stored);
       if (Array.isArray(parsed) && (parsed.length === 0 || parsed.every(s => 'date' in s && 'totalValue' in s))) {
-        return parsed;
+        // Map over data to ensure new fields exist for backward compatibility
+        return parsed.map(s => ({
+            ...s,
+            totalUnrealizedPL: s.totalUnrealizedPL ?? 0 // Default to 0 if missing
+        }));
       }
     }
   } catch (error) {
@@ -29,8 +33,8 @@ export function usePortfolioHistory() {
     }
   }, [history]);
 
-  const addSnapshot = useCallback((value: number) => {
-    if (value <= 0) return; // Don't save zero/negative value snapshots
+  const addSnapshot = useCallback(({ totalValue, totalUnrealizedPL }: { totalValue: number, totalUnrealizedPL: number }) => {
+    if (totalValue <= 0) return; // Don't save zero/negative value snapshots
 
     const todayStr = new Date().toISOString().split('T')[0];
     
@@ -40,10 +44,11 @@ export function usePortfolioHistory() {
 
         if (lastSnapshot && lastSnapshot.date === todayStr) {
             // Update today's snapshot with the latest value
-            lastSnapshot.totalValue = value;
+            lastSnapshot.totalValue = totalValue;
+            lastSnapshot.totalUnrealizedPL = totalUnrealizedPL;
         } else {
             // Add a new snapshot for today
-            newHistory.push({ date: todayStr, totalValue: value });
+            newHistory.push({ date: todayStr, totalValue, totalUnrealizedPL });
         }
         return newHistory;
     });
