@@ -24,6 +24,13 @@ export interface Wallet {
   assets: PortfolioAsset[];
 }
 
+// Represents a daily snapshot of the portfolio's value
+export interface PortfolioSnapshot {
+  date: string; // ISO date string 'YYYY-MM-DD'
+  totalValue: number;
+  totalUnrealizedPL: number;
+}
+
 // Represents a coin fetched from the search API
 export interface Coin {
   id: string;
@@ -68,11 +75,4 @@ export interface MarketIndicesData {
   liquidations: MarketIndex;
   avg_rsi: MarketIndex;
   altcoin_season_index: MarketIndex;
-}
-
-// Represents a snapshot of the portfolio's value on a given day
-export interface PortfolioSnapshot {
-  date: string; // ISO date string (YYYY-MM-DD)
-  totalValue: number; // The total portfolio value on that day in USD
-  totalUnrealizedPL: number; // The total unrealized Profit/Loss on that day
 }

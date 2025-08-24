@@ -3,10 +3,9 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Wallet, PriceData, PortfolioAsset, Transaction, Coin, MarketIndicesData } from './types';
 import { usePortfolio } from './hooks/usePortfolio';
 import { useTheme } from './hooks/useTheme';
-import { usePortfolioHistory } from './hooks/usePortfolioHistory';
 import { fetchPrices } from './services/coingecko';
 import { fetchMarketIndices } from './services/marketData';
-import { calculateTotalValue, calculatePortfolio24hChange, calculateTotalPL, getAssetIds, findTopPerformer, findTopLoser, getAssetMetrics, calculateTotalUnrealizedPL } from './utils/calculations';
+import { calculateTotalValue, calculatePortfolio24hChange, calculateTotalPL, getAssetIds, findTopPerformer, findTopLoser, getAssetMetrics } from './utils/calculations';
 
 import PortfolioHeader from './components/PortfolioHeader';
 import PortfolioSummary from './components/PortfolioSummary';
@@ -17,12 +16,10 @@ import AddAssetModal from './components/AddAssetModal';
 import AddTransactionModal from './components/AddTransactionModal';
 import BackToTopButton from './components/BackToTopButton';
 import MarketIndices from './components/MarketIndices';
-import PortfolioHistoryChart from './components/PortfolioHistoryChart';
 
 export default function App() {
   const { theme, toggleTheme } = useTheme();
   const { wallets, addWallet, removeWallet, addAssetToWallet, addTransactionToAsset, removeAssetFromWallet, importWallets, exportWallets } = usePortfolio();
-  const { history, addSnapshot } = usePortfolioHistory();
   
   const [prices, setPrices] = useState<PriceData>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -87,16 +84,8 @@ export default function App() {
   const totalValue = useMemo(() => calculateTotalValue(wallets, prices), [wallets, prices]);
   const portfolioChange = useMemo(() => calculatePortfolio24hChange(wallets, prices), [wallets, prices]);
   const totalPL = useMemo(() => calculateTotalPL(wallets, prices), [wallets, prices]);
-  const totalUnrealizedPL = useMemo(() => calculateTotalUnrealizedPL(wallets, prices), [wallets, prices]);
   const topPerformer = useMemo(() => findTopPerformer(wallets, prices), [wallets, prices]);
   const topLoser = useMemo(() => findTopLoser(wallets, prices), [wallets, prices]);
-
-  // Add a snapshot of the portfolio value and P/L once prices are loaded.
-  useEffect(() => {
-    if (totalValue > 0 && !isLoading) {
-      addSnapshot({ totalValue, totalUnrealizedPL });
-    }
-  }, [totalValue, totalUnrealizedPL, isLoading, addSnapshot]);
 
   const handleAddAssetClick = (walletId: string) => {
     setSelectedWalletId(walletId);
@@ -167,11 +156,6 @@ export default function App() {
                 <AllocationChart wallets={wallets} prices={prices} isPrivacyMode={isPrivacyMode} theme={theme} />
               </div>
             </div>
-            {history.length > 1 && (
-              <div className="my-8">
-                <PortfolioHistoryChart history={history} isPrivacyMode={isPrivacyMode} theme={theme} />
-              </div>
-            )}
           </>
         ) : (
           <div className="my-8">

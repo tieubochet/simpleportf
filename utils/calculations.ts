@@ -289,19 +289,3 @@ export const findTopLoser = (wallets: Wallet[], prices: PriceData): PerformerDat
 
   return topLoser;
 };
-
-/**
- * Calculates the total unrealized profit/loss for the entire portfolio.
- * @param wallets - An array of wallets.
- * @param prices - An object mapping asset IDs to their current prices.
- * @returns The total unrealized P/L value.
- */
-export const calculateTotalUnrealizedPL = (wallets: Wallet[], prices: PriceData): number => {
-  return wallets.reduce((total, wallet) => {
-    return total + wallet.assets.reduce((walletTotal, asset) => {
-      const currentPrice = prices[asset.id]?.usd ?? 0;
-      const { unrealizedPL } = getAssetMetrics(asset.transactions, currentPrice);
-      return walletTotal + unrealizedPL;
-    }, 0);
-  }, 0);
-};
