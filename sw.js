@@ -8,7 +8,6 @@ const URLS_TO_CACHE = [
   '/hooks/usePortfolio.ts',
   '/hooks/useStreak.ts',
   '/hooks/useTheme.ts',
-  '/hooks/usePortfolioHistory.ts',
   '/services/coingecko.ts',
   '/services/marketData.ts',
   '/utils/calculations.ts',
@@ -23,8 +22,7 @@ const URLS_TO_CACHE = [
   '/components/AddTransactionModal.tsx',
   '/components/DailyStreak.tsx',
   '/components/BackToTopButton.tsx',
-  '/components/MarketIndices.tsx',
-  '/components/PortfolioHistoryChart.tsx'
+  '/components/MarketIndices.tsx'
 ];
 
 self.addEventListener('install', event => {

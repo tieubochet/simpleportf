@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Wallet, PriceData, PortfolioAsset, Transaction, Coin, MarketIndicesData } from './types';
 import { usePortfolio } from './hooks/usePortfolio';
-import { usePortfolioHistory } from './hooks/usePortfolioHistory';
 import { useTheme } from './hooks/useTheme';
 import { fetchPrices } from './services/coingecko';
 import { fetchMarketIndices } from './services/marketData';
@@ -17,12 +16,10 @@ import AddAssetModal from './components/AddAssetModal';
 import AddTransactionModal from './components/AddTransactionModal';
 import BackToTopButton from './components/BackToTopButton';
 import MarketIndices from './components/MarketIndices';
-import PortfolioHistoryChart from './components/PortfolioHistoryChart';
 
 export default function App() {
   const { theme, toggleTheme } = useTheme();
   const { wallets, addWallet, removeWallet, addAssetToWallet, addTransactionToAsset, removeAssetFromWallet, importWallets, exportWallets } = usePortfolio();
-  const { history, addSnapshot } = usePortfolioHistory();
   
   const [prices, setPrices] = useState<PriceData>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -90,13 +87,6 @@ export default function App() {
   const topPerformer = useMemo(() => findTopPerformer(wallets, prices), [wallets, prices]);
   const topLoser = useMemo(() => findTopLoser(wallets, prices), [wallets, prices]);
 
-  useEffect(() => {
-    // Add a snapshot for today if prices are loaded and there's a value
-    if (!isLoading && totalValue > 0 && assetIds.length > 0) {
-      addSnapshot(totalValue);
-    }
-  }, [totalValue, isLoading, assetIds, addSnapshot]);
-
   const handleAddAssetClick = (walletId: string) => {
     setSelectedWalletId(walletId);
     setIsAddAssetModalOpen(true);
@@ -156,12 +146,6 @@ export default function App() {
           />
         </div>
         
-        {wallets.length > 0 && history.length > 0 && (
-            <div className="my-8">
-                <PortfolioHistoryChart history={history} isPrivacyMode={isPrivacyMode} theme={theme} />
-            </div>
-        )}
-
         {wallets.length > 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-5 lg:items-stretch gap-8 my-8">
             <div className="lg:col-span-2">

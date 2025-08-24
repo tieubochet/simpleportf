@@ -70,8 +70,8 @@ export interface MarketIndicesData {
   altcoin_season_index: MarketIndex;
 }
 
-// Represents a snapshot of portfolio value at a point in time
+// Represents a snapshot of the portfolio's value on a given day
 export interface PortfolioSnapshot {
   date: string; // ISO date string (YYYY-MM-DD)
-  totalValue: number;
+  totalValue: number; // The total portfolio value on that day in USD
 }
