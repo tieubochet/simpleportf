@@ -75,10 +75,10 @@ export interface PortfolioSnapshot {
   totalValue: number; // The total portfolio value on that day in USD
 }
 
-// Represents a source from Google Search grounding
+// Represents a grounding source from Gemini API
 export interface GroundingSource {
-  web: {
-    uri: string;
-    title: string;
-  };
+    web: {
+      uri: string;
+      title: string;
+    };
 }

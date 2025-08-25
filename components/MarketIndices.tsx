@@ -1,11 +1,10 @@
 import React from 'react';
-import { MarketIndicesData, MarketIndex, GroundingSource } from '../types';
+import { MarketIndicesData, MarketIndex } from '../types';
 import { InfoIcon } from './icons';
 
 interface MarketIndicesProps {
     data: MarketIndicesData | null;
     isLoading: boolean;
-    sources: GroundingSource[];
 }
 
 const ChangeDisplay: React.FC<{ change: string | number | undefined }> = ({ change }) => {
@@ -58,7 +57,7 @@ const LoadingSkeletonRow = () => (
 );
 
 
-const MarketIndices: React.FC<MarketIndicesProps> = ({ data, isLoading, sources }) => {
+const MarketIndices: React.FC<MarketIndicesProps> = ({ data, isLoading }) => {
     
     const indicesOrder: (keyof MarketIndicesData)[] = [
         'gold_future',
@@ -86,23 +85,6 @@ const MarketIndices: React.FC<MarketIndicesProps> = ({ data, isLoading, sources 
                     </div>
                 )}
             </div>
-            {sources && sources.length > 0 && (
-                <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400">
-                    <div className="flex items-center mb-2">
-                        <InfoIcon className="h-4 w-4 mr-2" />
-                        <h4 className="font-semibold">Data Sources</h4>
-                    </div>
-                    <ul className="list-disc list-inside space-y-1">
-                        {sources.map((source, index) => (
-                           source.web && <li key={index}>
-                                <a href={source.web.uri} target="_blank" rel="noopener noreferrer" className="hover:text-cyan-500 dark:hover:text-cyan-400 transition-colors break-all">
-                                    {source.web.title || source.web.uri}
-                                </a>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            )}
         </div>
     );
 };

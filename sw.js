@@ -1,4 +1,4 @@
-const CACHE_NAME = 'crypto-portfolio-cache-v5';
+const CACHE_NAME = 'crypto-portfolio-cache-v6';
 const URLS_TO_CACHE = [
   '/',
   '/index.html',
@@ -10,7 +10,7 @@ const URLS_TO_CACHE = [
   '/hooks/useTheme.ts',
   '/services/coingecko.ts',
   '/services/marketData.ts',
-  '/services/gemini.ts',
+  '/services/coinglass.ts',
   '/utils/calculations.ts',
   '/components/icons.tsx',
   '/components/PortfolioHeader.tsx',
