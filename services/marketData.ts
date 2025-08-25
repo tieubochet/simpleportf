@@ -1,23 +1,25 @@
-import { MarketIndicesData } from '../types';
+import { MarketIndicesData, GroundingSource } from '../types';
 import { fetchMarketDataFromGemini } from './gemini';
 
-const getErrorState = (): MarketIndicesData => ({
-    gold_future: { name: 'Gold Future', value: 'N/A', change: 0 },
-    dxy: { name: 'US Dollar Index', value: 'N/A', change: 0 },
-    btc_dominance: { name: 'Bitcoin Dominance', value: 'N/A', change: 0 },
-    btc_exchange_balance: { name: 'BTC Exchange Balance', value: 'N/A', change_24h_btc: '0' },
-    fear_and_greed: { name: 'Fear & Greed Index', value: 'N/A', sentiment: 'N/A' },
-    open_interest: { name: 'Open Interest', value: 'N/A', change: 0 },
-    liquidations: { name: 'Liquidations', value: 'N/A', change: 0 },
-    avg_rsi: { name: 'AVG RSI', value: 0, sentiment: 'N/A' },
-    altcoin_season_index: { name: 'Altcoin Season Index', value: 0, sentiment: 'N/A' },
+const getErrorState = (): { data: MarketIndicesData; sources: GroundingSource[] } => ({
+    data: {
+      gold_future: { name: 'Gold Future', value: 'N/A', change: 0 },
+      dxy: { name: 'US Dollar Index', value: 'N/A', change: 0 },
+      btc_dominance: { name: 'Bitcoin Dominance', value: 'N/A', change: 0 },
+      btc_exchange_balance: { name: 'BTC Exchange Balance', value: 'N/A', change_24h_btc: '0' },
+      fear_and_greed: { name: 'Fear & Greed Index', value: 0, sentiment: 'N/A' },
+      open_interest: { name: 'Open Interest', value: 'N/A', change: 0 },
+      liquidations: { name: 'Liquidations', value: 'N/A', change: 0 },
+      avg_rsi: { name: 'AVG RSI', value: 0, sentiment: 'N/A' },
+      altcoin_season_index: { name: 'Altcoin Season Index', value: 0, sentiment: 'N/A' },
+    },
+    sources: [],
 });
 
 
-export async function fetchMarketIndices(): Promise<MarketIndicesData> {
+export async function fetchMarketIndices(): Promise<{ data: MarketIndicesData; sources: GroundingSource[] }> {
   try {
-    const geminiData = await fetchMarketDataFromGemini();
-    return geminiData;
+    return await fetchMarketDataFromGemini();
   } catch (error) {
     console.error('Failed to fetch and process market indices:', error);
     // Return a default/error state object so the UI doesn't completely break

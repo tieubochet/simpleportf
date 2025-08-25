@@ -1,9 +1,11 @@
 import React from 'react';
-import { MarketIndicesData, MarketIndex } from '../types';
+import { MarketIndicesData, MarketIndex, GroundingSource } from '../types';
+import { InfoIcon } from './icons';
 
 interface MarketIndicesProps {
     data: MarketIndicesData | null;
     isLoading: boolean;
+    sources: GroundingSource[];
 }
 
 const ChangeDisplay: React.FC<{ change: string | number | undefined }> = ({ change }) => {
@@ -30,11 +32,11 @@ const IndexRow: React.FC<{ item: MarketIndex }> = ({ item }) => {
             <span className="text-slate-500 dark:text-slate-300 flex-1 pr-4">{item.name}</span>
             <div className="flex items-baseline space-x-6 text-right">
                 {item.change_24h_btc && (
-                    <span className={`w-20 text-right font-mono ${parseFloat(String(item.change_24h_btc)) >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    <span className={`w-20 text-right font-mono ${String(item.change_24h_btc).includes('-') ? 'text-red-500' : 'text-green-500'}`}>
                         {item.change_24h_btc}
                     </span>
                 )}
-                {item.change && <ChangeDisplay change={item.change} />}
+                {item.change !== undefined && <ChangeDisplay change={item.change} />}
                 <span className="w-24 text-right font-semibold text-slate-700 dark:text-slate-100">{item.value}</span>
                 {item.sentiment && (
                     <span className="w-24 text-right font-semibold text-slate-700 dark:text-slate-100">{item.sentiment}</span>
@@ -56,7 +58,7 @@ const LoadingSkeletonRow = () => (
 );
 
 
-const MarketIndices: React.FC<MarketIndicesProps> = ({ data, isLoading }) => {
+const MarketIndices: React.FC<MarketIndicesProps> = ({ data, isLoading, sources }) => {
     
     const indicesOrder: (keyof MarketIndicesData)[] = [
         'gold_future',
@@ -71,9 +73,9 @@ const MarketIndices: React.FC<MarketIndicesProps> = ({ data, isLoading }) => {
     ];
     
     return (
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-lg h-full">
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-lg h-full flex flex-col">
             <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">Market Indices</h3>
-            <div className="text-sm divide-y divide-slate-200 dark:divide-slate-800">
+            <div className="text-sm divide-y divide-slate-200 dark:divide-slate-800 flex-grow">
                 {isLoading ? (
                     Array.from({ length: 9 }).map((_, index) => <LoadingSkeletonRow key={index} />)
                 ) : data ? (
@@ -84,6 +86,23 @@ const MarketIndices: React.FC<MarketIndicesProps> = ({ data, isLoading }) => {
                     </div>
                 )}
             </div>
+            {sources && sources.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400">
+                    <div className="flex items-center mb-2">
+                        <InfoIcon className="h-4 w-4 mr-2" />
+                        <h4 className="font-semibold">Data Sources</h4>
+                    </div>
+                    <ul className="list-disc list-inside space-y-1">
+                        {sources.map((source, index) => (
+                           source.web && <li key={index}>
+                                <a href={source.web.uri} target="_blank" rel="noopener noreferrer" className="hover:text-cyan-500 dark:hover:text-cyan-400 transition-colors break-all">
+                                    {source.web.title || source.web.uri}
+                                </a>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
         </div>
     );
 };

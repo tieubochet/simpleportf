@@ -74,3 +74,11 @@ export interface PortfolioSnapshot {
   date: string; // ISO date string (YYYY-MM-DD)
   totalValue: number; // The total portfolio value on that day in USD
 }
+
+// Represents a source from Google Search grounding
+export interface GroundingSource {
+  web: {
+    uri: string;
+    title: string;
+  };
+}
