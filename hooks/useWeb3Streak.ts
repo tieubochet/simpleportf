@@ -29,6 +29,7 @@ const BASE_CHAIN_PARAMS = {
 export function useWeb3Streak() {
     const [signer, setSigner] = useState<ethers.JsonRpcSigner | null>(null);
     const [address, setAddress] = useState<string | null>(null);
+    const [streak, setStreak] = useState(0);
     
     const [isConnecting, setIsConnecting] = useState(false);
     const [isInteracting, setIsInteracting] = useState(false);
@@ -39,6 +40,7 @@ export function useWeb3Streak() {
     const clearState = useCallback(() => {
         setSigner(null);
         setAddress(null);
+        setStreak(0);
         setError(null);
     }, []);
 
@@ -63,6 +65,18 @@ export function useWeb3Streak() {
             }
         }
     }, []);
+    
+    const fetchStreak = useCallback(async (userAddress: string) => {
+        try {
+            const provider = new ethers.JsonRpcProvider(BASE_RPC_URL);
+            const contract = new ethers.Contract(streakContractAddress, streakContractAbi, provider);
+            const currentStreak = await contract.getStreak(userAddress);
+            setStreak(Number(currentStreak));
+        } catch (e) {
+            console.error("Failed to fetch streak:", e);
+            setStreak(0); // Reset on error
+        }
+    }, []);
 
     const connectWallet = useCallback(async () => {
         if (!window.ethereum) {
@@ -82,19 +96,19 @@ export function useWeb3Streak() {
             
             setSigner(newSigner);
             setAddress(userAddress);
+            await fetchStreak(userAddress);
             
-        } catch (e: any)
-{
+        } catch (e: any) {
             console.error("Connection failed:", e);
             setError(e.message || "Failed to connect wallet.");
             clearState();
         } finally {
             setIsConnecting(false);
         }
-    }, [switchNetwork, clearState]);
+    }, [switchNetwork, clearState, fetchStreak]);
 
-    const interactWithContract = useCallback(async () => {
-        if (!signer) {
+    const checkInWithContract = useCallback(async () => {
+        if (!signer || !address) {
             setError("Wallet not connected.");
             return;
         }
@@ -104,27 +118,26 @@ export function useWeb3Streak() {
         const contract = new ethers.Contract(streakContractAddress, streakContractAbi, signer);
 
         try {
-            // Bypass estimateGas by setting a manual limit.
-            // This forces the wallet confirmation prompt to always appear.
-            const tx = await contract.claim({ gasLimit: 100000 }); 
+            const tx = await contract.checkIn();
             const receipt = await tx.wait();
 
-            if (receipt.status === 0) {
-                 setError("Transaction reverted by contract.");
+            if (receipt.status === 1) {
+                // Success, refresh the streak from the contract
+                await fetchStreak(address);
+            } else {
+                 setError("Transaction failed.");
             }
         } catch (e: any) {
-            console.error("Interaction failed:", e);
+            console.error("Check-in failed:", e);
             if (e.code === 'ACTION_REJECTED') {
                  setError("Transaction rejected.");
-            } else if (e.code === 'CALL_EXCEPTION') {
-                 setError("Transaction reverted by contract.");
             } else {
-                setError("Interaction failed.");
+                setError("Check-in failed.");
             }
         } finally {
             setIsInteracting(false);
         }
-    }, [signer]);
+    }, [signer, address, fetchStreak]);
     
     useEffect(() => {
         const handleAccountsChanged = (accounts: string[]) => {
@@ -156,8 +169,9 @@ export function useWeb3Streak() {
         isConnected,
         isConnecting,
         isInteracting,
+        streak,
         error,
         connectWallet,
-        interactWithContract
+        checkInWithContract
     };
 }
