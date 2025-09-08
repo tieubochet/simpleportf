@@ -29,7 +29,6 @@ const BASE_CHAIN_PARAMS = {
 export function useWeb3Streak() {
     const [signer, setSigner] = useState<ethers.JsonRpcSigner | null>(null);
     const [address, setAddress] = useState<string | null>(null);
-    const [canInteract, setCanInteract] = useState(false);
     
     const [isConnecting, setIsConnecting] = useState(false);
     const [isInteracting, setIsInteracting] = useState(false);
@@ -41,7 +40,6 @@ export function useWeb3Streak() {
         setSigner(null);
         setAddress(null);
         setError(null);
-        setCanInteract(false);
     }, []);
 
     const switchNetwork = useCallback(async (ethProvider: Eip1193Provider) => {
@@ -94,42 +92,9 @@ export function useWeb3Streak() {
         }
     }, [switchNetwork, clearState]);
 
-    useEffect(() => {
-        if (!address) {
-            setCanInteract(false);
-            return;
-        }
-
-        const provider = new ethers.JsonRpcProvider(BASE_RPC_URL);
-        const contract = new ethers.Contract(streakContractAddress, streakContractAbi, provider);
-        let isMounted = true;
-
-        const checkEligibility = async () => {
-            if (!isMounted || !address) return;
-            try {
-                const isEligible = await contract.canClaim(address);
-                if (isMounted) {
-                    setCanInteract(isEligible);
-                }
-            } catch (e) {
-                if (isMounted) {
-                    setCanInteract(false);
-                }
-            }
-        };
-
-        checkEligibility(); // Check immediately
-        const intervalId = setInterval(checkEligibility, 10000); // Poll every 10 seconds
-
-        return () => {
-            isMounted = false;
-            clearInterval(intervalId);
-        };
-    }, [address]);
-
     const interactWithContract = useCallback(async () => {
-        if (!signer || !canInteract) {
-            setError("Interaction not ready.");
+        if (!signer) {
+            setError("Wallet not connected properly.");
             return;
         }
     
@@ -139,10 +104,7 @@ export function useWeb3Streak() {
         try {
             const contract = new ethers.Contract(streakContractAddress, streakContractAbi, signer);
             const tx = await contract.claim();
-            const receipt = await tx.wait();
-            if (receipt.status === 1) {
-                setCanInteract(false); // Immediately update UI after successful claim
-            }
+            await tx.wait();
     
         } catch (e: any) {
             if (e.code === 'CALL_EXCEPTION') {
@@ -155,7 +117,7 @@ export function useWeb3Streak() {
         } finally {
             setIsInteracting(false);
         }
-    }, [signer, canInteract]);
+    }, [signer]);
     
     useEffect(() => {
         const handleAccountsChanged = (accounts: string[]) => {
@@ -187,7 +149,6 @@ export function useWeb3Streak() {
         isConnected,
         isConnecting,
         isInteracting,
-        canInteract,
         error,
         connectWallet,
         interactWithContract

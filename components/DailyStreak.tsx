@@ -8,7 +8,6 @@ export const DailyStreak: React.FC = () => {
         isConnected,
         isConnecting,
         isInteracting,
-        canInteract,
         error,
         connectWallet,
         interactWithContract,
@@ -20,7 +19,7 @@ export const DailyStreak: React.FC = () => {
     const handleClick = () => {
         if (!isConnected) {
             connectWallet();
-        } else if (canInteract) {
+        } else {
             interactWithContract();
         }
     };
@@ -42,18 +41,9 @@ export const DailyStreak: React.FC = () => {
         );
     }
 
-    const isButtonDisabled = isLoading || !canInteract;
-    const buttonText = isInteracting ? 'Interacting...' : canInteract ? 'Interact' : 'Not Ready';
-    
-    const buttonColors = isButtonDisabled && !isInteracting
-        ? "bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed"
-        : "bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-white";
-        
-    const title = isInteracting 
-        ? "Processing..." 
-        : canInteract 
-            ? "Interact with the smart contract" 
-            : "Contract is not ready (cooldown)";
+    const buttonText = isInteracting ? 'Interacting...' : 'Interact';
+    const buttonColors = "bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-white";
+    const title = isInteracting ? "Processing..." : "Interact with the smart contract";
 
     return (
         <div className="relative">
@@ -61,7 +51,7 @@ export const DailyStreak: React.FC = () => {
                 onClick={handleClick} 
                 className={`${commonButtonStyles} ${buttonColors}`}
                 title={title}
-                disabled={isButtonDisabled}
+                disabled={isLoading}
             >
                 <BoltIcon className="h-5 w-5" />
                 <span>{buttonText}</span>
