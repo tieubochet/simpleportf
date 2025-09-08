@@ -104,25 +104,24 @@ export function useWeb3Streak() {
         try {
             const contract = new ethers.Contract(streakContractAddress, streakContractAbi, signer);
             
-            // First, simulate the transaction silently. This is a gas-free check.
-            // If it reverts, it will throw an error and we can catch it without bothering the user.
-            await contract.claim.staticCall();
+            // Bypass the wallet's automatic `estimateGas` check by providing a manual gas limit.
+            // This ensures the user always gets a wallet confirmation pop-up.
+            const tx = await contract.claim({
+                gasLimit: 150000 
+            });
             
-            // If the simulation is successful, proceed with the actual transaction.
-            const tx = await contract.claim();
-            await tx.wait(); // Wait for the transaction to be mined.
+            // Wait for the transaction to be mined.
+            await tx.wait();
     
         } catch (e: any) {
             console.error("Interaction failed:", e);
 
-            // Check for a CALL_EXCEPTION, which is what staticCall throws on revert.
-            // This is the most common reason for failure (e.g., cooldown not met).
-            if ((e as any).code === 'CALL_EXCEPTION') {
-                 setError("Contract rejected interaction. Try again later.");
+            if ((e as any).code === 'ACTION_REJECTED') {
+                 // User clicked "Reject" in their wallet.
+                 setError("Transaction rejected in wallet.");
             } else {
-                // Handle other errors, like user rejecting the transaction in their wallet.
-                const errorMessage = (e as any).reason || (e as any).message || "An unexpected error occurred.";
-                setError(errorMessage);
+                // The transaction was sent but failed on-chain (reverted).
+                setError("Transaction reverted by contract.");
             }
         } finally {
             setIsInteracting(false);
