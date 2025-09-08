@@ -17,17 +17,19 @@ declare global {
 
 // Base Chain details
 const BASE_CHAIN_ID = '0x2105'; // 8453 in hex
+const BASE_RPC_URL = 'https://mainnet.base.org';
 const BASE_CHAIN_PARAMS = {
     chainId: BASE_CHAIN_ID,
     chainName: 'Base',
     nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
-    rpcUrls: ['https://mainnet.base.org'],
+    rpcUrls: [BASE_RPC_URL],
     blockExplorerUrls: ['https://basescan.org'],
 };
 
 export function useWeb3Streak() {
     const [signer, setSigner] = useState<ethers.JsonRpcSigner | null>(null);
     const [address, setAddress] = useState<string | null>(null);
+    const [canInteract, setCanInteract] = useState(false);
     
     const [isConnecting, setIsConnecting] = useState(false);
     const [isInteracting, setIsInteracting] = useState(false);
@@ -39,6 +41,7 @@ export function useWeb3Streak() {
         setSigner(null);
         setAddress(null);
         setError(null);
+        setCanInteract(false);
     }, []);
 
     const switchNetwork = useCallback(async (ethProvider: Eip1193Provider) => {
@@ -91,9 +94,42 @@ export function useWeb3Streak() {
         }
     }, [switchNetwork, clearState]);
 
+    useEffect(() => {
+        if (!address) {
+            setCanInteract(false);
+            return;
+        }
+
+        const provider = new ethers.JsonRpcProvider(BASE_RPC_URL);
+        const contract = new ethers.Contract(streakContractAddress, streakContractAbi, provider);
+        let isMounted = true;
+
+        const checkEligibility = async () => {
+            if (!isMounted || !address) return;
+            try {
+                const isEligible = await contract.canClaim(address);
+                if (isMounted) {
+                    setCanInteract(isEligible);
+                }
+            } catch (e) {
+                if (isMounted) {
+                    setCanInteract(false);
+                }
+            }
+        };
+
+        checkEligibility(); // Check immediately
+        const intervalId = setInterval(checkEligibility, 10000); // Poll every 10 seconds
+
+        return () => {
+            isMounted = false;
+            clearInterval(intervalId);
+        };
+    }, [address]);
+
     const interactWithContract = useCallback(async () => {
-        if (!signer) {
-            setError("Wallet not connected.");
+        if (!signer || !canInteract) {
+            setError("Interaction not ready.");
             return;
         }
     
@@ -103,10 +139,12 @@ export function useWeb3Streak() {
         try {
             const contract = new ethers.Contract(streakContractAddress, streakContractAbi, signer);
             const tx = await contract.claim();
-            await tx.wait();
+            const receipt = await tx.wait();
+            if (receipt.status === 1) {
+                setCanInteract(false); // Immediately update UI after successful claim
+            }
     
         } catch (e: any) {
-            // Gracefully handle expected contract reverts (like cooldowns) vs. other errors.
             if (e.code === 'CALL_EXCEPTION') {
                 setError("Contract rejected interaction. Try again later.");
             } else {
@@ -117,7 +155,7 @@ export function useWeb3Streak() {
         } finally {
             setIsInteracting(false);
         }
-    }, [signer]);
+    }, [signer, canInteract]);
     
     useEffect(() => {
         const handleAccountsChanged = (accounts: string[]) => {
@@ -149,6 +187,7 @@ export function useWeb3Streak() {
         isConnected,
         isConnecting,
         isInteracting,
+        canInteract,
         error,
         connectWallet,
         interactWithContract
