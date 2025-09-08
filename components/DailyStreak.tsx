@@ -1,33 +1,63 @@
-
 import React from 'react';
-import { useStreak } from '../hooks/useStreak';
-import { FireIcon } from './icons';
+import { useWeb3Streak } from '../hooks/useWeb3Streak';
+import { FireIcon, WalletIcon } from './icons';
 
 export const DailyStreak: React.FC = () => {
-    const { streakCount, canConfirmToday, confirmDailyVisit } = useStreak();
+    const {
+        isConnected,
+        isConnecting,
+        isClaiming,
+        streakCount,
+        canClaim,
+        error,
+        connectWallet,
+        claimStreak,
+    } = useWeb3Streak();
+
+    const isLoading = isConnecting || isClaiming;
+    const commonButtonStyles = "flex items-center space-x-2 font-semibold py-2 px-4 rounded-lg transition-colors duration-300 relative disabled:opacity-70 disabled:cursor-not-allowed";
 
     const handleClick = () => {
-        if (canConfirmToday) {
-            confirmDailyVisit();
-        } else {
-            alert(`You've already confirmed your visit for today! Your current streak is ${streakCount}.`);
+        if (!isConnected) {
+            connectWallet();
+        } else if (canClaim) {
+            claimStreak();
         }
     };
     
-    // Add glowing animation if confirmation is needed.
-    const pulseAnimation = canConfirmToday ? 'animate-pulse' : '';
-    const cursorClass = canConfirmToday ? 'cursor-pointer' : 'cursor-default';
+    if (!isConnected) {
+        return (
+            <div className="relative">
+                <button
+                    onClick={handleClick}
+                    disabled={isLoading}
+                    className={`${commonButtonStyles} bg-cyan-500 hover:bg-cyan-600 text-white`}
+                    title="Connect wallet to track your streak on-chain"
+                >
+                    <WalletIcon className="h-5 w-5" />
+                    <span>{isLoading ? 'Connecting...' : 'Connect Wallet'}</span>
+                </button>
+                 {error && <p className="absolute top-full mt-1 text-xs text-red-500 dark:text-red-400 whitespace-nowrap">{error}</p>}
+            </div>
+        );
+    }
+
+    const pulseAnimation = canClaim && !isLoading ? 'animate-pulse' : '';
     const buttonColors = "bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600";
+    const title = isLoading ? "Processing..." : (canClaim ? "Click to claim your daily streak!" : `Current streak: ${streakCount} days. Come back tomorrow!`);
 
     return (
-        <button 
-            onClick={handleClick} 
-            className={`flex items-center space-x-2 text-amber-500 dark:text-amber-400 font-semibold py-2 px-4 rounded-lg transition-colors duration-300 relative ${buttonColors} ${pulseAnimation} ${cursorClass}`}
-            title={canConfirmToday ? "Click to confirm your daily visit!" : `Current streak: ${streakCount} days`}
-            disabled={!canConfirmToday}
-        >
-            <FireIcon className="h-5 w-5" />
-            <span>{streakCount}</span>
-        </button>
+        <div className="relative">
+            <button 
+                onClick={handleClick} 
+                className={`${commonButtonStyles} text-amber-500 dark:text-amber-400 ${buttonColors} ${pulseAnimation}`}
+                title={title}
+                disabled={!canClaim || isLoading}
+            >
+                <FireIcon className="h-5 w-5" />
+                <span>{isClaiming ? 'Claiming...' : streakCount}</span>
+            </button>
+            {error && <p className="absolute top-full right-0 mt-1 text-xs text-red-500 dark:text-red-400 whitespace-nowrap">{error}</p>}
+        </div>
     );
 };
