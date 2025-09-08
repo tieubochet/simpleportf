@@ -108,7 +108,6 @@ export function useWeb3Streak() {
         } catch (e: any) {
             // Gracefully handle expected contract reverts (like cooldowns) vs. other errors.
             if (e.code === 'CALL_EXCEPTION') {
-                console.log("Interaction reverted by contract. This is expected if conditions aren't met.");
                 setError("Contract rejected interaction. Try again later.");
             } else {
                 console.error("Interaction failed:", e);
