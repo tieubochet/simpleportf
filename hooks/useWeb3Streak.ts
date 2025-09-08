@@ -155,19 +155,34 @@ export function useWeb3Streak() {
             setError("Wallet not connected.");
             return;
         }
-        
+    
         setIsClaiming(true);
         setError(null);
-
+    
         try {
             const contract = new ethers.Contract(streakContractAddress, streakContractAbi, signer);
+    
+            // First, simulate the transaction with a static call to check for reverts.
+            // This prevents the user from sending a transaction that is known to fail.
+            try {
+                await contract.claim.staticCall();
+            } catch (simulationError: any) {
+                console.error("Claim simulation failed:", simulationError);
+                // Provide a user-friendly error for the most common failure reason (cooldown).
+                setError("Cannot claim yet. Please try again later.");
+                setIsClaiming(false);
+                return; // Stop the process
+            }
+    
+            // If the simulation succeeds, send the actual transaction.
             const tx = await contract.claim();
-            await tx.wait(); 
-            
+            await tx.wait();
+    
+            // Reload data to show the updated streak.
             await loadContractData(signer);
-
+    
         } catch (e: any) {
-            console.error("Claim failed:", e);
+            console.error("Claim transaction failed:", e);
             const errorMessage = e.reason || e.data?.message || e.message || "Transaction failed.";
             setError(errorMessage);
         } finally {
