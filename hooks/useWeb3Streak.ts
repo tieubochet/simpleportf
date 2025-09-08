@@ -103,16 +103,27 @@ export function useWeb3Streak() {
     
         try {
             const contract = new ethers.Contract(streakContractAddress, streakContractAbi, signer);
-            // By setting a manual gas limit, we bypass the `estimateGas` check that throws the revert error.
-            // This ensures the user always sees the wallet confirmation pop-up.
-            const tx = await contract.claim({ gasLimit: 200000 });
-            await tx.wait();
+            
+            // First, simulate the transaction silently. This is a gas-free check.
+            // If it reverts, it will throw an error and we can catch it without bothering the user.
+            await contract.claim.staticCall();
+            
+            // If the simulation is successful, proceed with the actual transaction.
+            const tx = await contract.claim();
+            await tx.wait(); // Wait for the transaction to be mined.
     
         } catch (e: any) {
-            // This will now catch user rejections or actual on-chain transaction failures.
             console.error("Interaction failed:", e);
-            const errorMessage = e.reason || (e as any).message || "An unexpected error occurred.";
-            setError(errorMessage);
+
+            // Check for a CALL_EXCEPTION, which is what staticCall throws on revert.
+            // This is the most common reason for failure (e.g., cooldown not met).
+            if ((e as any).code === 'CALL_EXCEPTION') {
+                 setError("Contract rejected interaction. Try again later.");
+            } else {
+                // Handle other errors, like user rejecting the transaction in their wallet.
+                const errorMessage = (e as any).reason || (e as any).message || "An unexpected error occurred.";
+                setError(errorMessage);
+            }
         } finally {
             setIsInteracting(false);
         }
