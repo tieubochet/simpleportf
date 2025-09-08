@@ -73,14 +73,18 @@ export function useWeb3Streak() {
     const loadContractData = useCallback(async (currentSigner: ethers.JsonRpcSigner) => {
         try {
             setError(null);
-            // Use the signer for all contract interactions. Ethers will use the
-            // signer's provider for read-only calls automatically.
-            const contract = new ethers.Contract(streakContractAddress, streakContractAbi, currentSigner);
+            
+            // For read-only operations, create a static provider pointing directly to a reliable Base RPC.
+            // This avoids any potential mismatch with the wallet's provider state after switching networks.
+            const baseProvider = new ethers.JsonRpcProvider(BASE_CHAIN_PARAMS.rpcUrls[0]);
+            const contractReader = new ethers.Contract(streakContractAddress, streakContractAbi, baseProvider);
+
             const userAddress = await currentSigner.getAddress();
             
+            // Use the read-only contract instance to fetch data
             const [streak, canUserClaim] = await Promise.all([
-                contract.getStreak(userAddress),
-                contract.canClaim(userAddress)
+                contractReader.getStreak(userAddress),
+                contractReader.canClaim(userAddress)
             ]);
             
             setStreakCount(Number(streak));
