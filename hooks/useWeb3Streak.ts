@@ -29,7 +29,6 @@ const BASE_CHAIN_PARAMS = {
 export function useWeb3Streak() {
     const [signer, setSigner] = useState<ethers.JsonRpcSigner | null>(null);
     const [address, setAddress] = useState<string | null>(null);
-    const [canInteract, setCanInteract] = useState(false);
     
     const [isConnecting, setIsConnecting] = useState(false);
     const [isInteracting, setIsInteracting] = useState(false);
@@ -40,7 +39,6 @@ export function useWeb3Streak() {
     const clearState = useCallback(() => {
         setSigner(null);
         setAddress(null);
-        setCanInteract(false);
         setError(null);
     }, []);
 
@@ -85,7 +83,8 @@ export function useWeb3Streak() {
             setSigner(newSigner);
             setAddress(userAddress);
             
-        } catch (e: any) {
+        } catch (e: any)
+{
             console.error("Connection failed:", e);
             setError(e.message || "Failed to connect wallet.");
             clearState();
@@ -94,35 +93,9 @@ export function useWeb3Streak() {
         }
     }, [switchNetwork, clearState]);
 
-    useEffect(() => {
-        if (!signer || !address) {
-            setCanInteract(false);
-            return;
-        }
-
-        const contract = new ethers.Contract(streakContractAddress, streakContractAbi, signer);
-
-        const checkEligibility = async () => {
-            try {
-                const isEligible = await contract.canClaim(address);
-                setCanInteract(isEligible);
-            } catch (e) {
-                // This can happen for new users if the contract reverts on canClaim.
-                // It's safe to assume they cannot interact yet.
-                console.warn("Could not check claim eligibility. Defaulting to false.", e);
-                setCanInteract(false);
-            }
-        };
-
-        checkEligibility(); // Check immediately on connect
-        const intervalId = setInterval(checkEligibility, 15000); // Poll every 15 seconds
-
-        return () => clearInterval(intervalId); // Cleanup interval on disconnect
-    }, [signer, address]);
-
     const interactWithContract = useCallback(async () => {
-        if (!signer || !canInteract) {
-            setError("Not eligible to interact yet.");
+        if (!signer) {
+            setError("Wallet not connected.");
             return;
         }
 
@@ -131,26 +104,27 @@ export function useWeb3Streak() {
         const contract = new ethers.Contract(streakContractAddress, streakContractAbi, signer);
 
         try {
-            const tx = await contract.claim(); // Let wallet estimate gas
+            // Bypass estimateGas by setting a manual limit.
+            // This forces the wallet confirmation prompt to always appear.
+            const tx = await contract.claim({ gasLimit: 100000 }); 
             const receipt = await tx.wait();
 
-            if (receipt.status === 1) {
-                // Success! Force a re-check of eligibility, which should now be false.
-                setCanInteract(false);
-            } else {
-                 setError("Transaction failed on-chain.");
+            if (receipt.status === 0) {
+                 setError("Transaction reverted by contract.");
             }
         } catch (e: any) {
             console.error("Interaction failed:", e);
             if (e.code === 'ACTION_REJECTED') {
                  setError("Transaction rejected.");
+            } else if (e.code === 'CALL_EXCEPTION') {
+                 setError("Transaction reverted by contract.");
             } else {
                 setError("Interaction failed.");
             }
         } finally {
             setIsInteracting(false);
         }
-    }, [signer, canInteract]);
+    }, [signer]);
     
     useEffect(() => {
         const handleAccountsChanged = (accounts: string[]) => {
@@ -182,7 +156,6 @@ export function useWeb3Streak() {
         isConnected,
         isConnecting,
         isInteracting,
-        canInteract,
         error,
         connectWallet,
         interactWithContract
