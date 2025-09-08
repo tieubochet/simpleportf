@@ -3,8 +3,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { ethers } from 'https://esm.sh/ethers@6.13.1';
 import { streakContractAddress, streakContractAbi } from '../services/streakContract';
 
-// FIX: Define the type for window.ethereum to resolve TypeScript errors.
-// The ethereum object is injected by web3 wallets like MetaMask.
 interface Eip1193Provider {
     request(request: { method: string; params?: any[] | Record<string, any> }): Promise<any>;
     on(event: string, listener: (...args: any[]) => void): void;
@@ -28,24 +26,18 @@ const BASE_CHAIN_PARAMS = {
 };
 
 export function useWeb3Streak() {
-    const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null);
     const [signer, setSigner] = useState<ethers.JsonRpcSigner | null>(null);
     const [address, setAddress] = useState<string | null>(null);
-    const [streakCount, setStreakCount] = useState(0);
-    const [canClaim, setCanClaim] = useState(false);
     
     const [isConnecting, setIsConnecting] = useState(false);
-    const [isClaiming, setIsClaiming] = useState(false);
+    const [isInteracting, setIsInteracting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const isConnected = !!address;
 
     const clearState = useCallback(() => {
-        setProvider(null);
         setSigner(null);
         setAddress(null);
-        setStreakCount(0);
-        setCanClaim(false);
         setError(null);
     }, []);
 
@@ -71,47 +63,6 @@ export function useWeb3Streak() {
         }
     }, []);
 
-    const loadContractData = useCallback(async (currentSigner: ethers.JsonRpcSigner) => {
-        setError(null);
-        try {
-            // Use a dedicated provider for read-only calls to ensure we're always on Base.
-            const baseProvider = new ethers.JsonRpcProvider(BASE_CHAIN_PARAMS.rpcUrls[0]);
-            const contractReader = new ethers.Contract(streakContractAddress, streakContractAbi, baseProvider);
-            const userAddress = await currentSigner.getAddress();
-            
-            // Use Promise.allSettled to fetch data and handle expected reverts gracefully.
-            const results = await Promise.allSettled([
-                contractReader.getStreak(userAddress),
-                contractReader.canClaim(userAddress) // Use the contract's function as the source of truth
-            ]);
-
-            // Process streak result
-            const streakResult = results[0];
-            if (streakResult.status === 'fulfilled') {
-                setStreakCount(Number(streakResult.value));
-            } else {
-                console.warn("getStreak() reverted. Defaulting to 0. This is expected for new users.");
-                setStreakCount(0);
-            }
-            
-            // Process canClaim result
-            const canClaimResult = results[1];
-            if (canClaimResult.status === 'fulfilled') {
-                setCanClaim(canClaimResult.value);
-            } else {
-                console.warn("canClaim() reverted. Defaulting to false. This is expected for new users.");
-                setCanClaim(false);
-            }
-
-            setAddress(userAddress);
-
-        } catch (e) {
-            console.error("Critical error loading contract data:", e);
-            setError("Contract error. Check network.");
-            clearState();
-        }
-    }, [clearState]);
-    
     const connectWallet = useCallback(async () => {
         if (!window.ethereum) {
             setError("Please install a Web3 wallet like MetaMask.");
@@ -126,9 +77,10 @@ export function useWeb3Streak() {
             await switchNetwork(window.ethereum);
 
             const newSigner = await browserProvider.getSigner();
-            setProvider(browserProvider);
+            const userAddress = await newSigner.getAddress();
+            
             setSigner(newSigner);
-            await loadContractData(newSigner);
+            setAddress(userAddress);
             
         } catch (e: any) {
             console.error("Connection failed:", e);
@@ -137,52 +89,51 @@ export function useWeb3Streak() {
         } finally {
             setIsConnecting(false);
         }
-    }, [switchNetwork, loadContractData, clearState]);
+    }, [switchNetwork, clearState]);
 
-    const claimStreak = useCallback(async () => {
-        if (!signer || !canClaim) { // Added !canClaim check
-            setError("Not eligible to claim.");
+    const interactWithContract = useCallback(async () => {
+        if (!signer) {
+            setError("Wallet not connected.");
             return;
         }
     
-        setIsClaiming(true);
+        setIsInteracting(true);
         setError(null);
     
         try {
             const contract = new ethers.Contract(streakContractAddress, streakContractAbi, signer);
     
-            // The simulation with staticCall is now a redundant safety check,
-            // as the UI should already be in sync. We keep it for robustness.
+            // We run a static call first to simulate the transaction. This checks
+            // for contract-side errors (like a cooldown) without costing gas.
             try {
                 await contract.claim.staticCall();
             } catch (simulationError: any) {
-                console.error("Claim simulation failed despite UI check:", simulationError);
-                setError("Cannot claim yet. Please try again later.");
-                setIsClaiming(false);
+                console.error("Interaction simulation failed:", simulationError);
+                // Try to get a human-readable reason from the contract revert.
+                const reason = simulationError.reason || "Interaction might fail or is not allowed yet.";
+                setError(reason);
+                setIsInteracting(false);
                 return;
             }
     
-            // If the simulation succeeds, send the actual transaction.
+            // If simulation is successful, send the actual transaction.
             const tx = await contract.claim();
-            await tx.wait();
-    
-            // Reload data to show the updated streak.
-            await loadContractData(signer);
+            await tx.wait(); // Wait for it to be mined
     
         } catch (e: any) {
-            console.error("Claim transaction failed:", e);
+            console.error("Interaction failed:", e);
             const errorMessage = e.reason || e.data?.message || e.message || "Transaction failed.";
             setError(errorMessage);
         } finally {
-            setIsClaiming(false);
+            setIsInteracting(false);
         }
-    }, [signer, canClaim, loadContractData]);
+    }, [signer]);
     
     useEffect(() => {
         const handleAccountsChanged = (accounts: string[]) => {
             if (accounts.length === 0) {
                 clearState();
-            } else if (provider) {
+            } else {
                 connectWallet();
             }
         };
@@ -202,16 +153,14 @@ export function useWeb3Streak() {
                 window.ethereum.removeListener('chainChanged', handleChainChanged);
             }
         };
-    }, [provider, clearState, connectWallet]);
+    }, [clearState, connectWallet]);
 
     return {
         isConnected,
         isConnecting,
-        isClaiming,
-        streakCount,
-        canClaim,
+        isInteracting,
         error,
         connectWallet,
-        claimStreak
+        interactWithContract
     };
 }
