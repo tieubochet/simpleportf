@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { ethers } from 'https://esm.sh/ethers@6.13.1';
 import { streakContractAddress, streakContractAbi } from '../services/streakContract';
@@ -74,25 +75,36 @@ export function useWeb3Streak() {
         try {
             setError(null);
             
+            // Use a dedicated read-only provider for fetching data to ensure it's always from Base.
             const baseProvider = new ethers.JsonRpcProvider(BASE_CHAIN_PARAMS.rpcUrls[0]);
             const contractReader = new ethers.Contract(streakContractAddress, streakContractAbi, baseProvider);
             const userAddress = await currentSigner.getAddress();
             
-            // Fetch streak count first.
-            const streak = await contractReader.getStreak(userAddress);
+            // Fetch data concurrently for better performance
+            const [streak, lastClaimed, latestBlock] = await Promise.all([
+                contractReader.getStreak(userAddress),
+                contractReader.lastClaimedTimestamp(userAddress),
+                baseProvider.getBlock('latest')
+            ]);
+            
             setStreakCount(Number(streak));
             
-            // The canClaim function reverts for new users. We'll handle this gracefully.
-            let canUserClaim = false;
-            try {
-                canUserClaim = await contractReader.canClaim(userAddress);
-            } catch (claimError) {
-                console.warn("canClaim() reverted. Defaulting to false. This is expected for new users.", claimError);
-                // If the call reverts, we assume the user cannot claim.
-                canUserClaim = false;
+            const lastClaimedNum = Number(lastClaimed);
+            const currentTimestamp = latestBlock?.timestamp;
+
+            if (currentTimestamp) {
+                // Determine if user can claim based on timestamps
+                const cooldown = 24 * 60 * 60; // 24 hours in seconds
+                
+                // If lastClaimed is 0, they've never claimed. Otherwise, check if cooldown has passed.
+                const canUserClaim = lastClaimedNum === 0 || (currentTimestamp - lastClaimedNum >= cooldown);
+                setCanClaim(canUserClaim);
+            } else {
+                // Fallback if we can't get the current time from the blockchain
+                setCanClaim(false);
+                setError("Could not get network time.");
             }
-            
-            setCanClaim(canUserClaim);
+
             setAddress(userAddress);
 
         } catch (e) {
