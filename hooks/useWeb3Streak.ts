@@ -74,44 +74,33 @@ export function useWeb3Streak() {
     const loadContractData = useCallback(async (currentSigner: ethers.JsonRpcSigner) => {
         setError(null);
         try {
+            // Use a dedicated provider for read-only calls to ensure we're always on Base.
             const baseProvider = new ethers.JsonRpcProvider(BASE_CHAIN_PARAMS.rpcUrls[0]);
             const contractReader = new ethers.Contract(streakContractAddress, streakContractAbi, baseProvider);
             const userAddress = await currentSigner.getAddress();
             
-            // Use Promise.allSettled to handle expected reverts for new users gracefully
+            // Use Promise.allSettled to fetch data and handle expected reverts gracefully.
             const results = await Promise.allSettled([
                 contractReader.getStreak(userAddress),
-                contractReader.lastClaimedTimestamp(userAddress),
-                baseProvider.getBlock('latest')
+                contractReader.canClaim(userAddress) // Use the contract's function as the source of truth
             ]);
 
             // Process streak result
             const streakResult = results[0];
-            const streak = streakResult.status === 'fulfilled' ? Number(streakResult.value) : 0;
-            if (streakResult.status === 'rejected') {
+            if (streakResult.status === 'fulfilled') {
+                setStreakCount(Number(streakResult.value));
+            } else {
                 console.warn("getStreak() reverted. Defaulting to 0. This is expected for new users.");
-            }
-            setStreakCount(streak);
-
-            // Process last claimed timestamp result
-            const lastClaimedResult = results[1];
-            const lastClaimed = lastClaimedResult.status === 'fulfilled' ? Number(lastClaimedResult.value) : 0;
-             if (lastClaimedResult.status === 'rejected') {
-                console.warn("lastClaimedTimestamp() reverted. Defaulting to 0. This is expected for new users.");
+                setStreakCount(0);
             }
             
-            // Process block result
-            const blockResult = results[2];
-            const latestBlock = blockResult.status === 'fulfilled' ? blockResult.value : null;
-            const currentTimestamp = latestBlock?.timestamp;
-
-            if (currentTimestamp) {
-                const cooldown = 24 * 60 * 60; // 24 hours in seconds
-                const canUserClaim = lastClaimed === 0 || (currentTimestamp - lastClaimed >= cooldown);
-                setCanClaim(canUserClaim);
+            // Process canClaim result
+            const canClaimResult = results[1];
+            if (canClaimResult.status === 'fulfilled') {
+                setCanClaim(canClaimResult.value);
             } else {
+                console.warn("canClaim() reverted. Defaulting to false. This is expected for new users.");
                 setCanClaim(false);
-                setError("Could not get network time.");
             }
 
             setAddress(userAddress);
@@ -151,8 +140,8 @@ export function useWeb3Streak() {
     }, [switchNetwork, loadContractData, clearState]);
 
     const claimStreak = useCallback(async () => {
-        if (!signer) {
-            setError("Wallet not connected.");
+        if (!signer || !canClaim) { // Added !canClaim check
+            setError("Not eligible to claim.");
             return;
         }
     
@@ -162,16 +151,15 @@ export function useWeb3Streak() {
         try {
             const contract = new ethers.Contract(streakContractAddress, streakContractAbi, signer);
     
-            // First, simulate the transaction with a static call to check for reverts.
-            // This prevents the user from sending a transaction that is known to fail.
+            // The simulation with staticCall is now a redundant safety check,
+            // as the UI should already be in sync. We keep it for robustness.
             try {
                 await contract.claim.staticCall();
             } catch (simulationError: any) {
-                console.error("Claim simulation failed:", simulationError);
-                // Provide a user-friendly error for the most common failure reason (cooldown).
+                console.error("Claim simulation failed despite UI check:", simulationError);
                 setError("Cannot claim yet. Please try again later.");
                 setIsClaiming(false);
-                return; // Stop the process
+                return;
             }
     
             // If the simulation succeeds, send the actual transaction.
@@ -188,7 +176,7 @@ export function useWeb3Streak() {
         } finally {
             setIsClaiming(false);
         }
-    }, [signer, loadContractData]);
+    }, [signer, canClaim, loadContractData]);
     
     useEffect(() => {
         const handleAccountsChanged = (accounts: string[]) => {
