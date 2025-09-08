@@ -74,20 +74,24 @@ export function useWeb3Streak() {
         try {
             setError(null);
             
-            // For read-only operations, create a static provider pointing directly to a reliable Base RPC.
-            // This avoids any potential mismatch with the wallet's provider state after switching networks.
             const baseProvider = new ethers.JsonRpcProvider(BASE_CHAIN_PARAMS.rpcUrls[0]);
             const contractReader = new ethers.Contract(streakContractAddress, streakContractAbi, baseProvider);
-
             const userAddress = await currentSigner.getAddress();
             
-            // Use the read-only contract instance to fetch data
-            const [streak, canUserClaim] = await Promise.all([
-                contractReader.getStreak(userAddress),
-                contractReader.canClaim(userAddress)
-            ]);
-            
+            // Fetch streak count first.
+            const streak = await contractReader.getStreak(userAddress);
             setStreakCount(Number(streak));
+            
+            // The canClaim function reverts for new users. We'll handle this gracefully.
+            let canUserClaim = false;
+            try {
+                canUserClaim = await contractReader.canClaim(userAddress);
+            } catch (claimError) {
+                console.warn("canClaim() reverted. Defaulting to false. This is expected for new users.", claimError);
+                // If the call reverts, we assume the user cannot claim.
+                canUserClaim = false;
+            }
+            
             setCanClaim(canUserClaim);
             setAddress(userAddress);
 
