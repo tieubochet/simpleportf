@@ -72,35 +72,44 @@ export function useWeb3Streak() {
     }, []);
 
     const loadContractData = useCallback(async (currentSigner: ethers.JsonRpcSigner) => {
+        setError(null);
         try {
-            setError(null);
-            
-            // Use a dedicated read-only provider for fetching data to ensure it's always from Base.
             const baseProvider = new ethers.JsonRpcProvider(BASE_CHAIN_PARAMS.rpcUrls[0]);
             const contractReader = new ethers.Contract(streakContractAddress, streakContractAbi, baseProvider);
             const userAddress = await currentSigner.getAddress();
             
-            // Fetch data concurrently for better performance
-            const [streak, lastClaimed, latestBlock] = await Promise.all([
+            // Use Promise.allSettled to handle expected reverts for new users gracefully
+            const results = await Promise.allSettled([
                 contractReader.getStreak(userAddress),
                 contractReader.lastClaimedTimestamp(userAddress),
                 baseProvider.getBlock('latest')
             ]);
+
+            // Process streak result
+            const streakResult = results[0];
+            const streak = streakResult.status === 'fulfilled' ? Number(streakResult.value) : 0;
+            if (streakResult.status === 'rejected') {
+                console.warn("getStreak() reverted. Defaulting to 0. This is expected for new users.");
+            }
+            setStreakCount(streak);
+
+            // Process last claimed timestamp result
+            const lastClaimedResult = results[1];
+            const lastClaimed = lastClaimedResult.status === 'fulfilled' ? Number(lastClaimedResult.value) : 0;
+             if (lastClaimedResult.status === 'rejected') {
+                console.warn("lastClaimedTimestamp() reverted. Defaulting to 0. This is expected for new users.");
+            }
             
-            setStreakCount(Number(streak));
-            
-            const lastClaimedNum = Number(lastClaimed);
+            // Process block result
+            const blockResult = results[2];
+            const latestBlock = blockResult.status === 'fulfilled' ? blockResult.value : null;
             const currentTimestamp = latestBlock?.timestamp;
 
             if (currentTimestamp) {
-                // Determine if user can claim based on timestamps
                 const cooldown = 24 * 60 * 60; // 24 hours in seconds
-                
-                // If lastClaimed is 0, they've never claimed. Otherwise, check if cooldown has passed.
-                const canUserClaim = lastClaimedNum === 0 || (currentTimestamp - lastClaimedNum >= cooldown);
+                const canUserClaim = lastClaimed === 0 || (currentTimestamp - lastClaimed >= cooldown);
                 setCanClaim(canUserClaim);
             } else {
-                // Fallback if we can't get the current time from the blockchain
                 setCanClaim(false);
                 setError("Could not get network time.");
             }
@@ -108,8 +117,8 @@ export function useWeb3Streak() {
             setAddress(userAddress);
 
         } catch (e) {
-            console.error("Error loading contract data:", e);
-            setError("Contract error. Is your wallet on Base network?");
+            console.error("Critical error loading contract data:", e);
+            setError("Contract error. Check network.");
             clearState();
         }
     }, [clearState]);
@@ -151,12 +160,10 @@ export function useWeb3Streak() {
         setError(null);
 
         try {
-            // The signer is required for write transactions
             const contract = new ethers.Contract(streakContractAddress, streakContractAbi, signer);
             const tx = await contract.claim();
-            await tx.wait(); // Wait for the transaction to be mined
+            await tx.wait(); 
             
-            // Refresh data after successful claim
             await loadContractData(signer);
 
         } catch (e: any) {
@@ -173,13 +180,11 @@ export function useWeb3Streak() {
             if (accounts.length === 0) {
                 clearState();
             } else if (provider) {
-                // Re-connect with the new account
                 connectWallet();
             }
         };
         
         const handleChainChanged = () => {
-            // Reload the page to reset state and re-check network
             window.location.reload();
         };
 
