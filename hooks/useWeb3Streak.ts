@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ethers } from 'ethers';
+import { ethers } from 'https://esm.sh/ethers@6.13.1';
 import { streakContractAddress, streakContractAbi } from '../services/streakContract';
 
 // FIX: Define the type for window.ethereum to resolve TypeScript errors.
