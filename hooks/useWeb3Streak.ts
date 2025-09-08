@@ -69,11 +69,15 @@ export function useWeb3Streak() {
         }
     }, []);
 
-    const loadContractData = useCallback(async (currentSigner: ethers.JsonRpcSigner) => {
+    const loadContractData = useCallback(async (
+        currentProvider: ethers.BrowserProvider, 
+        currentSigner: ethers.JsonRpcSigner
+    ) => {
         try {
             setError(null);
             const userAddress = await currentSigner.getAddress();
-            const contract = new ethers.Contract(streakContractAddress, streakContractAbi, currentSigner);
+            // Use the provider for read-only calls for better stability
+            const contract = new ethers.Contract(streakContractAddress, streakContractAbi, currentProvider);
             
             const [streak, canUserClaim] = await Promise.all([
                 contract.getStreak(userAddress),
@@ -86,7 +90,7 @@ export function useWeb3Streak() {
 
         } catch (e) {
             console.error("Error loading contract data:", e);
-            setError("Could not load streak data. Are you on the Base network?");
+            setError("Contract error. Please ensure you are on the Base network.");
             clearState();
         }
     }, [clearState]);
@@ -107,7 +111,7 @@ export function useWeb3Streak() {
             const newSigner = await browserProvider.getSigner();
             setProvider(browserProvider);
             setSigner(newSigner);
-            await loadContractData(newSigner);
+            await loadContractData(browserProvider, newSigner);
             
         } catch (e: any) {
             console.error("Connection failed:", e);
@@ -119,7 +123,7 @@ export function useWeb3Streak() {
     }, [switchNetwork, loadContractData, clearState]);
 
     const claimStreak = useCallback(async () => {
-        if (!signer) {
+        if (!signer || !provider) {
             setError("Wallet not connected.");
             return;
         }
@@ -128,12 +132,13 @@ export function useWeb3Streak() {
         setError(null);
 
         try {
+            // Use the signer for write transactions
             const contract = new ethers.Contract(streakContractAddress, streakContractAbi, signer);
             const tx = await contract.claim();
             await tx.wait(); // Wait for the transaction to be mined
             
             // Refresh data after successful claim
-            await loadContractData(signer);
+            await loadContractData(provider, signer);
 
         } catch (e: any) {
             console.error("Claim failed:", e);
@@ -142,7 +147,7 @@ export function useWeb3Streak() {
         } finally {
             setIsClaiming(false);
         }
-    }, [signer, loadContractData]);
+    }, [signer, provider, loadContractData]);
     
     useEffect(() => {
         const handleAccountsChanged = (accounts: string[]) => {
