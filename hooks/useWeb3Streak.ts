@@ -104,12 +104,13 @@ export function useWeb3Streak() {
         const contract = new ethers.Contract(streakContractAddress, streakContractAbi, signer);
 
         try {
-            // Step 1: Simulate the transaction silently. This is a gas-free check.
-            // If this fails, it will throw an error and we'll catch it.
-            await contract.claim.staticCall();
-
-            // Step 2: If the simulation was successful, send the actual transaction.
-            const tx = await contract.claim();
+            // Directly attempt to send the transaction.
+            // A manual gasLimit is set to bypass the wallet's automatic `estimateGas` check,
+            // which can fail if the contract's conditions (e.g., cooldown) are not met.
+            // This ensures the user ALWAYS sees the confirmation pop-up in their wallet.
+            const tx = await contract.claim({
+                gasLimit: 100000 // A generous limit for a simple claim function.
+            });
             
             // Wait for the transaction to be mined and confirmed.
             await tx.wait();
@@ -120,11 +121,11 @@ export function useWeb3Streak() {
             if (e.code === 'ACTION_REJECTED') {
                  // User clicked "Reject" in their wallet.
                  setError("Transaction rejected in wallet.");
-            } else if (e.code === 'CALL_EXCEPTION') {
-                // The simulation failed. This is the most common case for a cooldown.
-                setError("Pre-transaction check failed. Cooldown may be active.");
+            } else if (e.code === 'CALL_EXCEPTION' || (e.receipt && e.receipt.status === 0) || e.reason === 'require(false)') {
+                // The transaction was sent but reverted by the contract on-chain.
+                setError("Transaction reverted by contract.");
             } else {
-                // An unexpected error occurred.
+                // An unexpected error occurred (e.g., network issue, insufficient funds).
                 setError("An unexpected error occurred.");
             }
         } finally {
