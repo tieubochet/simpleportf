@@ -103,17 +103,16 @@ export function useWeb3Streak() {
     
         try {
             const contract = new ethers.Contract(streakContractAddress, streakContractAbi, signer);
-            const tx = await contract.claim();
+            // By setting a manual gas limit, we bypass the `estimateGas` check that throws the revert error.
+            // This ensures the user always sees the wallet confirmation pop-up.
+            const tx = await contract.claim({ gasLimit: 200000 });
             await tx.wait();
     
         } catch (e: any) {
-            if (e.code === 'CALL_EXCEPTION') {
-                setError("Contract rejected interaction. Try again later.");
-            } else {
-                console.error("Interaction failed:", e);
-                const errorMessage = e.reason || e.message || "An unexpected error occurred.";
-                setError(errorMessage);
-            }
+            // This will now catch user rejections or actual on-chain transaction failures.
+            console.error("Interaction failed:", e);
+            const errorMessage = e.reason || (e as any).message || "An unexpected error occurred.";
+            setError(errorMessage);
         } finally {
             setIsInteracting(false);
         }
