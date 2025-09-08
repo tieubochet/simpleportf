@@ -103,25 +103,14 @@ export function useWeb3Streak() {
         try {
             const contract = new ethers.Contract(streakContractAddress, streakContractAbi, signer);
     
-            // We run a static call first to simulate the transaction. This checks
-            // for contract-side errors (like a cooldown) without costing gas.
-            try {
-                await contract.claim.staticCall();
-            } catch (simulationError: any) {
-                console.error("Interaction simulation failed:", simulationError);
-                // Try to get a human-readable reason from the contract revert.
-                const reason = simulationError.reason || "Interaction might fail or is not allowed yet.";
-                setError(reason);
-                setIsInteracting(false);
-                return;
-            }
-    
-            // If simulation is successful, send the actual transaction.
+            // Directly send the transaction without a pre-flight simulation.
+            // The wallet will handle simulation and user confirmation.
             const tx = await contract.claim();
-            await tx.wait(); // Wait for it to be mined
+            await tx.wait(); // Wait for the transaction to be mined
     
         } catch (e: any) {
             console.error("Interaction failed:", e);
+            // This will catch user rejection, gas errors, or on-chain reverts.
             const errorMessage = e.reason || e.data?.message || e.message || "Transaction failed.";
             setError(errorMessage);
         } finally {
