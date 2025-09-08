@@ -29,6 +29,7 @@ const BASE_CHAIN_PARAMS = {
 export function useWeb3Streak() {
     const [signer, setSigner] = useState<ethers.JsonRpcSigner | null>(null);
     const [address, setAddress] = useState<string | null>(null);
+    const [canInteract, setCanInteract] = useState(false);
     
     const [isConnecting, setIsConnecting] = useState(false);
     const [isInteracting, setIsInteracting] = useState(false);
@@ -39,6 +40,7 @@ export function useWeb3Streak() {
     const clearState = useCallback(() => {
         setSigner(null);
         setAddress(null);
+        setCanInteract(false);
         setError(null);
     }, []);
 
@@ -92,46 +94,63 @@ export function useWeb3Streak() {
         }
     }, [switchNetwork, clearState]);
 
+    useEffect(() => {
+        if (!signer || !address) {
+            setCanInteract(false);
+            return;
+        }
+
+        const contract = new ethers.Contract(streakContractAddress, streakContractAbi, signer);
+
+        const checkEligibility = async () => {
+            try {
+                const isEligible = await contract.canClaim(address);
+                setCanInteract(isEligible);
+            } catch (e) {
+                // This can happen for new users if the contract reverts on canClaim.
+                // It's safe to assume they cannot interact yet.
+                console.warn("Could not check claim eligibility. Defaulting to false.", e);
+                setCanInteract(false);
+            }
+        };
+
+        checkEligibility(); // Check immediately on connect
+        const intervalId = setInterval(checkEligibility, 15000); // Poll every 15 seconds
+
+        return () => clearInterval(intervalId); // Cleanup interval on disconnect
+    }, [signer, address]);
+
     const interactWithContract = useCallback(async () => {
-        if (!signer) {
-            setError("Wallet not connected properly.");
+        if (!signer || !canInteract) {
+            setError("Not eligible to interact yet.");
             return;
         }
 
         setIsInteracting(true);
         setError(null);
-
         const contract = new ethers.Contract(streakContractAddress, streakContractAbi, signer);
 
         try {
-            // Directly attempt to send the transaction.
-            // A manual gasLimit is set to bypass the wallet's automatic `estimateGas` check,
-            // which can fail if the contract's conditions (e.g., cooldown) are not met.
-            // This ensures the user ALWAYS sees the confirmation pop-up in their wallet.
-            const tx = await contract.claim({
-                gasLimit: 100000 // A generous limit for a simple claim function.
-            });
-            
-            // Wait for the transaction to be mined and confirmed.
-            await tx.wait();
+            const tx = await contract.claim(); // Let wallet estimate gas
+            const receipt = await tx.wait();
 
+            if (receipt.status === 1) {
+                // Success! Force a re-check of eligibility, which should now be false.
+                setCanInteract(false);
+            } else {
+                 setError("Transaction failed on-chain.");
+            }
         } catch (e: any) {
             console.error("Interaction failed:", e);
-
             if (e.code === 'ACTION_REJECTED') {
-                 // User clicked "Reject" in their wallet.
-                 setError("Transaction rejected in wallet.");
-            } else if (e.code === 'CALL_EXCEPTION' || (e.receipt && e.receipt.status === 0) || e.reason === 'require(false)') {
-                // The transaction was sent but reverted by the contract on-chain.
-                setError("Transaction reverted by contract.");
+                 setError("Transaction rejected.");
             } else {
-                // An unexpected error occurred (e.g., network issue, insufficient funds).
-                setError("An unexpected error occurred.");
+                setError("Interaction failed.");
             }
         } finally {
             setIsInteracting(false);
         }
-    }, [signer]);
+    }, [signer, canInteract]);
     
     useEffect(() => {
         const handleAccountsChanged = (accounts: string[]) => {
@@ -163,6 +182,7 @@ export function useWeb3Streak() {
         isConnected,
         isConnecting,
         isInteracting,
+        canInteract,
         error,
         connectWallet,
         interactWithContract
