@@ -97,31 +97,35 @@ export function useWeb3Streak() {
             setError("Wallet not connected properly.");
             return;
         }
-    
+
         setIsInteracting(true);
         setError(null);
-    
+
+        const contract = new ethers.Contract(streakContractAddress, streakContractAbi, signer);
+
         try {
-            const contract = new ethers.Contract(streakContractAddress, streakContractAbi, signer);
+            // Step 1: Simulate the transaction silently. This is a gas-free check.
+            // If this fails, it will throw an error and we'll catch it.
+            await contract.claim.staticCall();
+
+            // Step 2: If the simulation was successful, send the actual transaction.
+            const tx = await contract.claim();
             
-            // Bypass the wallet's automatic `estimateGas` check by providing a manual gas limit.
-            // This ensures the user always gets a wallet confirmation pop-up.
-            const tx = await contract.claim({
-                gasLimit: 150000 
-            });
-            
-            // Wait for the transaction to be mined.
+            // Wait for the transaction to be mined and confirmed.
             await tx.wait();
-    
+
         } catch (e: any) {
             console.error("Interaction failed:", e);
 
-            if ((e as any).code === 'ACTION_REJECTED') {
+            if (e.code === 'ACTION_REJECTED') {
                  // User clicked "Reject" in their wallet.
                  setError("Transaction rejected in wallet.");
+            } else if (e.code === 'CALL_EXCEPTION') {
+                // The simulation failed. This is the most common case for a cooldown.
+                setError("Pre-transaction check failed. Cooldown may be active.");
             } else {
-                // The transaction was sent but failed on-chain (reverted).
-                setError("Transaction reverted by contract.");
+                // An unexpected error occurred.
+                setError("An unexpected error occurred.");
             }
         } finally {
             setIsInteracting(false);
