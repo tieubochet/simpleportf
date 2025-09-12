@@ -1,8 +1,8 @@
 import React from 'react';
-import { useWeb3Streak } from '../hooks/useWeb3Streak';
+import { useCeloStreak } from '../hooks/useCeloStreak';
 import { FireIcon, WalletIcon } from './icons';
 
-export const DailyStreak: React.FC = () => {
+export const CeloDailyStreak: React.FC = () => {
     const {
         isConnected,
         isConnecting,
@@ -11,7 +11,7 @@ export const DailyStreak: React.FC = () => {
         error,
         connectWallet,
         checkInWithContract,
-    } = useWeb3Streak();
+    } = useCeloStreak();
 
     const commonButtonStyles = "flex items-center space-x-2 font-semibold py-2 px-4 rounded-lg transition-colors duration-300 relative disabled:opacity-70 disabled:cursor-not-allowed";
 
@@ -21,11 +21,11 @@ export const DailyStreak: React.FC = () => {
                 <button
                     onClick={connectWallet}
                     disabled={isConnecting}
-                    className={`${commonButtonStyles} bg-blue-500 hover:bg-blue-600 text-white`}
-                    title="Connect Base wallet to check in"
+                    className={`${commonButtonStyles} bg-emerald-500 hover:bg-emerald-600 text-white`}
+                    title="Connect Celo wallet to check in"
                 >
                     <WalletIcon className="h-5 w-5" />
-                    <span>{isConnecting ? 'Connecting...' : 'Connect Base'}</span>
+                    <span>{isConnecting ? 'Connecting...' : 'Connect Celo'}</span>
                 </button>
                  {error && <p className="absolute top-full right-0 mt-1 text-xs text-red-500 dark:text-red-400 whitespace-nowrap">{error}</p>}
             </div>
@@ -34,8 +34,8 @@ export const DailyStreak: React.FC = () => {
 
     const isLoading = isInteracting || isConnecting;
     
-    let buttonText = 'Check In (Base)';
-    let title = "Check in for today's Base streak";
+    let buttonText = 'Check In (Celo)';
+    let title = "Check in for today's Celo streak";
 
     if (isLoading) {
         buttonText = 'Processing...';
@@ -50,7 +50,7 @@ export const DailyStreak: React.FC = () => {
                 title={title}
                 disabled={isLoading}
             >
-                <FireIcon className="h-5 w-5 text-blue-500" />
+                <FireIcon className="h-5 w-5 text-green-400" />
                 <span className="font-bold">{streak}</span>
                 <span>{buttonText}</span>
             </button>

@@ -1,7 +1,7 @@
-
 import React from 'react';
 import { UploadIcon, DownloadIcon, WalletIcon, EyeIcon, EyeOffIcon, SunIcon, MoonIcon, RefreshCwIcon, ContrastIcon } from './icons';
 import { DailyStreak } from './DailyStreak';
+import { CeloDailyStreak } from './CeloDailyStreak';
 import type { Theme } from '../hooks/useTheme';
 
 interface PortfolioHeaderProps {
@@ -28,7 +28,7 @@ const PortfolioHeader: React.FC<PortfolioHeaderProps> = ({ onAddWallet, onImport
       <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4 md:mb-0">
         Crypto Portfolios
       </h1>
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-2 flex-wrap justify-center gap-y-2">
         <button
           onClick={onToggleTheme}
           className={`flex items-center justify-center p-2 h-10 w-10 ${commonButtonStyles}`}
@@ -64,6 +64,7 @@ const PortfolioHeader: React.FC<PortfolioHeaderProps> = ({ onAddWallet, onImport
           <span className="hidden sm:inline">Add Wallet</span>
         </button>
         <DailyStreak />
+        <CeloDailyStreak />
       </div>
     </header>
   );
