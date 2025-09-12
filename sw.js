@@ -1,4 +1,4 @@
-const CACHE_NAME = 'crypto-portfolio-cache-v8'; // Cache version bump
+const CACHE_NAME = 'crypto-portfolio-cache-v9'; // Cache version bump
 const URLS_TO_CACHE = [
   '/',
   '/index.html',
@@ -14,7 +14,6 @@ const URLS_TO_CACHE = [
   '/services/coinglass.ts',
   '/services/streakContract.ts',
   '/services/celoStreakContract.ts',
-  '/services/streakContract.ts',
   '/utils/calculations.ts',
   '/components/icons.tsx',
   '/components/PortfolioHeader.tsx',

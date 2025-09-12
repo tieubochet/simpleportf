@@ -1,6 +1,6 @@
 import React from 'react';
 import { useWeb3Streak } from '../hooks/useWeb3Streak';
-import { FireIcon, WalletIcon } from './icons';
+import { WalletIcon } from './icons';
 
 export const DailyStreak: React.FC = () => {
     const {
@@ -22,7 +22,7 @@ export const DailyStreak: React.FC = () => {
                     onClick={connectWallet}
                     disabled={isConnecting}
                     className={`${commonButtonStyles} bg-blue-500 hover:bg-blue-600 text-white`}
-                    title="Connect Base wallet to check in"
+                    title="Connect Base wallet to say GM"
                 >
                     <WalletIcon className="h-5 w-5" />
                     <span>{isConnecting ? 'Connecting...' : 'Connect Base'}</span>
@@ -34,8 +34,8 @@ export const DailyStreak: React.FC = () => {
 
     const isLoading = isInteracting || isConnecting;
     
-    let buttonText = 'Check In (Base)';
-    let title = "Check in for today's Base streak";
+    let buttonText = 'Base GM';
+    let title = "Say GM on Base for today's streak";
 
     if (isLoading) {
         buttonText = 'Processing...';
@@ -50,7 +50,7 @@ export const DailyStreak: React.FC = () => {
                 title={title}
                 disabled={isLoading}
             >
-                <FireIcon className="h-5 w-5 text-blue-500" />
+                <svg className="h-5 w-5" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg"><path d="M128 256C57.307 256 0 198.693 0 128S57.307 0 128 0s128 57.307 128 128-57.307 128-128 128Z" fill="#0052FF"></path></svg>
                 <span className="font-bold">{streak}</span>
                 <span>{buttonText}</span>
             </button>

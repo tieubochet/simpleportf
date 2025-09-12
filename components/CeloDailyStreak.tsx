@@ -1,6 +1,6 @@
 import React from 'react';
 import { useCeloStreak } from '../hooks/useCeloStreak';
-import { FireIcon, WalletIcon } from './icons';
+import { WalletIcon } from './icons';
 
 export const CeloDailyStreak: React.FC = () => {
     const {
@@ -22,7 +22,7 @@ export const CeloDailyStreak: React.FC = () => {
                     onClick={connectWallet}
                     disabled={isConnecting}
                     className={`${commonButtonStyles} bg-emerald-500 hover:bg-emerald-600 text-white`}
-                    title="Connect Celo wallet to check in"
+                    title="Connect Celo wallet to say GM"
                 >
                     <WalletIcon className="h-5 w-5" />
                     <span>{isConnecting ? 'Connecting...' : 'Connect Celo'}</span>
@@ -34,8 +34,8 @@ export const CeloDailyStreak: React.FC = () => {
 
     const isLoading = isInteracting || isConnecting;
     
-    let buttonText = 'Check In (Celo)';
-    let title = "Check in for today's Celo streak";
+    let buttonText = 'Celo GM';
+    let title = "Say GM on Celo for today's streak";
 
     if (isLoading) {
         buttonText = 'Processing...';
@@ -50,7 +50,7 @@ export const CeloDailyStreak: React.FC = () => {
                 title={title}
                 disabled={isLoading}
             >
-                <FireIcon className="h-5 w-5 text-green-400" />
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21.419 12.428c0 5.24-4.26 9.5-9.5 9.5-5.24 0-9.5-4.26-9.5-9.5 0-5.24 4.26-9.5 9.5-9.5 5.24 0 9.5 4.26 9.5 9.5z" stroke="#35D07F" strokeWidth="2.5" strokeMiterlimit="10"></path><path d="M17.419 12.428a5.5 5.5 0 01-11 0 5.5 5.5 0 0111 0z" stroke="#35D07F" strokeWidth="2" strokeMiterlimit="10"></path></svg>
                 <span className="font-bold">{streak}</span>
                 <span>{buttonText}</span>
             </button>
