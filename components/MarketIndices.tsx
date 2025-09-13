@@ -15,18 +15,18 @@ const IndexRow: React.FC<{ index: MarketIndex }> = ({ index }) => {
     const { name, value, change, changeBtc, sentiment } = index;
 
     return (
-        <div className="grid grid-cols-3 items-center text-sm py-2.5">
-            <p className="text-slate-300 col-span-1">{name}</p>
+        <div className="flex justify-between items-center text-sm py-2.5">
+            {/* Column 1: Name */}
+            <p className="text-slate-300">{name}</p>
             
-            <div className="col-span-2 flex justify-end items-center space-x-8 font-mono">
-                {/* Middle Column */}
-                <div className="w-24 text-right">
+            {/* Column 2: Data (containing two sub-columns) */}
+            <div className="flex items-center space-x-8 font-mono text-right">
+                <div className="w-24">
                     {typeof change === 'number' && <ChangeDisplay value={change} />}
                     {changeBtc && <span className="text-green-500">{changeBtc}</span>}
                     {sentiment && <span className="text-white">{value}</span>}
                 </div>
-                {/* Right Column */}
-                <div className="w-28 text-right text-white font-semibold">
+                <div className="w-28 text-white font-semibold">
                     {(typeof change === 'number' || changeBtc) && value}
                     {sentiment && sentiment}
                 </div>
