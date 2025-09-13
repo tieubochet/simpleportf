@@ -1,4 +1,5 @@
-import { GoogleGenAI } from "https://esm.sh/@google/genai";
+// FIX: Use standard module import for @google/genai.
+import { GoogleGenAI } from "@google/genai";
 import { MarketIndicesData, GroundingSource } from '../types';
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });

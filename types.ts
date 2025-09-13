@@ -69,16 +69,16 @@ export interface MarketIndicesData {
   altcoin_season_index: MarketIndex;
 }
 
+// Represents a source from Google Search grounding
+export interface GroundingSource {
+  web: {
+    uri: string;
+    title: string;
+  };
+}
+
 // Represents a snapshot of the portfolio's value on a given day
 export interface PortfolioSnapshot {
   date: string; // ISO date string (YYYY-MM-DD)
   totalValue: number; // The total portfolio value on that day in USD
-}
-
-// Represents a grounding source from Gemini API
-export interface GroundingSource {
-    web: {
-      uri: string;
-      title: string;
-    };
 }
