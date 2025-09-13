@@ -1,10 +1,11 @@
 import React from 'react';
-import { MarketIndicesData, MarketIndex } from '../types';
+import { MarketIndicesData, MarketIndex, GroundingSource } from '../types';
 import { InfoIcon } from './icons';
 
 interface MarketIndicesProps {
     data: MarketIndicesData | null;
     isLoading: boolean;
+    sources?: GroundingSource[];
 }
 
 const ChangeDisplay: React.FC<{ change: string | number | undefined }> = ({ change }) => {
@@ -57,7 +58,7 @@ const LoadingSkeletonRow = () => (
 );
 
 
-const MarketIndices: React.FC<MarketIndicesProps> = ({ data, isLoading }) => {
+const MarketIndices: React.FC<MarketIndicesProps> = ({ data, isLoading, sources }) => {
     
     const indicesOrder: (keyof MarketIndicesData)[] = [
         'gold_future',
@@ -85,6 +86,28 @@ const MarketIndices: React.FC<MarketIndicesProps> = ({ data, isLoading }) => {
                     </div>
                 )}
             </div>
+            {sources && sources.length > 0 && !isLoading && (
+                <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-800">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">
+                        Data provided by Gemini, grounded on information from:
+                    </p>
+                    <ul className="text-xs space-y-1">
+                        {sources.slice(0, 3).map((source, index) => (
+                            <li key={index} className="truncate">
+                                <a 
+                                    href={source.web.uri} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    className="text-cyan-600 dark:text-cyan-400 hover:underline"
+                                    title={source.web.title || source.web.uri}
+                                >
+                                    {source.web.title || new URL(source.web.uri).hostname}
+                                </a>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
         </div>
     );
 };

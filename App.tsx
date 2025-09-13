@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Wallet, PriceData, PortfolioAsset, Transaction, Coin, MarketIndicesData } from './types';
+import { Wallet, PriceData, PortfolioAsset, Transaction, Coin, MarketIndicesData, GroundingSource } from './types';
 import { usePortfolio } from './hooks/usePortfolio';
 import { useTheme } from './hooks/useTheme';
 import { fetchPrices } from './services/coingecko';
@@ -34,6 +34,7 @@ export default function App() {
   const [isPrivacyMode, setIsPrivacyMode] = useState(false);
 
   const [marketIndices, setMarketIndices] = useState<MarketIndicesData | null>(null);
+  const [marketIndicesSources, setMarketIndicesSources] = useState<GroundingSource[]>([]);
   const [isIndicesLoading, setIsIndicesLoading] = useState(true);
 
   const assetIds = useMemo(() => getAssetIds(wallets), [wallets]);
@@ -60,11 +61,13 @@ export default function App() {
   const updateMarketIndices = useCallback(async () => {
       setIsIndicesLoading(true);
       try {
-          const data = await fetchMarketIndices();
+          const { data, sources } = await fetchMarketIndices();
           setMarketIndices(data);
+          setMarketIndicesSources(sources);
       } catch (err) {
           console.error("Failed to fetch market indices:", err);
           setMarketIndices(null);
+          setMarketIndicesSources([]);
       } finally {
           setIsIndicesLoading(false);
       }
@@ -132,8 +135,8 @@ export default function App() {
           onTogglePrivacyMode={() => setIsPrivacyMode(p => !p)}
           theme={theme}
           onToggleTheme={toggleTheme}
-          onRefresh={() => updatePrices(true)}
-          isRefreshing={isRefreshing}
+          onRefresh={() => { updatePrices(true); updateMarketIndices(); }}
+          isRefreshing={isRefreshing || isIndicesLoading}
         />
         <div className="mb-8">
           <PortfolioSummary 
@@ -150,7 +153,7 @@ export default function App() {
         {wallets.length > 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-5 lg:items-stretch gap-8 my-8">
             <div className="lg:col-span-2">
-              <MarketIndices data={marketIndices} isLoading={isIndicesLoading} />
+              <MarketIndices data={marketIndices} isLoading={isIndicesLoading} sources={marketIndicesSources} />
             </div>
             <div className="lg:col-span-3">
               <AllocationChart wallets={wallets} prices={prices} isPrivacyMode={isPrivacyMode} theme={theme} />
@@ -158,7 +161,7 @@ export default function App() {
           </div>
         ) : (
           <div className="my-8">
-            <MarketIndices data={marketIndices} isLoading={isIndicesLoading} />
+            <MarketIndices data={marketIndices} isLoading={isIndicesLoading} sources={marketIndicesSources} />
           </div>
         )}
 

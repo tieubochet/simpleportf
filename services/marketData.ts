@@ -1,5 +1,5 @@
-import { MarketIndicesData } from '../types';
-import { fetchMarketDataFromCoinGlass } from './coinglass';
+import { MarketIndicesData, GroundingSource } from '../types';
+import { fetchMarketDataFromGemini } from './gemini';
 
 const getErrorState = (): MarketIndicesData => ({
     gold_future: { name: 'Gold Future', value: 'N/A', change: 0 },
@@ -14,12 +14,12 @@ const getErrorState = (): MarketIndicesData => ({
 });
 
 
-export async function fetchMarketIndices(): Promise<MarketIndicesData> {
+export async function fetchMarketIndices(): Promise<{ data: MarketIndicesData, sources: GroundingSource[] }> {
   try {
-    return await fetchMarketDataFromCoinGlass();
+    return await fetchMarketDataFromGemini();
   } catch (error) {
-    console.error('Failed to fetch and process market indices from CoinGlass:', error);
-    // Return a default/error state object so the UI doesn't completely break
-    return getErrorState();
+    console.error('Failed to fetch and process market indices from Gemini:', error);
+    // Return a default/error state object with empty sources
+    return { data: getErrorState(), sources: [] };
   }
 }
