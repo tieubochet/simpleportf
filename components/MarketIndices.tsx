@@ -52,21 +52,23 @@ const LoadingSkeleton = () => (
 
 const MarketIndices: React.FC<{ data: MarketIndicesData | null; isLoading: boolean }> = ({ data, isLoading }) => {
     return (
-        <div className="bg-[#161c2d] p-6 rounded-lg shadow-lg">
-            <h2 className="text-2xl font-bold text-white mb-4">Market Indices</h2>
-            {isLoading && <LoadingSkeleton />}
-            {!isLoading && !data && (
-                <div className="text-center text-slate-400 py-8">
-                    Could not load market data.
-                </div>
-            )}
-            {!isLoading && data && (
-                <div className="divide-y divide-slate-700/50">
-                    {Object.values(data).map(index => (
-                        <IndexRow key={index.name} index={index} />
-                    ))}
-                </div>
-            )}
+        <div className="bg-[#161c2d] p-6 rounded-lg shadow-lg h-full flex flex-col">
+            <h2 className="text-2xl font-bold text-white mb-4 flex-shrink-0">Market Indices</h2>
+            <div className="flex-grow">
+                {isLoading && <LoadingSkeleton />}
+                {!isLoading && !data && (
+                    <div className="text-center text-slate-400 py-8">
+                        Could not load market data.
+                    </div>
+                )}
+                {!isLoading && data && (
+                    <div className="divide-y divide-slate-700/50">
+                        {Object.values(data).map(index => (
+                            <IndexRow key={index.name} index={index} />
+                        ))}
+                    </div>
+                )}
+            </div>
         </div>
     );
 };

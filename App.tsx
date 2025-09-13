@@ -147,15 +147,12 @@ export default function App() {
           />
         </div>
         
-        <div className="my-8">
-            <MarketIndices data={marketIndices} isLoading={isMarketIndicesLoading} />
-        </div>
-        
-        {wallets.length > 0 && (
-          <div className="my-8">
+        <div className={`my-8 grid gap-8 ${wallets.length > 0 ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'}`}>
+          <MarketIndices data={marketIndices} isLoading={isMarketIndicesLoading} />
+          {wallets.length > 0 && (
             <AllocationChart wallets={wallets} prices={prices} isPrivacyMode={isPrivacyMode} theme={theme} />
-          </div>
-        )}
+          )}
+        </div>
 
         <div>
           {wallets.length > 0 ? (
