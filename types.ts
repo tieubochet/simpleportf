@@ -47,16 +47,24 @@ export interface PerformerData {
   change: number; // The 24h percentage change
 }
 
-// Represents a single market index
+// Represents a source from Google Search grounding
+export interface GroundingSource {
+  web: {
+    uri: string;
+    title: string;
+  };
+}
+
+// Represents a single market index item
 export interface MarketIndex {
   name: string;
   value: string | number;
-  change?: string | number;
-  change_24h_btc?: string | number; // For exchange balance
-  sentiment?: string; // For Fear & Greed
+  change?: number; // percentage change
+  changeBtc?: string; // special case for BTC exchange balance
+  sentiment?: string; // e.g., 'Neutral', 'Fear'
 }
 
-// Represents the collection of all market indices data
+// Represents the entire collection of market indices
 export interface MarketIndicesData {
   gold_future: MarketIndex;
   dxy: MarketIndex;
@@ -69,16 +77,39 @@ export interface MarketIndicesData {
   altcoin_season_index: MarketIndex;
 }
 
-// Represents a source from Google Search grounding
-export interface GroundingSource {
-  web: {
-    uri: string;
-    title: string;
-  };
-}
-
 // Represents a snapshot of the portfolio's value on a given day
 export interface PortfolioSnapshot {
   date: string; // ISO date string (YYYY-MM-DD)
   totalValue: number; // The total portfolio value on that day in USD
+}
+
+// FIX: Add missing types for advanced market stats to resolve import errors.
+// Represents a single chart-based stat
+export interface ChartStat {
+  name: string;
+  value: string;
+  change: number; // percentage change
+  sparkline: string; // SVG path data for the sparkline
+}
+
+// Represents the AVG RSI gauge stat
+export interface RsiGaugeStat {
+  name: string;
+  value: number;
+  sentiment: string;
+}
+
+// Represents the Altcoin Season Index gauge stat
+export interface SeasonGaugeStat {
+  name: string;
+  value: number;
+  sentiment: string;
+}
+
+// Represents the entire collection of advanced market stats
+export interface AdvancedMarketStatsData {
+  openInterest: ChartStat;
+  liquidations: ChartStat;
+  avgRsi: RsiGaugeStat;
+  altcoinSeason: SeasonGaugeStat;
 }

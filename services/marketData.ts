@@ -1,13 +1,14 @@
+
 import { MarketIndicesData } from '../types';
-import { fetchMarketDataFromCoinGlass } from './coinglass';
+import { fetchMarketIndicesFromCoinGlass } from './coinglass';
 
 /**
- * Fetches market indices data. 
+ * Fetches market indices.
  * This implementation uses the CoinGlass service as the data source.
  */
 export async function fetchMarketIndices(): Promise<MarketIndicesData> {
   try {
-    const data = await fetchMarketDataFromCoinGlass();
+    const data = await fetchMarketIndicesFromCoinGlass();
     return data;
   } catch (error) {
     console.error('Failed to fetch market indices:', error);

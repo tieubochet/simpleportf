@@ -34,7 +34,7 @@ export default function App() {
   const [isPrivacyMode, setIsPrivacyMode] = useState(false);
 
   const [marketIndices, setMarketIndices] = useState<MarketIndicesData | null>(null);
-  const [isIndicesLoading, setIsIndicesLoading] = useState(true);
+  const [isMarketIndicesLoading, setIsMarketIndicesLoading] = useState(true);
 
   const assetIds = useMemo(() => getAssetIds(wallets), [wallets]);
   const existingAssetIdsInSelectedWallet = useMemo(() => {
@@ -58,7 +58,7 @@ export default function App() {
   }, [assetIds]);
   
   const updateMarketIndices = useCallback(async () => {
-      setIsIndicesLoading(true);
+      setIsMarketIndicesLoading(true);
       try {
           const data = await fetchMarketIndices();
           setMarketIndices(data);
@@ -66,7 +66,7 @@ export default function App() {
           console.error("Failed to fetch market indices:", err);
           setMarketIndices(null);
       } finally {
-          setIsIndicesLoading(false);
+          setIsMarketIndicesLoading(false);
       }
   }, []);
 
@@ -133,7 +133,7 @@ export default function App() {
           theme={theme}
           onToggleTheme={toggleTheme}
           onRefresh={() => { updatePrices(true); updateMarketIndices(); }}
-          isRefreshing={isRefreshing || isIndicesLoading}
+          isRefreshing={isRefreshing || isMarketIndicesLoading}
         />
         <div className="mb-8">
           <PortfolioSummary 
@@ -147,18 +147,13 @@ export default function App() {
           />
         </div>
         
-        {wallets.length > 0 ? (
-          <div className="grid grid-cols-1 lg:grid-cols-5 lg:items-stretch gap-8 my-8">
-            <div className="lg:col-span-2">
-              <MarketIndices data={marketIndices} isLoading={isIndicesLoading} />
-            </div>
-            <div className="lg:col-span-3">
-              <AllocationChart wallets={wallets} prices={prices} isPrivacyMode={isPrivacyMode} theme={theme} />
-            </div>
-          </div>
-        ) : (
+        <div className="my-8">
+            <MarketIndices data={marketIndices} isLoading={isMarketIndicesLoading} />
+        </div>
+        
+        {wallets.length > 0 && (
           <div className="my-8">
-            <MarketIndices data={marketIndices} isLoading={isIndicesLoading} />
+            <AllocationChart wallets={wallets} prices={prices} isPrivacyMode={isPrivacyMode} theme={theme} />
           </div>
         )}
 

@@ -1,4 +1,5 @@
-const CACHE_NAME = 'crypto-portfolio-cache-v9'; // Cache version bump
+
+const CACHE_NAME = 'crypto-portfolio-cache-v11'; // Cache version bump
 const URLS_TO_CACHE = [
   '/',
   '/index.html',
