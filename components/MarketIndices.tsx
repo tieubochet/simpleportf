@@ -38,7 +38,7 @@ const IndexRow: React.FC<{ index: MarketIndex }> = ({ index }) => {
 // A skeleton loader to show while data is fetching.
 const LoadingSkeleton = () => (
     <div className="space-y-2 animate-pulse">
-        {Array.from({ length: 9 }).map((_, i) => (
+        {Array.from({ length: 7 }).map((_, i) => (
             <div key={i} className="flex justify-between items-center py-2.5">
                 <div className="h-4 bg-slate-700 rounded w-1/3"></div>
                 <div className="flex items-center space-x-8">

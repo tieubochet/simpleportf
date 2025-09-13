@@ -101,16 +101,6 @@ export async function fetchMarketIndicesFromCoinGlass(): Promise<MarketIndicesDa
 
     // Combine live data with static fallbacks for a complete object
     return {
-        gold_future: {
-            name: 'Hợp đồng tương lai Vàng',
-            value: '$3362.59',
-            change: -0.28,
-        },
-        dxy: {
-            name: 'Chỉ số đồng đô la Mỹ',
-            value: '97.782',
-            change: 0.19,
-        },
         btc_dominance,
         btc_exchange_balance,
         fear_and_greed,

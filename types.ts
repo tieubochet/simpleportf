@@ -66,8 +66,6 @@ export interface MarketIndex {
 
 // Represents the entire collection of market indices
 export interface MarketIndicesData {
-  gold_future: MarketIndex;
-  dxy: MarketIndex;
   btc_dominance: MarketIndex;
   btc_exchange_balance: MarketIndex;
   fear_and_greed: MarketIndex;
