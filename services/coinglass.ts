@@ -2,8 +2,8 @@
 import { MarketIndicesData } from '../types';
 
 /**
- * NOTE: This service now fetches live data from CoinGlass APIs.
- * For indices not available on CoinGlass (e.g., Gold, DXY), static data is used as a fallback.
+ * NOTE: This service now fetches live data from CoinGlass's new v2 public APIs.
+ * If API calls fail, it will return 'N/A' values to avoid showing stale data.
  */
 
 // Helper to format large numbers into a more readable format (e.g., 1.23B, 45.6M, 7.8K)
@@ -25,7 +25,7 @@ const fetchJson = async (url: string, options: RequestInit = {}) => {
             throw new Error(`Network response was not ok for ${url}`);
         }
         const json = await response.json();
-        if (json.code !== "0") {
+        if (json.code !== "0" && json.code !== 0) { // API uses both string and number codes
             throw new Error(`API error for ${url}: ${json.msg}`);
         }
         return json.data;
@@ -36,68 +36,69 @@ const fetchJson = async (url: string, options: RequestInit = {}) => {
 };
 
 export async function fetchMarketIndicesFromCoinGlass(): Promise<MarketIndicesData> {
-    const API_BASE = 'https://fapi.coinglass.com/api';
+    const API_BASE = 'https://open-api.coinglass.com/public/v2';
 
     // Fetch all data points concurrently for better performance
     const [
-        overviewData,
+        statisticsData,
         fearGreedData,
         altcoinIndexData,
         btcDominanceData,
         btcBalanceData,
         rsiData
     ] = await Promise.all([
-        fetchJson(`${API_BASE}/futures/home/overviewV2`),
-        fetchJson(`${API_BASE}/index/fearGreedIndex`),
-        fetchJson(`${API_BASE}/index/altcoinIndex`),
-        fetchJson(`${API_BASE}/index/v3/bitcoin_dominance`),
-        fetchJson(`${API_BASE}/exchange/balance/v2?ex_name=all&coin_name=BTC`),
+        fetchJson(`${API_BASE}/home/statistics`),
+        fetchJson(`${API_BASE}/indicator/fear_greed_index`),
+        fetchJson(`${API_BASE}/indicator/altcoin_season_index`),
+        fetchJson(`${API_BASE}/indicator/bitcoin_dominance_chart`),
+        fetchJson(`${API_BASE}/exchange/btc_balance`),
         fetchJson(`${API_BASE}/indicator/rsi?symbol=BTC`)
     ]);
 
     // --- Transform API data into the required structure ---
 
-    const open_interest = overviewData ? {
+    const open_interest = statisticsData ? {
         name: 'Open Interest',
-        value: formatLargeNumber(overviewData.totalOpenInterest),
-        change: overviewData.totalOpenInterestChange * 100,
-    } : { name: 'Open Interest', value: '18.31B', change: -1.16 }; // Fallback
+        value: formatLargeNumber(statisticsData.total_open_interest_usd),
+        change: statisticsData.total_open_interest_change_24h * 100,
+    } : { name: 'Open Interest', value: 'N/A', change: 0 };
 
-    const liquidations = overviewData ? {
-        name: 'Liquidations',
-        value: formatLargeNumber(overviewData.totalLiquidations),
-        change: overviewData.totalLiquidationsChange * 100,
-    } : { name: 'Liquidations', value: '20.63M', change: -33.70 }; // Fallback
+    const liquidations = statisticsData ? {
+        name: 'Liquidations (24h)',
+        value: formatLargeNumber(statisticsData.total_liquidation_usd_24h),
+        change: statisticsData.total_liquidation_change_24h * 100,
+    } : { name: 'Liquidations (24h)', value: 'N/A', change: 0 };
 
     const fear_and_greed = (fearGreedData && fearGreedData.length > 0) ? {
         name: 'Fear & Greed Index',
         value: parseInt(fearGreedData[0].value, 10),
-        sentiment: fearGreedData[0].valueClassification,
-    } : { name: 'Fear & Greed Index', value: 46, sentiment: 'Neutral' }; // Fallback
+        sentiment: fearGreedData[0].value_classification,
+    } : { name: 'Fear & Greed Index', value: 0, sentiment: 'N/A' };
 
     const altcoin_season_index = (altcoinIndexData && altcoinIndexData.length > 0) ? {
         name: 'Altcoin Season Index',
         value: parseInt(altcoinIndexData[0].value, 10),
-        sentiment: altcoinIndexData[0].valueClassification.toUpperCase().replace('SEASON', ' SEASON'),
-    } : { name: 'Altcoin Season Index', value: 80, sentiment: 'ALTCOIN SEASON' }; // Fallback
+        sentiment: altcoinIndexData[0].value_classification.toUpperCase().replace('SEASON', ' SEASON'),
+    } : { name: 'Altcoin Season Index', value: 0, sentiment: 'N/A' };
 
-    const btc_dominance = (btcDominanceData && btcDominanceData.dataList.length > 1) ? {
+    const btc_dominance = (btcDominanceData && btcDominanceData.data_list.length > 1) ? {
         name: 'Bitcoin Dominance',
-        value: `${btcDominanceData.dataList[btcDominanceData.dataList.length - 1].toFixed(2)}%`,
-        change: ((btcDominanceData.dataList[btcDominanceData.dataList.length - 1] - btcDominanceData.dataList[btcDominanceData.dataList.length - 2]) / btcDominanceData.dataList[btcDominanceData.dataList.length - 2]) * 100,
-    } : { name: 'Bitcoin Dominance', value: '57.19%', change: -0.47 }; // Fallback
+        value: `${btcDominanceData.data_list[btcDominanceData.data_list.length - 1].toFixed(2)}%`,
+        change: ((btcDominanceData.data_list[btcDominanceData.data_list.length - 1] - btcDominanceData.data_list[btcDominanceData.data_list.length - 2]) / btcDominanceData.data_list[btcDominanceData.data_list.length - 2]) * 100,
+    } : { name: 'Bitcoin Dominance', value: 'N/A', change: 0 };
     
-    const btc_exchange_balance = (btcBalanceData && btcBalanceData.balanceList.length > 0) ? {
+    const btc_exchange_balance = (btcBalanceData && btcBalanceData.balance_list.length > 0) ? {
         name: 'BTC Exchange Balance',
-        value: formatLargeNumber(btcBalanceData.balanceList[btcBalanceData.balanceList.length - 1].balance),
-        changeBtc: `${btcBalanceData.balanceList[btcBalanceData.balanceList.length - 1].change24h > 0 ? '+' : ''}${formatLargeNumber(btcBalanceData.balanceList[btcBalanceData.balanceList.length - 1].change24h)}`,
-    } : { name: 'BTC Exchange Balance', value: '2.24M', changeBtc: '+4.46K' }; // Fallback
+        value: formatLargeNumber(btcBalanceData.balance_list[btcBalanceData.balance_list.length - 1].balance),
+        changeBtc: `${btcBalanceData.balance_list[btcBalanceData.balance_list.length - 1].change_24h > 0 ? '+' : ''}${formatLargeNumber(btcBalanceData.balance_list[btcBalanceData.balance_list.length - 1].change_24h)}`,
+    } : { name: 'BTC Exchange Balance', value: 'N/A', changeBtc: '0' };
     
-    const avg_rsi = (rsiData && rsiData.length > 0) ? {
-        name: 'AVG RSI',
-        value: Math.round(rsiData[rsiData.length - 1].value),
-        sentiment: rsiData[rsiData.length - 1].value > 70 ? 'OVERBOUGHT' : rsiData[rsiData.length - 1].value < 30 ? 'OVERSOLD' : 'NEUTRAL',
-    } : { name: 'AVG RSI', value: 44, sentiment: 'NEUTRAL' }; // Fallback
+    const rsiList = rsiData?.data;
+    const avg_rsi = (rsiList && rsiList.length > 0) ? {
+        name: 'BTC RSI (1D)',
+        value: Math.round(rsiList[rsiList.length - 1].value),
+        sentiment: rsiList[rsiList.length - 1].value > 70 ? 'OVERBOUGHT' : rsiList[rsiList.length - 1].value < 30 ? 'OVERSOLD' : 'NEUTRAL',
+    } : { name: 'BTC RSI (1D)', value: 0, sentiment: 'N/A' };
 
     // Combine live data with static fallbacks for a complete object
     return {
