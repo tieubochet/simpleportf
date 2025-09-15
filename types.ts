@@ -55,31 +55,53 @@ export interface GroundingSource {
   };
 }
 
-// Represents a single market index item
-export interface MarketIndex {
-  name: string;
-  value: string | number;
-  change?: number; // percentage change
-  changeBtc?: string; // special case for BTC exchange balance
-  sentiment?: string; // e.g., 'Neutral', 'Fear'
+// Represents the global market stats fetched from CoinGecko
+export interface GlobalStatsData {
+  active_cryptocurrencies: number;
+  markets: number; // exchanges
+  total_market_cap: number;
+  market_cap_change_percentage_24h_usd: number;
+  total_volume_24h: number;
+  btc_dominance: number;
+  eth_dominance: number;
+  eth_gas_price_gwei: number;
 }
 
-// Represents the entire collection of market indices
-// FIX: Update MarketIndicesData to support fields from multiple data sources (CoinGecko, CoinGlass).
-// Made non-common fields optional to prevent type errors when a source doesn't provide them.
-export interface MarketIndicesData {
-  fear_and_greed: MarketIndex;
-  btc_dominance: MarketIndex;
-  eth_dominance?: MarketIndex;
-  total_market_cap?: MarketIndex;
-  total_volume_24h?: MarketIndex;
-  active_cryptocurrencies?: MarketIndex;
-  btc_exchange_balance?: MarketIndex;
-  open_interest?: MarketIndex;
-  liquidations?: MarketIndex;
-  avg_rsi?: MarketIndex;
-  altcoin_season_index?: MarketIndex;
+// FIX: Add missing types for market indices to resolve import errors.
+// Represents a generic market index with a value and change
+export interface MarketIndex {
+  name: string;
+  value: string;
+  change: number;
 }
+
+// Represents a gauge-style market index with a value and sentiment
+export interface GaugeIndex {
+  name: string;
+  value: number;
+  sentiment: string;
+}
+
+// Represents the specific structure for BTC exchange balance
+export interface BtcBalanceIndex {
+    name: string;
+    value: string;
+    changeBtc: string;
+}
+
+// Represents the complete data structure for market indices fetched from external services
+export interface MarketIndicesData {
+  gold_future: MarketIndex;
+  dxy: MarketIndex;
+  btc_dominance: MarketIndex;
+  btc_exchange_balance: BtcBalanceIndex;
+  fear_and_greed: GaugeIndex;
+  open_interest: MarketIndex;
+  liquidations: MarketIndex;
+  avg_rsi: GaugeIndex;
+  altcoin_season_index: GaugeIndex;
+}
+
 
 // Represents a snapshot of the portfolio's value on a given day
 export interface PortfolioSnapshot {

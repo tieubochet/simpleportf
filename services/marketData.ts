@@ -1,100 +1,72 @@
+import { GlobalStatsData } from '../types';
 
-import { MarketIndicesData } from '../types';
-
-// Helper to format large numbers into a more readable format (e.g., 1.23T, 45.6B)
-const formatLargeNumber = (num: number): string => {
-    if (Math.abs(num) >= 1e12) return `$${(num / 1e12).toFixed(2)}T`;
-    if (Math.abs(num) >= 1e9) return `$${(num / 1e9).toFixed(2)}B`;
-    if (Math.abs(num) >= 1e6) return `$${(num / 1e6).toFixed(2)}M`;
-    return `$${num.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
-};
-
-async function fetchFearAndGreedIndex() {
+async function fetchGlobalFromCoinGecko() {
     try {
-        const response = await fetch('https://api.alternative.me/fng/?limit=1');
+        const response = await fetch('https://api.coingecko.com/api/v3/global');
         if (!response.ok) {
-            throw new Error('Network response for Fear & Greed was not ok');
+            throw new Error('Network response for CoinGecko global data was not ok');
         }
         const data = await response.json();
-        return data.data[0];
+        if (!data || !data.data) {
+            throw new Error('Invalid data structure from CoinGecko global API');
+        }
+        return data.data;
     } catch (error) {
-        console.error('Failed to fetch Fear & Greed Index:', error);
-        return null; // Return null on failure
+        console.error('Failed to fetch global market data from CoinGecko:', error);
+        throw error;
     }
 }
 
-async function fetchCoinMarketCapGlobalData() {
+async function fetchEthGasPrice() {
     try {
-        const response = await fetch('https://api.coinmarketcap.com/data-api/v3/global/quote/latest');
+        // Using a reliable public API for gas prices
+        const response = await fetch('https://ethgas.watch/api/gas');
         if (!response.ok) {
-            throw new Error('Network response for CoinMarketCap global data was not ok');
+            throw new Error('Network response for ETH gas was not ok');
         }
         const data = await response.json();
-        return data.data; // The actual data is in a 'data' property
+        // Add validation to ensure the expected data structure exists
+        if (data && data.fast && typeof data.fast.gwei === 'number') {
+            return data.fast.gwei; // Use the "fast" gas price
+        }
+        throw new Error('Invalid data structure from ethgas.watch API');
     } catch (error) {
-        console.error('Failed to fetch global market data from CoinMarketCap:', error);
-        throw error;
+        console.error('Failed to fetch ETH gas price:', error);
+        return 0; // Return 0 on failure so the app doesn't crash
     }
 }
 
 
 /**
- * Fetches market indices from CoinMarketCap and Alternative.me.
+ * Fetches global market stats from CoinGecko and ETH gas price.
  */
-export async function fetchMarketIndices(): Promise<MarketIndicesData> {
+export async function fetchGlobalStats(): Promise<GlobalStatsData> {
     try {
-        const [globalData, fearAndGreedData] = await Promise.all([
-            fetchCoinMarketCapGlobalData(),
-            fetchFearAndGreedIndex(),
+        const [globalData, gasPrice] = await Promise.all([
+            fetchGlobalFromCoinGecko(),
+            fetchEthGasPrice(),
         ]);
         
-        // Default structure for fallbacks
-        const indices: MarketIndicesData = {
-            fear_and_greed: { name: 'Fear & Greed', value: 'N/A', sentiment: 'N/A' },
-            btc_dominance: { name: 'BTC Dominance', value: 'N/A' },
-            eth_dominance: { name: 'ETH Dominance', value: 'N/A' },
-            total_market_cap: { name: 'Total Market Cap', value: 'N/A', change: 0 },
-            total_volume_24h: { name: 'Total Volume (24h)', value: 'N/A' },
-            active_cryptocurrencies: { name: 'Active Cryptos', value: 'N/A' },
+        if (!globalData) {
+            throw new Error("Failed to get global data from CoinGecko.");
+        }
+
+        // Safely access nested properties with nullish coalescing to prevent runtime errors
+        const stats: GlobalStatsData = {
+            active_cryptocurrencies: globalData.active_cryptocurrencies ?? 0,
+            markets: globalData.markets ?? 0,
+            total_market_cap: globalData.total_market_cap?.usd ?? 0,
+            market_cap_change_percentage_24h_usd: globalData.market_cap_change_percentage_24h_usd ?? 0,
+            total_volume_24h: globalData.total_volume?.usd ?? 0,
+            btc_dominance: globalData.market_cap_percentage?.btc ?? 0,
+            eth_dominance: globalData.market_cap_percentage?.eth ?? 0,
+            eth_gas_price_gwei: gasPrice,
         };
 
-        if (fearAndGreedData) {
-            indices.fear_and_greed = {
-                name: 'Fear & Greed',
-                value: parseInt(fearAndGreedData.value, 10),
-                sentiment: fearAndGreedData.value_classification,
-            };
-        }
-
-        if (globalData) {
-            indices.btc_dominance = {
-                name: 'BTC Dominance',
-                value: `${globalData.btc_dominance.toFixed(2)}%`,
-            };
-            indices.eth_dominance = {
-                name: 'ETH Dominance',
-                value: `${globalData.eth_dominance.toFixed(2)}%`,
-            };
-            indices.total_market_cap = {
-                name: 'Total Market Cap',
-                value: formatLargeNumber(globalData.quote.USD.total_market_cap),
-                change: globalData.quote.USD.total_market_cap_yesterday_percentage_change,
-            };
-            indices.total_volume_24h = {
-                name: 'Total Volume (24h)',
-                value: formatLargeNumber(globalData.quote.USD.total_volume_24h),
-            };
-            indices.active_cryptocurrencies = {
-                name: 'Active Cryptos',
-                value: globalData.active_cryptocurrencies.toLocaleString(),
-            };
-        }
-
-        return indices;
+        return stats;
 
     } catch (error) {
-        console.error('Failed to fetch market indices:', error);
-        // The UI layer will handle this error and show an appropriate message.
+        console.error('Failed to fetch global market stats:', error);
         throw error;
     }
 }

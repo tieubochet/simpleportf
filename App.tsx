@@ -1,10 +1,10 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Wallet, PriceData, PortfolioAsset, Transaction, Coin, MarketIndicesData } from './types';
+import { Wallet, PriceData, PortfolioAsset, Transaction, Coin, GlobalStatsData } from './types';
 import { usePortfolio } from './hooks/usePortfolio';
 import { useTheme } from './hooks/useTheme';
 import { fetchPrices } from './services/coingecko';
-import { fetchMarketIndices } from './services/marketData';
+import { fetchGlobalStats } from './services/marketData';
 import { calculateTotalValue, calculatePortfolio24hChange, calculateTotalPL, getAssetIds, findTopPerformer, findTopLoser, getAssetMetrics } from './utils/calculations';
 
 import PortfolioHeader from './components/PortfolioHeader';
@@ -15,7 +15,7 @@ import AddWalletModal from './components/AddWalletModal';
 import AddAssetModal from './components/AddAssetModal';
 import AddTransactionModal from './components/AddTransactionModal';
 import BackToTopButton from './components/BackToTopButton';
-import MarketIndices from './components/MarketIndices';
+import GlobalStatsBar from './components/MarketIndices';
 
 export default function App() {
   const { theme, toggleTheme } = useTheme();
@@ -33,8 +33,8 @@ export default function App() {
   
   const [isPrivacyMode, setIsPrivacyMode] = useState(false);
 
-  const [marketIndices, setMarketIndices] = useState<MarketIndicesData | null>(null);
-  const [isMarketIndicesLoading, setIsMarketIndicesLoading] = useState(true);
+  const [globalStats, setGlobalStats] = useState<GlobalStatsData | null>(null);
+  const [isGlobalStatsLoading, setIsGlobalStatsLoading] = useState(true);
 
   const assetIds = useMemo(() => getAssetIds(wallets), [wallets]);
   const existingAssetIdsInSelectedWallet = useMemo(() => {
@@ -57,16 +57,16 @@ export default function App() {
     if (isRefresh) setIsRefreshing(false);
   }, [assetIds]);
   
-  const updateMarketIndices = useCallback(async () => {
-      setIsMarketIndicesLoading(true);
+  const updateGlobalStats = useCallback(async () => {
+      setIsGlobalStatsLoading(true);
       try {
-          const data = await fetchMarketIndices();
-          setMarketIndices(data);
+          const data = await fetchGlobalStats();
+          setGlobalStats(data);
       } catch (err) {
-          console.error("Failed to fetch market indices:", err);
-          setMarketIndices(null);
+          console.error("Failed to fetch global stats:", err);
+          setGlobalStats(null);
       } finally {
-          setIsMarketIndicesLoading(false);
+          setIsGlobalStatsLoading(false);
       }
   }, []);
 
@@ -77,10 +77,10 @@ export default function App() {
   }, [updatePrices]);
   
   useEffect(() => {
-      updateMarketIndices();
-      const interval = setInterval(updateMarketIndices, 300000); // Update every 5 minutes
+      updateGlobalStats();
+      const interval = setInterval(updateGlobalStats, 300000); // Update every 5 minutes
       return () => clearInterval(interval);
-  }, [updateMarketIndices]);
+  }, [updateGlobalStats]);
 
   const totalValue = useMemo(() => calculateTotalValue(wallets, prices), [wallets, prices]);
   const portfolioChange = useMemo(() => calculatePortfolio24hChange(wallets, prices), [wallets, prices]);
@@ -100,12 +100,12 @@ export default function App() {
     setIsAddAssetModalOpen(false);
     setSelectedWalletId(null);
   };
-  
+
   const handleAddTransactionClick = (walletId: string, asset: PortfolioAsset) => {
     setSelectedAsset({ walletId, asset });
     setIsAddTxModalOpen(true);
   };
-  
+
   const handleAddTransaction = (transaction: Transaction) => {
     if (selectedAsset) {
       addTransactionToAsset(selectedAsset.walletId, selectedAsset.asset.id, transaction);
@@ -114,73 +114,102 @@ export default function App() {
     setSelectedAsset(null);
   };
 
-  const selectedAssetMetrics = useMemo(() => {
-    if (!selectedAsset) return { currentQuantity: 0, currentPrice: 0 };
-    const price = prices[selectedAsset.asset.id]?.usd ?? 0;
-    const { currentQuantity } = getAssetMetrics(selectedAsset.asset.transactions, price);
-    return { currentQuantity, currentPrice: price };
-  }, [selectedAsset, prices]);
-
+  // FIX: Add return statement with JSX to make this a valid component.
   return (
-    <div className="min-h-screen bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-200 font-sans transition-colors duration-300">
-      <main className="container mx-auto p-4 md:p-8">
-        <PortfolioHeader 
+    <div className={`bg-slate-100 dark:bg-slate-900 min-h-screen text-slate-800 dark:text-slate-200 transition-colors duration-300 font-sans`}>
+      <main className="container mx-auto p-4 md:p-6 lg:p-8">
+        <PortfolioHeader
           onAddWallet={() => setIsAddWalletModalOpen(true)}
           onImport={importWallets}
           onExport={exportWallets}
           isPrivacyMode={isPrivacyMode}
-          onTogglePrivacyMode={() => setIsPrivacyMode(p => !p)}
+          onTogglePrivacyMode={() => setIsPrivacyMode(prev => !prev)}
           theme={theme}
           onToggleTheme={toggleTheme}
-          onRefresh={() => { updatePrices(true); updateMarketIndices(); }}
-          isRefreshing={isRefreshing || isMarketIndicesLoading}
+          onRefresh={() => updatePrices(true)}
+          isRefreshing={isRefreshing}
         />
-        <div className="mb-8">
-          <PortfolioSummary 
-            totalValue={totalValue}
-            changeData={portfolioChange}
-            plData={totalPL}
-            performer={topPerformer}
-            loser={topLoser}
-            isLoading={isLoading && wallets.length > 0}
-            isPrivacyMode={isPrivacyMode}
-          />
-        </div>
-        
-        <div className={`my-8 grid gap-8 ${wallets.length > 0 ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'}`}>
-          <MarketIndices data={marketIndices} isLoading={isMarketIndicesLoading} />
-          {wallets.length > 0 && (
-            <AllocationChart wallets={wallets} prices={prices} isPrivacyMode={isPrivacyMode} theme={theme} />
-          )}
-        </div>
 
-        <div>
-          {wallets.length > 0 ? (
-            wallets.map(wallet => (
-              <WalletCard 
-                key={wallet.id}
-                wallet={wallet}
-                prices={prices}
-                onAddAsset={handleAddAssetClick}
-                onRemoveAsset={removeAssetFromWallet}
-                onRemoveWallet={removeWallet}
-                onAddTransaction={handleAddTransactionClick}
+        <div className="space-y-8 mt-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+               <PortfolioSummary
+                totalValue={totalValue}
+                changeData={portfolioChange}
+                plData={totalPL}
+                performer={topPerformer}
+                loser={topLoser}
+                isLoading={isLoading}
                 isPrivacyMode={isPrivacyMode}
               />
-            ))
+            </div>
+             <GlobalStatsBar data={globalStats} isLoading={isGlobalStatsLoading} />
+          </div>
+
+          {wallets.length > 0 && totalValue > 0 && (
+            <AllocationChart wallets={wallets} prices={prices} isPrivacyMode={isPrivacyMode} theme={theme} />
+           )}
+
+          {wallets.length > 0 ? (
+            <div>
+              {wallets.map(wallet => (
+                <WalletCard
+                  key={wallet.id}
+                  wallet={wallet}
+                  prices={prices}
+                  onAddAsset={handleAddAssetClick}
+                  onRemoveAsset={removeAssetFromWallet}
+                  onRemoveWallet={removeWallet}
+                  onAddTransaction={handleAddTransactionClick}
+                  isPrivacyMode={isPrivacyMode}
+                />
+              ))}
+            </div>
           ) : (
             <div className="text-center py-16 bg-white dark:bg-slate-800 rounded-lg shadow-md">
-              <h2 className="text-2xl font-semibold text-slate-700 dark:text-slate-200">Welcome to your Portfolio!</h2>
-              <p className="text-slate-500 dark:text-slate-400 mt-2">Create a wallet to start adding your crypto assets.</p>
+              <h2 className="text-2xl font-semibold text-slate-700 dark:text-slate-300">Welcome to Your Crypto Portfolio Tracker</h2>
+              <p className="text-slate-500 dark:text-slate-400 mt-2">Get started by adding your first wallet.</p>
+              <button onClick={() => setIsAddWalletModalOpen(true)} className="mt-6 bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                Add a Wallet
+              </button>
             </div>
           )}
         </div>
       </main>
-      
-      {isAddWalletModalOpen && <AddWalletModal onClose={() => setIsAddWalletModalOpen(false)} onAddWallet={addWallet} />}
-      {isAddAssetModalOpen && selectedWalletId && <AddAssetModal onClose={() => setIsAddAssetModalOpen(false)} onAddAsset={handleAddAsset} existingAssetIds={existingAssetIdsInSelectedWallet} />}
-      {isAddTxModalOpen && selectedAsset && <AddTransactionModal onClose={() => setIsAddTxModalOpen(false)} asset={selectedAsset.asset} onAddTransaction={handleAddTransaction} currentQuantity={selectedAssetMetrics.currentQuantity} currentPrice={selectedAssetMetrics.currentPrice} />}
-      
+
+      {isAddWalletModalOpen && (
+        <AddWalletModal
+          onClose={() => setIsAddWalletModalOpen(false)}
+          onAddWallet={(name) => {
+            addWallet(name);
+            setIsAddWalletModalOpen(false);
+          }}
+        />
+      )}
+
+      {isAddAssetModalOpen && selectedWalletId && (
+        <AddAssetModal
+          onClose={() => {
+            setIsAddAssetModalOpen(false);
+            setSelectedWalletId(null);
+          }}
+          onAddAsset={handleAddAsset}
+          existingAssetIds={existingAssetIdsInSelectedWallet}
+        />
+      )}
+
+      {isAddTxModalOpen && selectedAsset && (
+        <AddTransactionModal
+          onClose={() => {
+            setIsAddTxModalOpen(false);
+            setSelectedAsset(null);
+          }}
+          onAddTransaction={handleAddTransaction}
+          asset={selectedAsset.asset}
+          currentPrice={prices[selectedAsset.asset.id]?.usd ?? 0}
+          currentQuantity={getAssetMetrics(selectedAsset.asset.transactions, prices[selectedAsset.asset.id]?.usd ?? 0).currentQuantity}
+        />
+      )}
       <BackToTopButton />
     </div>
   );
