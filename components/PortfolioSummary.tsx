@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { PerformerData } from '../types';
 import { TrophyIcon, TrendingDownIcon, EyeIcon, EyeOffIcon, ClockIcon, ReceiptIcon } from './icons';
