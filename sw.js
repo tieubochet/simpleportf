@@ -1,5 +1,5 @@
 
-const CACHE_NAME = 'crypto-portfolio-cache-v13'; // Cache version bump
+const CACHE_NAME = 'crypto-portfolio-cache-v14'; // Cache version bump
 const URLS_TO_CACHE = [
   '/',
   '/index.html',
@@ -47,7 +47,7 @@ self.addEventListener('fetch', event => {
   }
 
   // Network-first for API calls to ensure fresh data
-  if (event.request.url.includes('open-api.coinglass.com') || event.request.url.includes('api.coingecko.com') || event.request.url.includes('api.alternative.me') || event.request.url.includes('esm.sh') || event.request.url.includes('cdn.tailwindcss.com')) {
+  if (event.request.url.includes('open-api-v4.coinglass.com') || event.request.url.includes('api.coingecko.com') || event.request.url.includes('api.alternative.me') || event.request.url.includes('esm.sh') || event.request.url.includes('cdn.tailwindcss.com')) {
     // Let the browser handle these requests, bypassing the cache.
     return;
   }

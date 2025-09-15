@@ -2,7 +2,7 @@
 import { MarketIndicesData } from '../types';
 
 /**
- * NOTE: This service now fetches live data from CoinGlass's new v2 public APIs.
+ * NOTE: This service now fetches live data from CoinGlass's new v4 public APIs.
  * If API calls fail, it will return 'N/A' values to avoid showing stale data.
  */
 
@@ -19,7 +19,12 @@ const fetchJson = async (url: string, options: RequestInit = {}) => {
     try {
         const response = await fetch(url, {
             ...options,
-            headers: { 'Accept': 'application/json', ...options.headers },
+            headers: { 
+                'Accept': 'application/json',
+                // v4 API requires this public key header
+                'cg-api-key': '2331584558e348938cd4856f712b8429',
+                ...options.headers 
+            },
         });
         if (!response.ok) {
             throw new Error(`Network response was not ok for ${url}`);
@@ -36,7 +41,7 @@ const fetchJson = async (url: string, options: RequestInit = {}) => {
 };
 
 export async function fetchMarketIndicesFromCoinGlass(): Promise<MarketIndicesData> {
-    const API_BASE = 'https://open-api.coinglass.com/public/v2';
+    const API_BASE = 'https://open-api-v4.coinglass.com/api/futures';
 
     // Fetch all data points concurrently for better performance
     const [
@@ -48,10 +53,10 @@ export async function fetchMarketIndicesFromCoinGlass(): Promise<MarketIndicesDa
         rsiData
     ] = await Promise.all([
         fetchJson(`${API_BASE}/home/statistics`),
-        fetchJson(`${API_BASE}/indicator/fear_greed_index`),
-        fetchJson(`${API_BASE}/indicator/altcoin_season_index`),
-        fetchJson(`${API_BASE}/indicator/bitcoin_dominance_chart`),
-        fetchJson(`${API_BASE}/exchange/btc_balance`),
+        fetchJson(`${API_BASE}/indicator/fear-greed`),
+        fetchJson(`${API_BASE}/indicator/altcoin-season`),
+        fetchJson(`${API_BASE}/indicator/dominance-chart`),
+        fetchJson(`${API_BASE}/exchange/btc-balance`),
         fetchJson(`${API_BASE}/indicator/rsi?symbol=BTC`)
     ]);
 
