@@ -144,16 +144,16 @@ const AllocationChart: React.FC<AllocationChartProps> = ({ wallets, prices, isPr
 
   if (pieDataToShow.length === 0) {
     return (
-        <div className="bg-white dark:bg-slate-900 h-full p-6 rounded-lg flex flex-col items-center justify-center">
-            <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">Overall Allocation</h3>
+        <div className="bg-white dark:bg-slate-800 shadow-md h-full p-6 rounded-lg flex flex-col items-center justify-center">
+            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Overall Allocation</h3>
             <p className="text-slate-500 dark:text-slate-400">Not enough data to display chart.</p>
         </div>
     );
   }
 
   return (
-    <div className="bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-lg h-full flex flex-col">
-      <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-6">Overall Allocation</h3>
+    <div className="bg-white dark:bg-slate-800 shadow-md p-4 sm:p-6 rounded-lg h-full flex flex-col">
+      <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Overall Allocation</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center flex-grow">
         <div className="h-[250px] sm:h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
