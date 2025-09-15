@@ -107,6 +107,9 @@ export async function fetchMarketIndicesFromCoinGlass(): Promise<MarketIndicesDa
 
     // Combine live data with static fallbacks for a complete object
     return {
+        // FIX: Add missing gold_future and dxy properties with fallback data to satisfy MarketIndicesData type.
+        gold_future: { name: 'Gold Futures', value: 'N/A', change: 0 },
+        dxy: { name: 'US Dollar Index (DXY)', value: 'N/A', change: 0 },
         btc_dominance,
         btc_exchange_balance,
         fear_and_greed,

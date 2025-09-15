@@ -131,24 +131,20 @@ export default function App() {
         />
 
         <div className="space-y-8 mt-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
-               <PortfolioSummary
-                totalValue={totalValue}
-                changeData={portfolioChange}
-                plData={totalPL}
-                performer={topPerformer}
-                loser={topLoser}
-                isLoading={isLoading}
-                isPrivacyMode={isPrivacyMode}
-              />
-            </div>
-             <GlobalStatsBar data={globalStats} isLoading={isGlobalStatsLoading} />
-          </div>
-
-          {wallets.length > 0 && totalValue > 0 && (
+          <PortfolioSummary
+            totalValue={totalValue}
+            changeData={portfolioChange}
+            plData={totalPL}
+            performer={topPerformer}
+            loser={topLoser}
+            isLoading={isLoading}
+            isPrivacyMode={isPrivacyMode}
+          />
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <GlobalStatsBar data={globalStats} isLoading={isGlobalStatsLoading} />
             <AllocationChart wallets={wallets} prices={prices} isPrivacyMode={isPrivacyMode} theme={theme} />
-           )}
+          </div>
 
           {wallets.length > 0 ? (
             <div>
