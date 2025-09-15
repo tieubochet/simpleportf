@@ -70,10 +70,10 @@ export async function fetchMarketIndicesFromCoinGlass(): Promise<MarketIndicesDa
     } : { name: 'Liquidations', value: '20.63M', change: -33.70 }; // Fallback
 
     const fear_and_greed = (fearGreedData && fearGreedData.length > 0) ? {
-        name: 'Chỉ số Sợ hãi và Tham lam',
+        name: 'Fear & Greed Index',
         value: parseInt(fearGreedData[0].value, 10),
         sentiment: fearGreedData[0].valueClassification,
-    } : { name: 'Chỉ số Sợ hãi và Tham lam', value: 46, sentiment: 'Trung tính' }; // Fallback
+    } : { name: 'Fear & Greed Index', value: 46, sentiment: 'Neutral' }; // Fallback
 
     const altcoin_season_index = (altcoinIndexData && altcoinIndexData.length > 0) ? {
         name: 'Altcoin Season Index',
@@ -88,10 +88,10 @@ export async function fetchMarketIndicesFromCoinGlass(): Promise<MarketIndicesDa
     } : { name: 'Bitcoin Dominance', value: '57.19%', change: -0.47 }; // Fallback
     
     const btc_exchange_balance = (btcBalanceData && btcBalanceData.balanceList.length > 0) ? {
-        name: 'Số Dư Giao Dịch Bitcoin',
+        name: 'BTC Exchange Balance',
         value: formatLargeNumber(btcBalanceData.balanceList[btcBalanceData.balanceList.length - 1].balance),
         changeBtc: `${btcBalanceData.balanceList[btcBalanceData.balanceList.length - 1].change24h > 0 ? '+' : ''}${formatLargeNumber(btcBalanceData.balanceList[btcBalanceData.balanceList.length - 1].change24h)}`,
-    } : { name: 'Số Dư Giao Dịch Bitcoin', value: '2.24M', changeBtc: '+4.46K' }; // Fallback
+    } : { name: 'BTC Exchange Balance', value: '2.24M', changeBtc: '+4.46K' }; // Fallback
     
     const avg_rsi = (rsiData && rsiData.length > 0) ? {
         name: 'AVG RSI',
