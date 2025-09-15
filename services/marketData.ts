@@ -23,32 +23,28 @@ async function fetchFearAndGreedIndex() {
     }
 }
 
-async function fetchCmcGlobalMarketData() {
+async function fetchCoingeckoGlobalMarketData() {
     try {
-        const API_BASE_URL = 'https://api.coinmarketcap.com/data-api/v3';
-        const response = await fetch(`${API_BASE_URL}/global-metrics/quotes/latest`);
+        const response = await fetch('https://api.coingecko.com/api/v3/global');
         if (!response.ok) {
-            throw new Error('Network response for global market data was not ok');
+            throw new Error('Network response for CoinGecko global data was not ok');
         }
         const data = await response.json();
-        if (data.status.error_code !== "0") {
-            throw new Error(data.status.error_message);
-        }
-        return data.data;
+        return data.data; // The actual data is in a 'data' property
     } catch (error) {
-        console.error('Failed to fetch global market data from CMC:', error);
+        console.error('Failed to fetch global market data from CoinGecko:', error);
         throw error;
     }
 }
 
 
 /**
- * Fetches market indices from CoinMarketCap and Alternative.me.
+ * Fetches market indices from CoinGecko and Alternative.me.
  */
 export async function fetchMarketIndices(): Promise<MarketIndicesData> {
     try {
         const [globalData, fearAndGreedData] = await Promise.all([
-            fetchCmcGlobalMarketData(),
+            fetchCoingeckoGlobalMarketData(),
             fetchFearAndGreedIndex(),
         ]);
         
@@ -71,27 +67,26 @@ export async function fetchMarketIndices(): Promise<MarketIndicesData> {
         }
 
         if (globalData) {
-            const quote = globalData.quote.USD;
             indices.btc_dominance = {
                 name: 'BTC Dominance',
-                value: `${globalData.btcDominance.toFixed(2)}%`,
+                value: `${globalData.market_cap_percentage.btc.toFixed(2)}%`,
             };
             indices.eth_dominance = {
                 name: 'ETH Dominance',
-                value: `${globalData.ethDominance.toFixed(2)}%`,
+                value: `${globalData.market_cap_percentage.eth.toFixed(2)}%`,
             };
             indices.total_market_cap = {
                 name: 'Total Market Cap',
-                value: formatLargeNumber(quote.totalMarketCap),
-                change: quote.totalMarketCapYesterdayPercentageChange,
+                value: formatLargeNumber(globalData.total_market_cap.usd),
+                change: globalData.market_cap_change_percentage_24h_usd,
             };
             indices.total_volume_24h = {
                 name: 'Total Volume (24h)',
-                value: formatLargeNumber(quote.totalVolume24h),
+                value: formatLargeNumber(globalData.total_volume.usd),
             };
             indices.active_cryptocurrencies = {
                 name: 'Active Cryptos',
-                value: globalData.activeCryptocurrencies.toLocaleString(),
+                value: globalData.active_cryptocurrencies.toLocaleString(),
             };
         }
 
