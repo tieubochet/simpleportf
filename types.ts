@@ -65,14 +65,20 @@ export interface MarketIndex {
 }
 
 // Represents the entire collection of market indices
+// FIX: Update MarketIndicesData to support fields from multiple data sources (CoinGecko, CoinGlass).
+// Made non-common fields optional to prevent type errors when a source doesn't provide them.
 export interface MarketIndicesData {
-  btc_dominance: MarketIndex;
-  btc_exchange_balance: MarketIndex;
   fear_and_greed: MarketIndex;
-  open_interest: MarketIndex;
-  liquidations: MarketIndex;
-  avg_rsi: MarketIndex;
-  altcoin_season_index: MarketIndex;
+  btc_dominance: MarketIndex;
+  eth_dominance?: MarketIndex;
+  total_market_cap?: MarketIndex;
+  total_volume_24h?: MarketIndex;
+  active_cryptocurrencies?: MarketIndex;
+  btc_exchange_balance?: MarketIndex;
+  open_interest?: MarketIndex;
+  liquidations?: MarketIndex;
+  avg_rsi?: MarketIndex;
+  altcoin_season_index?: MarketIndex;
 }
 
 // Represents a snapshot of the portfolio's value on a given day
