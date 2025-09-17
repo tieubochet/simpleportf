@@ -47,14 +47,6 @@ export interface PerformerData {
   change: number; // The 24h percentage change
 }
 
-// Represents a source from Google Search grounding
-export interface GroundingSource {
-  web: {
-    uri: string;
-    title: string;
-  };
-}
-
 // Represents the global market stats fetched from CoinGecko
 export interface GlobalStatsData {
   active_cryptocurrencies: number;
@@ -67,82 +59,8 @@ export interface GlobalStatsData {
   eth_gas_price_gwei: number;
 }
 
-// FIX: Add missing types for market indices to resolve import errors.
-// Represents a generic market index with a value and change
-export interface MarketIndex {
-  name: string;
-  value: string;
-  change: number;
-}
-
-// Represents a gauge-style market index with a value and sentiment
-export interface GaugeIndex {
-  name: string;
-  value: number;
-  sentiment: string;
-}
-
-// Represents the specific structure for BTC exchange balance
-export interface BtcBalanceIndex {
-    name: string;
-    value: string;
-    changeBtc: string;
-}
-
-// Represents a simple stat with a name and a string value
-export interface SimpleValueIndex {
-  name: string;
-  value: string;
-}
-
-// Represents the complete data structure for market indices fetched from external services
-export interface MarketIndicesData {
-  gold_future: MarketIndex;
-  dxy: MarketIndex;
-  btc_dominance: MarketIndex;
-  btc_exchange_balance: BtcBalanceIndex;
-  fear_and_greed: GaugeIndex;
-  open_interest: MarketIndex;
-  liquidations: MarketIndex;
-  avg_rsi: GaugeIndex;
-  altcoin_season_index: GaugeIndex;
-  eth_gas_price: SimpleValueIndex;
-}
-
-
 // Represents a snapshot of the portfolio's value on a given day
 export interface PortfolioSnapshot {
   date: string; // ISO date string (YYYY-MM-DD)
   totalValue: number; // The total portfolio value on that day in USD
-}
-
-// FIX: Add missing types for advanced market stats to resolve import errors.
-// Represents a single chart-based stat
-export interface ChartStat {
-  name: string;
-  value: string;
-  change: number; // percentage change
-  sparkline: string; // SVG path data for the sparkline
-}
-
-// Represents the AVG RSI gauge stat
-export interface RsiGaugeStat {
-  name: string;
-  value: number;
-  sentiment: string;
-}
-
-// Represents the Altcoin Season Index gauge stat
-export interface SeasonGaugeStat {
-  name: string;
-  value: number;
-  sentiment: string;
-}
-
-// Represents the entire collection of advanced market stats
-export interface AdvancedMarketStatsData {
-  openInterest: ChartStat;
-  liquidations: ChartStat;
-  avgRsi: RsiGaugeStat;
-  altcoinSeason: SeasonGaugeStat;
 }
