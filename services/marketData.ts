@@ -14,7 +14,7 @@ async function fetchEthGasPriceGwei(): Promise<number> {
         }
         const data = await response.json();
         if (data && typeof data.price === 'number') {
-            return Math.round(data.price);
+            return data.price;
         }
         throw new Error('Invalid data structure from ethgas.watch API');
     } catch (error) {
