@@ -1,6 +1,6 @@
-
 import React from 'react';
 import { MarketIndicesData, GroundingSource, MarketIndex, GaugeIndex, BtcBalanceIndex } from '../types';
+import { BoltIcon } from './icons';
 
 const StatCard: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-lg h-full">
@@ -103,6 +103,12 @@ const MarketIndices: React.FC<{ data: MarketIndicesData | null; sources: Groundi
         <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-md h-full flex flex-col">
             <div className="flex justify-between items-center mb-6 flex-shrink-0">
                 <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Market Snapshot</h2>
+                {data.eth_gas_price && (
+                    <div className="flex items-center space-x-2 text-sm font-semibold" title={data.eth_gas_price.name}>
+                        <BoltIcon className="h-4 w-4 text-amber-500" />
+                        <span className="text-slate-700 dark:text-slate-300 font-mono">{data.eth_gas_price.value}</span>
+                    </div>
+                )}
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 flex-grow">
                 <GaugeStat stat={data.fear_and_greed} />

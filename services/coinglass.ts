@@ -1,5 +1,5 @@
-
-import { MarketIndicesData } from '../types';
+import { MarketIndicesData, SimpleValueIndex } from '../types';
+import { fetchEthGasPrice } from './marketData';
 
 /**
  * NOTE: This service now fetches live data from CoinGlass's new v4 public APIs.
@@ -50,14 +50,16 @@ export async function fetchMarketIndicesFromCoinGlass(): Promise<MarketIndicesDa
         altcoinIndexData,
         btcDominanceData,
         btcBalanceData,
-        rsiData
+        rsiData,
+        gasPriceData
     ] = await Promise.all([
         fetchJson(`${API_BASE}/home/statistics`),
         fetchJson(`${API_BASE}/indicator/fear-greed`),
         fetchJson(`${API_BASE}/indicator/altcoin-season`),
         fetchJson(`${API_BASE}/indicator/dominance-chart`),
         fetchJson(`${API_BASE}/exchange/btc-balance`),
-        fetchJson(`${API_BASE}/indicator/rsi?symbol=BTC`)
+        fetchJson(`${API_BASE}/indicator/rsi?symbol=BTC`),
+        fetchEthGasPrice()
     ]);
 
     // --- Transform API data into the required structure ---
@@ -105,6 +107,8 @@ export async function fetchMarketIndicesFromCoinGlass(): Promise<MarketIndicesDa
         sentiment: rsiList[rsiList.length - 1].value > 70 ? 'OVERBOUGHT' : rsiList[rsiList.length - 1].value < 30 ? 'OVERSOLD' : 'NEUTRAL',
     } : { name: 'BTC RSI (1D)', value: 0, sentiment: 'N/A' };
 
+    const eth_gas_price = gasPriceData;
+
     // Combine live data with static fallbacks for a complete object
     return {
         // FIX: Add missing gold_future and dxy properties with fallback data to satisfy MarketIndicesData type.
@@ -117,5 +121,6 @@ export async function fetchMarketIndicesFromCoinGlass(): Promise<MarketIndicesDa
         liquidations,
         avg_rsi,
         altcoin_season_index,
+        eth_gas_price,
     };
 }

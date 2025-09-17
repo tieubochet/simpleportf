@@ -1,4 +1,4 @@
-import { MarketIndicesData, GroundingSource } from '../types';
+import { MarketIndicesData, GroundingSource, SimpleValueIndex } from '../types';
 import { fetchMarketDataFromGemini } from './gemini';
 import { fetchMarketIndicesFromCoinGlass } from './coinglass';
 
@@ -30,40 +30,29 @@ export async function fetchMarketIndices(): Promise<{ data: MarketIndicesData; s
     }
 }
 
-
-// The functions below are no longer used as we are switching to a more advanced data source.
-// They are kept here for historical reference but are not exported or used in the app.
-
-async function fetchGlobalFromCoinGecko() {
+/**
+ * Fetches the current fast ETH gas price from ethgas.watch.
+ * @returns A promise that resolves to an object with the gas price, or a fallback on error.
+ */
+export async function fetchEthGasPrice(): Promise<SimpleValueIndex> {
     try {
-        const response = await fetch('https://api.coingcko.com/api/v3/global');
-        if (!response.ok) {
-            throw new Error('Network response for CoinGecko global data was not ok');
-        }
-        const data = await response.json();
-        if (!data || !data.data) {
-            throw new Error('Invalid data structure from CoinGecko global API');
-        }
-        return data.data;
-    } catch (error) {
-        console.error('Failed to fetch global market data from CoinGecko:', error);
-        throw error;
-    }
-}
-
-async function fetchEthGasPrice() {
-    try {
-        const response = await fetch('https://ethgas.watch/api/gas');
+        // Using 'latest' endpoint as per current API, correcting typo from user's 'lastest'.
+        const response = await fetch('https://ethgas.watch/api/gas/latest');
         if (!response.ok) {
             throw new Error('Network response for ETH gas was not ok');
         }
         const data = await response.json();
-        if (data && data.fast && typeof data.fast.gwei === 'number') {
-            return data.fast.gwei;
+        // The new API structure returns a 'price' field.
+        if (data && typeof data.price === 'number') {
+            return {
+                name: 'ETH Gas (Fast)',
+                value: `${Math.round(data.price)} Gwei`,
+            };
         }
         throw new Error('Invalid data structure from ethgas.watch API');
     } catch (error) {
         console.error('Failed to fetch ETH gas price:', error);
-        return 0;
+        // Return a fallback value to prevent UI breakage
+        return { name: 'ETH Gas (Fast)', value: 'N/A' };
     }
 }

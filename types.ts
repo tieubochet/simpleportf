@@ -89,6 +89,12 @@ export interface BtcBalanceIndex {
     changeBtc: string;
 }
 
+// Represents a simple stat with a name and a string value
+export interface SimpleValueIndex {
+  name: string;
+  value: string;
+}
+
 // Represents the complete data structure for market indices fetched from external services
 export interface MarketIndicesData {
   gold_future: MarketIndex;
@@ -100,6 +106,7 @@ export interface MarketIndicesData {
   liquidations: MarketIndex;
   avg_rsi: GaugeIndex;
   altcoin_season_index: GaugeIndex;
+  eth_gas_price: SimpleValueIndex;
 }
 
 
