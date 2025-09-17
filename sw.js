@@ -1,5 +1,5 @@
 
-const CACHE_NAME = 'crypto-portfolio-cache-v22'; // Cache version bump
+const CACHE_NAME = 'crypto-portfolio-cache-v23'; // Cache version bump
 const URLS_TO_CACHE = [
   '/',
   '/index.html',
@@ -10,7 +10,6 @@ const URLS_TO_CACHE = [
   '/hooks/useWeb3Streak.ts',
   '/hooks/useCeloStreak.ts',
   '/hooks/useTheme.ts',
-  '/hooks/usePortfolioHistory.ts',
   '/services/coingecko.ts',
   '/services/marketData.ts',
   '/services/streakContract.ts',
@@ -28,8 +27,7 @@ const URLS_TO_CACHE = [
   '/components/DailyStreak.tsx',
   '/components/CeloDailyStreak.tsx',
   '/components/BackToTopButton.tsx',
-  '/components/MarketIndices.tsx',
-  '/components/PortfolioHistoryChart.tsx'
+  '/components/MarketIndices.tsx'
 ];
 
 self.addEventListener('install', event => {

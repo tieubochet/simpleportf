@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Wallet, PriceData, PortfolioAsset, Transaction, Coin, GlobalStatsData } from './types';
 import { usePortfolio } from './hooks/usePortfolio';
-import { usePortfolioHistory } from './hooks/usePortfolioHistory';
 import { useTheme } from './hooks/useTheme';
 import { fetchPrices } from './services/coingecko';
 import { fetchGlobalMarketStats } from './services/marketData';
@@ -17,12 +16,10 @@ import AddAssetModal from './components/AddAssetModal';
 import AddTransactionModal from './components/AddTransactionModal';
 import BackToTopButton from './components/BackToTopButton';
 import MarketIndices from './components/MarketIndices';
-import PortfolioHistoryChart from './components/PortfolioHistoryChart';
 
 export default function App() {
   const { theme, toggleTheme } = useTheme();
   const { wallets, addWallet, removeWallet, addAssetToWallet, addTransactionToAsset, removeAssetFromWallet, importWallets, exportWallets } = usePortfolio();
-  const { history, addSnapshot } = usePortfolioHistory();
   
   const [prices, setPrices] = useState<PriceData>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -90,14 +87,6 @@ export default function App() {
   const totalPL = useMemo(() => calculateTotalPL(wallets, prices), [wallets, prices]);
   const topPerformer = useMemo(() => findTopPerformer(wallets, prices), [wallets, prices]);
   const topLoser = useMemo(() => findTopLoser(wallets, prices), [wallets, prices]);
-  
-  useEffect(() => {
-    // Save a snapshot of the portfolio value for the history chart
-    if (!isLoading && totalValue > 0) {
-      addSnapshot(totalValue);
-    }
-  }, [totalValue, isLoading, addSnapshot]);
-
 
   const handleAddAssetClick = (walletId: string) => {
     setSelectedWalletId(walletId);
@@ -155,8 +144,6 @@ export default function App() {
             <MarketIndices data={globalStats} isLoading={isGlobalStatsLoading} />
             <AllocationChart wallets={wallets} prices={prices} isPrivacyMode={isPrivacyMode} theme={theme} />
           </div>
-
-          <PortfolioHistoryChart history={history} isPrivacyMode={isPrivacyMode} theme={theme} />
 
           {wallets.length > 0 ? (
             <div>

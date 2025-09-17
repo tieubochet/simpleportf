@@ -1,3 +1,4 @@
+
 // Represents a single buy or sell transaction
 export interface Transaction {
   id: string;
@@ -47,6 +48,13 @@ export interface PerformerData {
   change: number; // The 24h percentage change
 }
 
+// FIX: Added missing PortfolioSnapshot interface.
+// Represents a daily snapshot of the portfolio's total value
+export interface PortfolioSnapshot {
+  date: string; // ISO string for the date of the snapshot (YYYY-MM-DD)
+  totalValue: number; // Total value in USD on that day
+}
+
 // Represents the global market stats fetched from CoinGecko
 export interface GlobalStatsData {
   active_cryptocurrencies: number;
@@ -57,10 +65,4 @@ export interface GlobalStatsData {
   btc_dominance: number;
   eth_dominance: number;
   eth_gas_price_gwei: number;
-}
-
-// Represents a snapshot of the portfolio's value on a given day
-export interface PortfolioSnapshot {
-  date: string; // ISO date string (YYYY-MM-DD)
-  totalValue: number; // The total portfolio value on that day in USD
 }
