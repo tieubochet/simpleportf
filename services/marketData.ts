@@ -3,23 +3,28 @@ import { GlobalStatsData } from '../types';
 const API_BASE_URL = 'https://api.coingecko.com/api/v3';
 
 /**
- * Fetches the current fast ETH gas price from ethgas.watch.
+ * Fetches the current fast ETH gas price from Etherchain.
  * @returns A promise that resolves to the gas price in Gwei, or 0 on error.
  */
 async function fetchEthGasPriceGwei(): Promise<number> {
     try {
-        const response = await fetch('https://ethgas.watch/api/gas/latest');
+        // Switched from ethgas.watch (CORS issues) to a reliable public endpoint.
+        const response = await fetch('https://etherchain.org/api/gasPriceOracle');
         if (!response.ok) {
             throw new Error('Network response for ETH gas was not ok');
         }
         const data = await response.json();
-        if (data && typeof data.price === 'number') {
-            return data.price;
+        // Etherchain API provides 'fast' price, which might be a string.
+        if (data && data.fast) {
+            const gasPrice = parseFloat(data.fast);
+            if (!isNaN(gasPrice)) {
+                return Math.round(gasPrice);
+            }
         }
-        throw new Error('Invalid data structure from ethgas.watch API');
+        throw new Error('Invalid data structure from Etherchain gas API');
     } catch (error) {
         console.error('Failed to fetch ETH gas price:', error);
-        return 0;
+        return 0; // Return 0 as a fallback on any error.
     }
 }
 
