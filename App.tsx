@@ -1,10 +1,10 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Wallet, PriceData, PortfolioAsset, Transaction, Coin, GlobalStatsData } from './types';
+import { Wallet, PriceData, PortfolioAsset, Transaction, Coin, MarketIndicesData, GroundingSource } from './types';
 import { usePortfolio } from './hooks/usePortfolio';
 import { useTheme } from './hooks/useTheme';
 import { fetchPrices } from './services/coingecko';
-import { fetchGlobalStats } from './services/marketData';
+import { fetchMarketIndices } from './services/marketData';
 import { calculateTotalValue, calculatePortfolio24hChange, calculateTotalPL, getAssetIds, findTopPerformer, findTopLoser, getAssetMetrics } from './utils/calculations';
 
 import PortfolioHeader from './components/PortfolioHeader';
@@ -15,7 +15,7 @@ import AddWalletModal from './components/AddWalletModal';
 import AddAssetModal from './components/AddAssetModal';
 import AddTransactionModal from './components/AddTransactionModal';
 import BackToTopButton from './components/BackToTopButton';
-import GlobalStatsBar from './components/MarketIndices';
+import MarketIndices from './components/MarketIndices';
 
 export default function App() {
   const { theme, toggleTheme } = useTheme();
@@ -33,8 +33,9 @@ export default function App() {
   
   const [isPrivacyMode, setIsPrivacyMode] = useState(false);
 
-  const [globalStats, setGlobalStats] = useState<GlobalStatsData | null>(null);
-  const [isGlobalStatsLoading, setIsGlobalStatsLoading] = useState(true);
+  const [marketIndices, setMarketIndices] = useState<MarketIndicesData | null>(null);
+  const [marketIndicesSources, setMarketIndicesSources] = useState<GroundingSource[]>([]);
+  const [isMarketIndicesLoading, setIsMarketIndicesLoading] = useState(true);
 
   const assetIds = useMemo(() => getAssetIds(wallets), [wallets]);
   const existingAssetIdsInSelectedWallet = useMemo(() => {
@@ -57,16 +58,18 @@ export default function App() {
     if (isRefresh) setIsRefreshing(false);
   }, [assetIds]);
   
-  const updateGlobalStats = useCallback(async () => {
-      setIsGlobalStatsLoading(true);
+  const updateMarketIndices = useCallback(async () => {
+      setIsMarketIndicesLoading(true);
       try {
-          const data = await fetchGlobalStats();
-          setGlobalStats(data);
+          const { data, sources } = await fetchMarketIndices();
+          setMarketIndices(data);
+          setMarketIndicesSources(sources);
       } catch (err) {
-          console.error("Failed to fetch global stats:", err);
-          setGlobalStats(null);
+          console.error("Failed to fetch market indices:", err);
+          setMarketIndices(null);
+          setMarketIndicesSources([]);
       } finally {
-          setIsGlobalStatsLoading(false);
+          setIsMarketIndicesLoading(false);
       }
   }, []);
 
@@ -77,10 +80,10 @@ export default function App() {
   }, [updatePrices]);
   
   useEffect(() => {
-      updateGlobalStats();
-      const interval = setInterval(updateGlobalStats, 300000); // Update every 5 minutes
+      updateMarketIndices();
+      const interval = setInterval(updateMarketIndices, 300000); // Update every 5 minutes
       return () => clearInterval(interval);
-  }, [updateGlobalStats]);
+  }, [updateMarketIndices]);
 
   const totalValue = useMemo(() => calculateTotalValue(wallets, prices), [wallets, prices]);
   const portfolioChange = useMemo(() => calculatePortfolio24hChange(wallets, prices), [wallets, prices]);
@@ -114,7 +117,6 @@ export default function App() {
     setSelectedAsset(null);
   };
 
-  // FIX: Add return statement with JSX to make this a valid component.
   return (
     <div className={`bg-slate-100 dark:bg-slate-900 min-h-screen text-slate-800 dark:text-slate-200 transition-colors duration-300 font-sans`}>
       <main className="container mx-auto p-4 md:p-6 lg:p-8">
@@ -126,7 +128,7 @@ export default function App() {
           onTogglePrivacyMode={() => setIsPrivacyMode(prev => !prev)}
           theme={theme}
           onToggleTheme={toggleTheme}
-          onRefresh={() => updatePrices(true)}
+          onRefresh={() => { updatePrices(true); updateMarketIndices(); }}
           isRefreshing={isRefreshing}
         />
 
@@ -142,7 +144,7 @@ export default function App() {
           />
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <GlobalStatsBar data={globalStats} isLoading={isGlobalStatsLoading} />
+            <MarketIndices data={marketIndices} sources={marketIndicesSources} isLoading={isMarketIndicesLoading} />
             <AllocationChart wallets={wallets} prices={prices} isPrivacyMode={isPrivacyMode} theme={theme} />
           </div>
 
