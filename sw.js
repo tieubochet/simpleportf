@@ -1,5 +1,5 @@
 
-const CACHE_NAME = 'crypto-portfolio-cache-v20'; // Cache version bump
+const CACHE_NAME = 'crypto-portfolio-cache-v22'; // Cache version bump
 const URLS_TO_CACHE = [
   '/',
   '/index.html',
@@ -10,6 +10,7 @@ const URLS_TO_CACHE = [
   '/hooks/useWeb3Streak.ts',
   '/hooks/useCeloStreak.ts',
   '/hooks/useTheme.ts',
+  '/hooks/usePortfolioHistory.ts',
   '/services/coingecko.ts',
   '/services/marketData.ts',
   '/services/streakContract.ts',
@@ -27,7 +28,8 @@ const URLS_TO_CACHE = [
   '/components/DailyStreak.tsx',
   '/components/CeloDailyStreak.tsx',
   '/components/BackToTopButton.tsx',
-  '/components/MarketIndices.tsx'
+  '/components/MarketIndices.tsx',
+  '/components/PortfolioHistoryChart.tsx'
 ];
 
 self.addEventListener('install', event => {
@@ -48,7 +50,7 @@ self.addEventListener('fetch', event => {
   // Let the browser handle API/CDN requests to ensure fresh data, bypassing the SW cache.
   if (
     event.request.url.includes('api.coingecko.com') || 
-    event.request.url.includes('ethgas.watch') ||
+    event.request.url.includes('www.ethgastracker.com') ||
     event.request.url.includes('esm.sh') || 
     event.request.url.includes('cdn.tailwindcss.com')
   ) {
