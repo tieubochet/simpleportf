@@ -25,7 +25,7 @@ export const CeloDailyStreak: React.FC = () => {
                     title="Connect Celo wallet to say GM"
                 >
                     <WalletIcon className="h-5 w-5" />
-                    <span>{isConnecting ? 'Connecting...' : 'Connect Celo'}</span>
+                    <span>{isConnecting ? 'Connecting...' : 'Celo Streak'}</span>
                 </button>
                  {error && <p className="absolute top-full right-0 mt-1 text-xs text-red-500 dark:text-red-400 whitespace-nowrap">{error}</p>}
             </div>
