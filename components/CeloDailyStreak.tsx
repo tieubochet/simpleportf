@@ -34,11 +34,9 @@ export const CeloDailyStreak: React.FC = () => {
 
     const isLoading = isInteracting || isConnecting;
     
-    let buttonText = 'Celo GM';
     let title = "Say GM on Celo for today's streak";
 
     if (isLoading) {
-        buttonText = 'Processing...';
         title = "Processing transaction...";
     }
 
@@ -52,7 +50,6 @@ export const CeloDailyStreak: React.FC = () => {
             >
                 <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21.419 12.428c0 5.24-4.26 9.5-9.5 9.5-5.24 0-9.5-4.26-9.5-9.5 0-5.24 4.26-9.5 9.5-9.5 5.24 0 9.5 4.26 9.5 9.5z" stroke="#35D07F" strokeWidth="2.5" strokeMiterlimit="10"></path><path d="M17.419 12.428a5.5 5.5 0 01-11 0 5.5 5.5 0 0111 0z" stroke="#35D07F" strokeWidth="2" strokeMiterlimit="10"></path></svg>
                 <span className="font-bold">{streak}</span>
-                <span>{buttonText}</span>
             </button>
             {error && <p className="absolute top-full right-0 mt-1 text-xs text-red-500 dark:text-red-400 whitespace-nowrap">{error}</p>}
         </div>
