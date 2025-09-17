@@ -1,8 +1,8 @@
 // FIX: Use standard module import for @google/genai.
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI } from "https://esm.sh/@google/genai";
 import { MarketIndicesData, GroundingSource } from '../types';
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export async function fetchMarketDataFromGemini(): Promise<{ data: MarketIndicesData; sources: GroundingSource[] }> {
     const prompt = `
