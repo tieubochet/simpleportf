@@ -11,7 +11,7 @@ const ETHERSCAN_API_BASE_URL = 'https://api.etherscan.io/v2/api';
 async function fetchEthGasPriceGwei(): Promise<number> {
     try {
         // As per user's confirmation, an API key is securely provided via environment variables.
-        const response = await fetch(`${ETHERSCAN_API_BASE_URL}??chainid=1&module=gastracker&action=gasoracle&apikey=${process.env.API_KEY}`);
+        const response = await fetch(`${ETHERSCAN_API_BASE_URL}?chainid=1&module=gastracker&action=gasoracle&apikey=${process.env.ETHERSCAN_API}`);
         
         if (!response.ok) {
             throw new Error(`Etherscan API request failed with status ${response.status}`);
