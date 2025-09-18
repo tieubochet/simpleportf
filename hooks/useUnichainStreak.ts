@@ -15,15 +15,15 @@ declare global {
 }
 
 // Unichain Mainnet details
-const UNICHAIN_CHAIN_ID = '0x309'; // 777 in hex
-const UNICHAIN_CHAIN_ID_DECIMAL = 777;
-const UNICHAIN_RPC_URLS = ['https://rpc-1.unichain.world/', 'https://rpc.unichain.world', 'https://rpc-mainnet.unichain.world'];
+const UNICHAIN_CHAIN_ID = '0x82'; // 777 in hex
+const UNICHAIN_CHAIN_ID_DECIMAL = 130;
+const UNICHAIN_RPC_URLS = ['https://mainnet.unichain.org'];
 const UNICHAIN_CHAIN_PARAMS = {
     chainId: UNICHAIN_CHAIN_ID,
     chainName: 'Unichain',
     nativeCurrency: { name: 'Unichain', symbol: 'UNI', decimals: 18 },
     rpcUrls: UNICHAIN_RPC_URLS,
-    blockExplorerUrls: ['https://unichain.info'],
+    blockExplorerUrls: ['https://uniscan.xyz'],
 };
 
 export function useUnichainStreak() {
