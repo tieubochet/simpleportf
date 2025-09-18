@@ -1,5 +1,5 @@
 import { GlobalStatsData } from '../types';
-import { ethers } from 'ethers';
+import { ethers } from 'https://esm.sh/ethers@6.13.1';
 
 const API_BASE_URL = 'https://api.coingecko.com/api/v3';
 
