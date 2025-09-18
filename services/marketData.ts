@@ -1,33 +1,32 @@
 import { GlobalStatsData } from '../types';
-import { ethers } from 'https://esm.sh/ethers@6.13.1';
 
-const API_BASE_URL = 'https://api.coingecko.com/api/v3';
+const COINGECKO_API_BASE_URL = 'https://api.coingecko.com/api/v3';
+const ETHERSCAN_API_BASE_URL = 'https://api.etherscan.io/api';
 
 /**
- * Fetches the current ETH gas price in Gwei by querying a pool of public RPC endpoints for reliability.
- * @returns A promise that resolves to the gas price in Gwei.
+ * Fetches the current ETH gas price in Gwei from the Etherscan API.
+ * This is a more reliable method than querying public RPCs.
+ * @returns A promise that resolves to the "Fast" gas price in Gwei.
  */
 async function fetchEthGasPriceGwei(): Promise<number> {
     try {
-        // Create a list of reliable public RPC providers for redundancy.
-        const providers = [
-            new ethers.JsonRpcProvider('https://cloudflare-eth.com'),
-            new ethers.JsonRpcProvider('https://rpc.ankr.com/eth'),
-            new ethers.JsonRpcProvider('https://eth-mainnet.public.blastapi.io'),
-        ];
+        // As per user's confirmation, an API key is securely provided via environment variables.
+        const response = await fetch(`${ETHERSCAN_API_BASE_URL}?module=gastracker&action=gasoracle&apikey=${process.env.API_KEY}`);
         
-        // The FallbackProvider will query each provider in order until one returns a result.
-        const fallbackProvider = new ethers.FallbackProvider(providers);
-
-        const feeData = await fallbackProvider.getFeeData();
-        
-        if (feeData.gasPrice) {
-            const gasPriceGwei = ethers.formatUnits(feeData.gasPrice, 'gwei');
-            return parseFloat(gasPriceGwei);
+        if (!response.ok) {
+            throw new Error(`Etherscan API request failed with status ${response.status}`);
         }
-        return 0;
+
+        const data = await response.json();
+
+        if (data.status === "1" && data.result && data.result.FastGasPrice) {
+            return parseFloat(data.result.FastGasPrice);
+        } else {
+            console.warn("Etherscan API did not return a valid gas price:", data.message || data.result);
+            return 0;
+        }
     } catch (error) {
-        console.warn("Could not fetch ETH gas price from any RPC provider:", error);
+        console.error("Could not fetch ETH gas price from Etherscan:", error);
         return 0; // Return 0 on failure
     }
 }
@@ -40,7 +39,7 @@ async function fetchEthGasPriceGwei(): Promise<number> {
 export async function fetchGlobalMarketStats(): Promise<GlobalStatsData> {
     try {
         const [globalRes, gasPriceRes] = await Promise.allSettled([
-            fetch(`${API_BASE_URL}/global`),
+            fetch(`${COINGECKO_API_BASE_URL}/global`),
             fetchEthGasPriceGwei()
         ]);
         
