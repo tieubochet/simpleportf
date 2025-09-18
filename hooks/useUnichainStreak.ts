@@ -16,7 +16,7 @@ declare global {
 
 // Unichain Mainnet details
 const UNICHAIN_CHAIN_ID = '0x309'; // 777 in hex
-const UNICHAIN_RPC_URL = 'https://rpc.unichain.world';
+const UNICHAIN_RPC_URL = 'https://rpc-mainnet.unichain.world';
 const UNICHAIN_CHAIN_PARAMS = {
     chainId: UNICHAIN_CHAIN_ID,
     chainName: 'Unichain',
