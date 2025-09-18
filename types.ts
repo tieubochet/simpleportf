@@ -63,5 +63,4 @@ export interface GlobalStatsData {
   total_volume_24h: number;
   btc_dominance: number;
   eth_dominance: number;
-  eth_gas_price_gwei: number;
 }

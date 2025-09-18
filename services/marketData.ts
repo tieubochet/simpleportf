@@ -5,16 +5,15 @@ const ETHERSCAN_API_BASE_URL = 'https://api.etherscan.io/v2/api';
 
 /**
  * Fetches the current ETH gas price in Gwei from the Etherscan API.
- * This is a more reliable method than querying public RPCs.
  * @returns A promise that resolves to the "Fast" gas price in Gwei.
  */
-async function fetchEthGasPriceGwei(): Promise<number> {
+export async function fetchEtherscanGasPriceGwei(): Promise<number> {
     try {
         // Use import.meta.env for Vite-based environments (like Vercel) to correctly access the API key.
-        // The user must set VITE_ETHERSCAN_API in their deployment environment.
-        const apiKey = (import.meta as any).env?.VITE_ETHERSCAN_API;
+        // The user must set ETHERSCAN_API in their deployment environment.
+        const apiKey = (import.meta as any).env?.ETHERSCAN_API;
         if (!apiKey) {
-            console.warn("Etherscan API key is not configured.");
+            console.warn("Etherscan API key (ETHERSCAN_API) is not configured.");
             return 0;
         }
 
@@ -40,34 +39,24 @@ async function fetchEthGasPriceGwei(): Promise<number> {
 
 
 /**
- * Fetches global cryptocurrency market statistics from CoinGecko and ETH gas price.
- * @returns A promise that resolves to an object containing global market data.
+ * Fetches global cryptocurrency market statistics from CoinGecko.
+ * @returns A promise that resolves to an object containing global market data, excluding gas price.
  */
-export async function fetchGlobalMarketStats(): Promise<GlobalStatsData> {
+export async function fetchGlobalMarketStats(): Promise<Omit<GlobalStatsData, 'eth_gas_price_gwei'>> {
     try {
-        const [globalRes, gasPriceRes] = await Promise.allSettled([
-            fetch(`${COINGECKO_API_BASE_URL}/global`),
-            fetchEthGasPriceGwei()
-        ]);
+        const response = await fetch(`${COINGECKO_API_BASE_URL}/global`);
         
-        if (globalRes.status !== 'fulfilled' || !globalRes.value.ok) {
+        if (!response.ok) {
              throw new Error('Network response for global stats was not ok');
         }
 
-        const globalData = await globalRes.value.json();
+        const globalData = await response.json();
         const { data } = globalData;
 
         if (!data) {
              throw new Error('Invalid data structure from CoinGecko global API');
         }
         
-        let gasPriceGwei = 0; // Default value
-        if (gasPriceRes.status === 'fulfilled' && typeof gasPriceRes.value === 'number') {
-           gasPriceGwei = gasPriceRes.value;
-        } else {
-            console.warn("Failed to fetch ETH gas price, defaulting to 0.");
-        }
-
         return {
             active_cryptocurrencies: data.active_cryptocurrencies,
             markets: data.markets,
@@ -76,7 +65,6 @@ export async function fetchGlobalMarketStats(): Promise<GlobalStatsData> {
             total_volume_24h: data.total_volume.usd,
             btc_dominance: data.market_cap_percentage.btc,
             eth_dominance: data.market_cap_percentage.eth,
-            eth_gas_price_gwei: gasPriceGwei,
         };
 
     } catch (error) {

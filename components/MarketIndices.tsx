@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { GlobalStatsData } from '../types';
 import { BoltIcon } from './icons';
+import { fetchEtherscanGasPriceGwei } from '../services/marketData';
 
 // Reusable stat card component
 const StatCard: React.FC<{ title: string; value: string; change?: number; changeColorClass?: string; icon?: React.ReactNode }> = ({ title, value, change, changeColorClass, icon }) => (
@@ -42,7 +43,24 @@ const LoadingSkeleton = () => (
     </div>
 );
 
-const MarketIndices: React.FC<{ data: GlobalStatsData | null; isLoading: boolean }> = ({ data, isLoading }) => {
+const MarketIndices: React.FC<{ data: Omit<GlobalStatsData, 'eth_gas_price_gwei'> | null; isLoading: boolean }> = ({ data, isLoading }) => {
+    const [gasPrice, setGasPrice] = useState<number | null>(null);
+    const [isGasLoading, setIsGasLoading] = useState(true);
+
+    useEffect(() => {
+        const getGasPrice = async () => {
+            setIsGasLoading(true);
+            const price = await fetchEtherscanGasPriceGwei();
+            setGasPrice(price);
+            setIsGasLoading(false);
+        };
+
+        getGasPrice();
+        // Refresh gas price every minute
+        const interval = setInterval(getGasPrice, 60000); 
+        return () => clearInterval(interval);
+    }, []);
+
     if (isLoading) {
         return <LoadingSkeleton />;
     }
@@ -58,6 +76,8 @@ const MarketIndices: React.FC<{ data: GlobalStatsData | null; isLoading: boolean
 
     const marketCapChange = data.market_cap_change_percentage_24h_usd;
     const marketCapChangeColor = marketCapChange >= 0 ? 'text-green-500' : 'text-red-500';
+    const gasDisplayValue = isGasLoading ? '...' : (gasPrice !== null && gasPrice > 0) ? `${gasPrice.toFixed(0)} Gwei` : '-';
+
 
     return (
         <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-md h-full flex flex-col">
@@ -75,7 +95,7 @@ const MarketIndices: React.FC<{ data: GlobalStatsData | null; isLoading: boolean
                 />
                 <StatCard
                     title="ETH Gas (Fast)"
-                    value={data.eth_gas_price_gwei > 0 ? `${data.eth_gas_price_gwei.toFixed(0)} Gwei` : '-'}
+                    value={gasDisplayValue}
                     icon={<BoltIcon className="h-4 w-4 text-amber-500" />}
                 />
                  <StatCard 
@@ -93,7 +113,7 @@ const MarketIndices: React.FC<{ data: GlobalStatsData | null; isLoading: boolean
             </div>
              <div className="mt-6 pt-3 border-t border-slate-200 dark:border-slate-700 flex-shrink-0">
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Data provided by <a href="https://www.coingecko.com/" target="_blank" rel="noopener noreferrer" className="text-cyan-500 hover:underline">CoinGecko</a>
+                    Data provided by <a href="https://www.coingecko.com/" target="_blank" rel="noopener noreferrer" className="text-cyan-500 hover:underline">CoinGecko</a> & Etherscan
                 </p>
             </div>
         </div>
