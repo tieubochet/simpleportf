@@ -51,7 +51,7 @@ self.addEventListener('fetch', event => {
   // Let the browser handle API/CDN requests to ensure fresh data, bypassing the SW cache.
   if (
     event.request.url.includes('api.coingecko.com') || 
-    event.request.url.includes('www.ethgastracker.com') ||
+    event.request.url.includes('fees.defillama.com') ||
     event.request.url.includes('esm.sh') || 
     event.request.url.includes('cdn.tailwindcss.com')
   ) {

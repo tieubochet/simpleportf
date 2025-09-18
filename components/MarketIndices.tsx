@@ -75,7 +75,7 @@ const MarketIndices: React.FC<{ data: GlobalStatsData | null; isLoading: boolean
                 />
                 <StatCard
                     title="ETH Gas (Fast)"
-                    value={`${data.eth_gas_price_gwei} Gwei`}
+                    value={data.eth_gas_price_gwei > 0 ? `${data.eth_gas_price_gwei.toFixed(0)} Gwei` : '-'}
                     icon={<BoltIcon className="h-4 w-4 text-amber-500" />}
                 />
                  <StatCard 
