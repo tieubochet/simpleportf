@@ -10,10 +10,10 @@ const ETHERSCAN_API_BASE_URL = 'https://api.etherscan.io/v2/api';
 export async function fetchEtherscanGasPriceGwei(): Promise<number> {
     try {
         // Use import.meta.env for Vite-based environments (like Vercel) to correctly access the API key.
-        // The user must set ETHERSCAN_API in their deployment environment.
-        const apiKey = (import.meta as any).env?.ETHERSCAN_API;
+        // The user must set VITE_ETHERSCAN_API in their deployment environment.
+        const apiKey = (import.meta as any).env?.VITE_ETHERSCAN_API;
         if (!apiKey) {
-            console.warn("Etherscan API key (ETHERSCAN_API) is not configured.");
+            console.warn("Etherscan API key (VITE_ETHERSCAN_API) is not configured.");
             return 0;
         }
 
