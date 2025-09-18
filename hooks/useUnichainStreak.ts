@@ -20,7 +20,7 @@ const UNICHAIN_RPC_URL = 'https://rpc.unichain.world';
 const UNICHAIN_CHAIN_PARAMS = {
     chainId: UNICHAIN_CHAIN_ID,
     chainName: 'Unichain',
-    nativeCurrency: { name: 'Uni', symbol: 'UNI', decimals: 18 },
+    nativeCurrency: { name: 'Unichain', symbol: 'UNI', decimals: 18 },
     rpcUrls: [UNICHAIN_RPC_URL],
     blockExplorerUrls: ['https://unichain.info'],
 };
