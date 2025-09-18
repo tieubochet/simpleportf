@@ -76,7 +76,11 @@ const MarketIndices: React.FC<{ data: Omit<GlobalStatsData, 'eth_gas_price_gwei'
 
     const marketCapChange = data.market_cap_change_percentage_24h_usd;
     const marketCapChangeColor = marketCapChange >= 0 ? 'text-green-500' : 'text-red-500';
-    const gasDisplayValue = isGasLoading ? '...' : (gasPrice !== null && gasPrice > 0) ? `${gasPrice.toFixed(0)} Gwei` : '-';
+    const gasDisplayValue = isGasLoading 
+        ? '...' 
+        : (gasPrice !== null && gasPrice > 0) 
+            ? `${gasPrice.toFixed(gasPrice < 1 ? 2 : 0)} Gwei` 
+            : '-';
 
 
     return (
