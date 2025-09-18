@@ -17,6 +17,7 @@ declare global {
 
 // Base Chain details
 const BASE_CHAIN_ID = '0x2105'; // 8453 in hex
+const BASE_CHAIN_ID_DECIMAL = 8453;
 const BASE_RPC_URL = 'https://mainnet.base.org';
 const BASE_CHAIN_PARAMS = {
     chainId: BASE_CHAIN_ID,
@@ -93,8 +94,11 @@ export function useWeb3Streak() {
             // 1. Explicitly request accounts to ensure wallet connection prompt
             await browserProvider.send("eth_requestAccounts", []);
 
-            // 2. Switch to the correct network
-            await switchNetwork(window.ethereum);
+            // 2. Check current network and switch only if necessary
+            const network = await browserProvider.getNetwork();
+            if (network.chainId !== BigInt(BASE_CHAIN_ID_DECIMAL)) {
+                await switchNetwork(window.ethereum);
+            }
             
             // 3. Get the signer, which should now be available without a prompt
             const newSigner = await browserProvider.getSigner();

@@ -16,6 +16,7 @@ declare global {
 
 // Celo Mainnet details
 const CELO_CHAIN_ID = '0xa4ec'; // 42220 in hex
+const CELO_CHAIN_ID_DECIMAL = 42220;
 const CELO_RPC_URL = 'https://forno.celo.org';
 const CELO_CHAIN_PARAMS = {
     chainId: CELO_CHAIN_ID,
@@ -92,8 +93,11 @@ export function useCeloStreak() {
             // 1. Explicitly request accounts to ensure wallet connection prompt
             await browserProvider.send("eth_requestAccounts", []);
 
-            // 2. Switch to the correct network
-            await switchNetwork(window.ethereum);
+            // 2. Check current network and switch only if necessary
+            const network = await browserProvider.getNetwork();
+            if (network.chainId !== BigInt(CELO_CHAIN_ID_DECIMAL)) {
+                 await switchNetwork(window.ethereum);
+            }
 
             // 3. Get the signer, which should now be available without a prompt
             const newSigner = await browserProvider.getSigner();

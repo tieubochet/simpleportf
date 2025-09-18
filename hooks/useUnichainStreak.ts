@@ -16,6 +16,7 @@ declare global {
 
 // Unichain Mainnet details
 const UNICHAIN_CHAIN_ID = '0x309'; // 777 in hex
+const UNICHAIN_CHAIN_ID_DECIMAL = 777;
 const UNICHAIN_RPC_URL = 'https://rpc.unichain.world/'; // Updated RPC URL
 const UNICHAIN_CHAIN_PARAMS = {
     chainId: UNICHAIN_CHAIN_ID,
@@ -92,8 +93,11 @@ export function useUnichainStreak() {
             // 1. Explicitly request accounts to ensure wallet connection prompt
             await browserProvider.send("eth_requestAccounts", []);
 
-            // 2. Switch to the correct network
-            await switchNetwork(window.ethereum);
+            // 2. Check current network and switch only if necessary
+            const network = await browserProvider.getNetwork();
+            if (network.chainId !== BigInt(UNICHAIN_CHAIN_ID_DECIMAL)) {
+                await switchNetwork(window.ethereum);
+            }
             
             // 3. Get the signer, which should now be available without a prompt
             const newSigner = await browserProvider.getSigner();
