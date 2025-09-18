@@ -20,6 +20,7 @@ async function fetchEthGasPriceGwei(): Promise<number> {
         const data = await response.json();
 
         if (data.status === "1" && data.result && data.result.FastGasPrice) {
+            console.log(data.result.FastGasPrice);
             return parseFloat(data.result.FastGasPrice);
         } else {
             console.warn("Etherscan API did not return a valid gas price:", data.message || data.result);
