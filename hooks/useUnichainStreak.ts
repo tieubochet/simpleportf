@@ -17,12 +17,12 @@ declare global {
 // Unichain Mainnet details
 const UNICHAIN_CHAIN_ID = '0x309'; // 777 in hex
 const UNICHAIN_CHAIN_ID_DECIMAL = 777;
-const UNICHAIN_RPC_URL = 'https://rpc.unichain.world/'; // Updated RPC URL
+const UNICHAIN_RPC_URLS = ['https://rpc-1.unichain.world/', 'https://rpc.unichain.world', 'https://rpc-mainnet.unichain.world'];
 const UNICHAIN_CHAIN_PARAMS = {
     chainId: UNICHAIN_CHAIN_ID,
     chainName: 'Unichain',
     nativeCurrency: { name: 'Unichain', symbol: 'UNI', decimals: 18 },
-    rpcUrls: [UNICHAIN_RPC_URL],
+    rpcUrls: UNICHAIN_RPC_URLS,
     blockExplorerUrls: ['https://unichain.info'],
 };
 
@@ -68,7 +68,7 @@ export function useUnichainStreak() {
     
     const fetchStreak = useCallback(async (userAddress: string) => {
         try {
-            const provider = new ethers.JsonRpcProvider(UNICHAIN_RPC_URL);
+            const provider = new ethers.JsonRpcProvider(UNICHAIN_RPC_URLS[0]);
             const contract = new ethers.Contract(streakContractAddress, streakContractAbi, provider);
             const currentStreak = await contract.getStreak(userAddress);
             setStreak(Number(currentStreak));
