@@ -89,8 +89,14 @@ export function useWeb3Streak() {
         
         try {
             const browserProvider = new ethers.BrowserProvider(window.ethereum);
-            await switchNetwork(window.ethereum);
+            
+            // 1. Explicitly request accounts to ensure wallet connection prompt
+            await browserProvider.send("eth_requestAccounts", []);
 
+            // 2. Switch to the correct network
+            await switchNetwork(window.ethereum);
+            
+            // 3. Get the signer, which should now be available without a prompt
             const newSigner = await browserProvider.getSigner();
             const userAddress = await newSigner.getAddress();
             
