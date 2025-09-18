@@ -1,16 +1,39 @@
 import { GlobalStatsData } from '../types';
+import { ethers } from 'ethers';
 
 const API_BASE_URL = 'https://api.coingecko.com/api/v3';
 
 /**
- * Fetches global cryptocurrency market statistics from CoinGecko and ETH gas price from DeFiLlama.
+ * Fetches the current ETH gas price in Gwei from a public RPC endpoint.
+ * @returns A promise that resolves to the gas price in Gwei.
+ */
+async function fetchEthGasPriceGwei(): Promise<number> {
+    try {
+        // Use a reliable public RPC provider to query the blockchain directly
+        const provider = new ethers.JsonRpcProvider('https://cloudflare-eth.com');
+        const feeData = await provider.getFeeData();
+        
+        if (feeData.gasPrice) {
+            const gasPriceGwei = ethers.formatUnits(feeData.gasPrice, 'gwei');
+            return parseFloat(gasPriceGwei);
+        }
+        return 0;
+    } catch (error) {
+        console.warn("Could not fetch ETH gas price from RPC:", error);
+        return 0; // Return 0 on failure
+    }
+}
+
+
+/**
+ * Fetches global cryptocurrency market statistics from CoinGecko and ETH gas price.
  * @returns A promise that resolves to an object containing global market data.
  */
 export async function fetchGlobalMarketStats(): Promise<GlobalStatsData> {
     try {
         const [globalRes, gasPriceRes] = await Promise.allSettled([
             fetch(`${API_BASE_URL}/global`),
-            fetch('https://fees.defillama.com/gas')
+            fetchEthGasPriceGwei()
         ]);
         
         if (globalRes.status !== 'fulfilled' || !globalRes.value.ok) {
@@ -25,12 +48,8 @@ export async function fetchGlobalMarketStats(): Promise<GlobalStatsData> {
         }
         
         let gasPriceGwei = 0; // Default value
-        if (gasPriceRes.status === 'fulfilled' && gasPriceRes.value.ok) {
-            const gasData = await gasPriceRes.value.json();
-            const price = gasData?.ethereum?.gasPrice;
-            if (typeof price === 'number') {
-                gasPriceGwei = price;
-            }
+        if (gasPriceRes.status === 'fulfilled' && typeof gasPriceRes.value === 'number') {
+           gasPriceGwei = gasPriceRes.value;
         } else {
             console.warn("Failed to fetch ETH gas price, defaulting to 0.");
         }
