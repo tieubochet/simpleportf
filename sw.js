@@ -1,5 +1,6 @@
 
-const CACHE_NAME = 'crypto-portfolio-cache-v24'; // Cache version bump
+
+const CACHE_NAME = 'crypto-portfolio-cache-v26'; // Cache version bump
 const URLS_TO_CACHE = [
   '/',
   '/index.html',
@@ -51,7 +52,9 @@ self.addEventListener('fetch', event => {
   // Let the browser handle API/CDN requests to ensure fresh data, bypassing the SW cache.
   if (
     event.request.url.includes('api.coingecko.com') || 
-    event.request.url.includes('fees.defillama.com') ||
+    event.request.url.includes('cloudflare-eth.com') ||
+    event.request.url.includes('rpc.ankr.com') ||
+    event.request.url.includes('eth-mainnet.public.blastapi.io') ||
     event.request.url.includes('esm.sh') || 
     event.request.url.includes('cdn.tailwindcss.com')
   ) {

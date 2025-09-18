@@ -4,14 +4,22 @@ import { ethers } from 'https://esm.sh/ethers@6.13.1';
 const API_BASE_URL = 'https://api.coingecko.com/api/v3';
 
 /**
- * Fetches the current ETH gas price in Gwei from a public RPC endpoint.
+ * Fetches the current ETH gas price in Gwei by querying a pool of public RPC endpoints for reliability.
  * @returns A promise that resolves to the gas price in Gwei.
  */
 async function fetchEthGasPriceGwei(): Promise<number> {
     try {
-        // Use a reliable public RPC provider to query the blockchain directly
-        const provider = new ethers.JsonRpcProvider('https://cloudflare-eth.com');
-        const feeData = await provider.getFeeData();
+        // Create a list of reliable public RPC providers for redundancy.
+        const providers = [
+            new ethers.JsonRpcProvider('https://cloudflare-eth.com'),
+            new ethers.JsonRpcProvider('https://rpc.ankr.com/eth'),
+            new ethers.JsonRpcProvider('https://eth-mainnet.public.blastapi.io'),
+        ];
+        
+        // The FallbackProvider will query each provider in order until one returns a result.
+        const fallbackProvider = new ethers.FallbackProvider(providers);
+
+        const feeData = await fallbackProvider.getFeeData();
         
         if (feeData.gasPrice) {
             const gasPriceGwei = ethers.formatUnits(feeData.gasPrice, 'gwei');
@@ -19,7 +27,7 @@ async function fetchEthGasPriceGwei(): Promise<number> {
         }
         return 0;
     } catch (error) {
-        console.warn("Could not fetch ETH gas price from RPC:", error);
+        console.warn("Could not fetch ETH gas price from any RPC provider:", error);
         return 0; // Return 0 on failure
     }
 }
