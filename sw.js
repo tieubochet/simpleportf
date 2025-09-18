@@ -1,5 +1,5 @@
 
-const CACHE_NAME = 'crypto-portfolio-cache-v23'; // Cache version bump
+const CACHE_NAME = 'crypto-portfolio-cache-v24'; // Cache version bump
 const URLS_TO_CACHE = [
   '/',
   '/index.html',
@@ -9,11 +9,13 @@ const URLS_TO_CACHE = [
   '/hooks/usePortfolio.ts',
   '/hooks/useWeb3Streak.ts',
   '/hooks/useCeloStreak.ts',
+  '/hooks/useUnichainStreak.ts',
   '/hooks/useTheme.ts',
   '/services/coingecko.ts',
   '/services/marketData.ts',
   '/services/streakContract.ts',
   '/services/celoStreakContract.ts',
+  '/services/unichainStreakContract.ts',
   '/utils/calculations.ts',
   '/components/icons.tsx',
   '/components/PortfolioHeader.tsx',
@@ -26,6 +28,7 @@ const URLS_TO_CACHE = [
   '/components/AddTransactionModal.tsx',
   '/components/DailyStreak.tsx',
   '/components/CeloDailyStreak.tsx',
+  '/components/UnichainDailyStreak.tsx',
   '/components/BackToTopButton.tsx',
   '/components/MarketIndices.tsx'
 ];
