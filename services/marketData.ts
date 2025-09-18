@@ -10,8 +10,15 @@ const ETHERSCAN_API_BASE_URL = 'https://api.etherscan.io/v2/api';
  */
 async function fetchEthGasPriceGwei(): Promise<number> {
     try {
-        // As per user's confirmation, an API key is securely provided via environment variables.
-        const response = await fetch(`${ETHERSCAN_API_BASE_URL}?chainid=1&module=gastracker&action=gasoracle&apikey=${process.env.ETHERSCAN_API}`);
+        // Use import.meta.env for Vite-based environments (like Vercel) to correctly access the API key.
+        // The user must set VITE_ETHERSCAN_API in their deployment environment.
+        const apiKey = (import.meta as any).env?.VITE_ETHERSCAN_API;
+        if (!apiKey) {
+            console.warn("Etherscan API key is not configured.");
+            return 0;
+        }
+
+        const response = await fetch(`${ETHERSCAN_API_BASE_URL}?chainid=1&module=gastracker&action=gasoracle&apikey=${apiKey}`);
         
         if (!response.ok) {
             throw new Error(`Etherscan API request failed with status ${response.status}`);
@@ -20,7 +27,6 @@ async function fetchEthGasPriceGwei(): Promise<number> {
         const data = await response.json();
 
         if (data.status === "1" && data.result && data.result.FastGasPrice) {
-            console.log(data.result.FastGasPrice);
             return parseFloat(data.result.FastGasPrice);
         } else {
             console.warn("Etherscan API did not return a valid gas price:", data.message || data.result);
