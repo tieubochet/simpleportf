@@ -3,6 +3,7 @@ import { UploadIcon, DownloadIcon, WalletIcon, EyeIcon, EyeOffIcon, SunIcon, Moo
 import { DailyStreak } from './DailyStreak';
 import { CeloDailyStreak } from './CeloDailyStreak';
 import { UnichainDailyStreak } from './UnichainDailyStreak';
+import { EthereumDailyStreak } from './EthereumDailyStreak';
 import type { Theme } from '../hooks/useTheme';
 
 interface PortfolioHeaderProps {
@@ -67,6 +68,7 @@ const PortfolioHeader: React.FC<PortfolioHeaderProps> = ({ onAddWallet, onImport
         <DailyStreak />
         <CeloDailyStreak />
         <UnichainDailyStreak />
+        <EthereumDailyStreak />
       </div>
     </header>
   );
