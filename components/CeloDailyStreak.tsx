@@ -28,7 +28,7 @@ export const CeloDailyStreak: React.FC<CeloDailyStreakProps> = ({ displayMode = 
                     <path d="M17.419 12.428a5.5 5.5 0 01-11 0 5.5 5.5 0 0111 0z" stroke="#FCFF52" strokeWidth="2" strokeMiterlimit="10"></path>
                 </svg>
                 {isConnected && streak > 0 && (
-                     <span className="absolute -top-0.5 -right-0.5 bg-emerald-500 text-white text-[10px] font-bold min-w-[16px] h-4 px-1 flex items-center justify-center rounded-full ring-2 ring-slate-200 dark:ring-slate-700">
+                     <span className="absolute -top-0.5 -right-0.5 bg-emerald-500 text-white text-[10px] font-bold min-w-[16px] h-4 px-1 flex items-center justify-center rounded-full ring-2 ring-slate-100 dark:ring-slate-900">
                         {streak}
                     </span>
                 )}

@@ -32,7 +32,7 @@ export const EthereumDailyStreak: React.FC<EthereumDailyStreakProps> = ({ displa
                     <path d="M16.5 13L12 16V22L16.5 13Z" className="fill-[#393939] dark:fill-slate-400"/>
                 </svg>
                 {isConnected && streak > 0 && (
-                     <span className="absolute -top-0.5 -right-0.5 bg-slate-500 text-white text-[10px] font-bold min-w-[16px] h-4 px-1 flex items-center justify-center rounded-full ring-2 ring-slate-200 dark:ring-slate-700">
+                     <span className="absolute -top-0.5 -right-0.5 bg-slate-500 text-white text-[10px] font-bold min-w-[16px] h-4 px-1 flex items-center justify-center rounded-full ring-2 ring-slate-100 dark:ring-slate-900">
                         {streak}
                     </span>
                 )}

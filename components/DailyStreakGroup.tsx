@@ -5,18 +5,18 @@ import { UnichainDailyStreak } from './UnichainDailyStreak';
 import { EthereumDailyStreak } from './EthereumDailyStreak';
 
 export const DailyStreakGroup: React.FC = () => {
-    // This component renders a horizontal group for daily streak check-ins,
-    // visually grouping the different blockchain streak buttons under a common label.
-    // It's designed to match the height of other buttons in the PortfolioHeader.
+    // This component renders a group of daily streak buttons using a fieldset
+    // for a visual style that more closely matches the user's request, resembling
+    // a labeled group of inputs.
     return (
-        <div className="flex items-center space-x-2 bg-slate-200 dark:bg-slate-700 rounded-lg h-10">
-             <span className="text-sm font-semibold text-slate-700 dark:text-slate-200 pl-3 pr-1 select-none">Daily Streak</span>
-             <div className="flex items-center space-x-1 pr-1">
+        <fieldset className="border border-slate-300 dark:border-slate-600 rounded-lg px-2">
+            <legend className="px-1 text-sm font-semibold text-slate-700 dark:text-slate-200">Daily Streak</legend>
+            <div className="flex items-center space-x-1 pb-1 -mt-1">
                 <DailyStreak displayMode="icon" />
                 <CeloDailyStreak displayMode="icon" />
                 <UnichainDailyStreak displayMode="icon" />
                 <EthereumDailyStreak displayMode="icon" />
-             </div>
-        </div>
+            </div>
+        </fieldset>
     );
 };

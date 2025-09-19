@@ -28,7 +28,7 @@ export const UnichainDailyStreak: React.FC<UnichainDailyStreakProps> = ({ displa
                     <path d="M8 8V13C8 15.2091 9.79086 17 12 17C14.2091 17 16 15.2091 16 13V8" stroke="white" strokeWidth="2.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
                 {isConnected && streak > 0 && (
-                     <span className="absolute -top-0.5 -right-0.5 bg-purple-500 text-white text-[10px] font-bold min-w-[16px] h-4 px-1 flex items-center justify-center rounded-full ring-2 ring-slate-200 dark:ring-slate-700">
+                     <span className="absolute -top-0.5 -right-0.5 bg-purple-500 text-white text-[10px] font-bold min-w-[16px] h-4 px-1 flex items-center justify-center rounded-full ring-2 ring-slate-100 dark:ring-slate-900">
                         {streak}
                     </span>
                 )}
