@@ -65,7 +65,7 @@ export const DailyStreak: React.FC<DailyStreakProps> = ({ displayMode = 'full' }
                     title="Connect Base wallet to say GM"
                 >
                     <WalletIcon className="h-5 w-5" />
-                    <span>{isConnecting ? 'Connecting...' : 'Base Streak'}</span>
+                    <span>{isConnecting ? 'Connecting...' : '<svg className="h-5 w-5" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg"><path d="M128 256C57.307 256 0 198.693 0 128S57.307 0 128 0s128 57.307 128 128-57.307 128-128 128Z" fill="#0052FF"></path></svg>'}</span>
                 </button>
                  {error && <p className="absolute top-full right-0 mt-1 text-xs text-red-500 dark:text-red-400 whitespace-nowrap">{error}</p>}
             </div>
