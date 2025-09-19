@@ -12,10 +12,10 @@ export const DailyStreakGroup: React.FC = () => {
         <fieldset className="border border-slate-300 dark:border-slate-600 rounded-lg px-2">
             <legend className="px-1 text-sm font-semibold text-slate-700 dark:text-slate-200">Daily Streak</legend>
             <div className="flex items-center space-x-1 pb-1 -mt-1">
-                <DailyStreak displayMode="icon" />
-                <CeloDailyStreak displayMode="icon" />
-                <UnichainDailyStreak displayMode="icon" />
-                <EthereumDailyStreak displayMode="icon" />
+                <DailyStreak />
+                <CeloDailyStreak />
+                <UnichainDailyStreak />
+                <EthereumDailyStreak />
             </div>
         </fieldset>
     );
