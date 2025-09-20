@@ -3,6 +3,7 @@ import { DailyStreak } from './DailyStreak';
 import { CeloDailyStreak } from './CeloDailyStreak';
 import { UnichainDailyStreak } from './UnichainDailyStreak';
 import { EthereumDailyStreak } from './EthereumDailyStreak';
+import { OpDailyStreak } from './OpDailyStreak';
 
 export const DailyStreakGroup: React.FC = () => {
     return (
@@ -11,6 +12,7 @@ export const DailyStreakGroup: React.FC = () => {
             <CeloDailyStreak />
             <UnichainDailyStreak />
             <EthereumDailyStreak />
+            <OpDailyStreak />
         </div>
     );
 };
