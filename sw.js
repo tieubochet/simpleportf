@@ -1,6 +1,6 @@
 
 
-const CACHE_NAME = 'crypto-portfolio-cache-v31'; // Cache version bump
+const CACHE_NAME = 'crypto-portfolio-cache-v32'; // Cache version bump
 const URLS_TO_CACHE = [
   '/',
   '/index.html',
@@ -42,6 +42,7 @@ const URLS_TO_CACHE = [
 ];
 
 self.addEventListener('install', event => {
+  self.skipWaiting(); // Force the waiting service worker to become the active service worker.
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
@@ -98,14 +99,16 @@ self.addEventListener('fetch', event => {
 self.addEventListener('activate', event => {
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
+    clients.claim().then(() => { // Take control of all clients immediately.
+      caches.keys().then(cacheNames => {
+        return Promise.all(
+          cacheNames.map(cacheName => {
+            if (cacheWhitelist.indexOf(cacheName) === -1) {
+              return caches.delete(cacheName);
+            }
+          })
+        );
+      })
     })
   );
 });
