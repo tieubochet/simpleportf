@@ -10,9 +10,7 @@ export const DailyStreakGroup: React.FC = () => {
         <div className="flex items-center space-x-2">
             <DailyStreak />
             <CeloDailyStreak />
-            <UnichainDailyStreak />
-            <EthereumDailyStreak />
-            <OpDailyStreak />
+            
         </div>
     );
 };
