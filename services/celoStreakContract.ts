@@ -1,5 +1,5 @@
 // The address of the daily streak smart contract on the Celo chain.
-export const streakContractAddress = '0xf4f17a4028ee21671e394f23b3cae9bfdd862c68';
+export const streakContractAddress = '0xa6172aa54722d4f99d0996aa6a6138181b7ee792';
 
 // The Application Binary Interface (ABI) for the streak contract.
 // This defines the functions we can call on the contract.
