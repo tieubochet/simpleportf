@@ -17,7 +17,7 @@ declare global {
 // Monad Devnet details
 const MONAD_CHAIN_ID = '0x279f'; // 80084 in hex
 const MONAD_CHAIN_ID_DECIMAL = 10143;
-const MONAD_RPC_URL = 'https://devnet.monad.xyz';
+const MONAD_RPC_URL = 'https://testnet-rpc.monad.xyz';
 const MONAD_CHAIN_PARAMS = {
     chainId: MONAD_CHAIN_ID,
     chainName: 'Monad Testnet',
