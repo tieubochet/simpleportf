@@ -5,6 +5,7 @@ import { CeloDailyStreak } from './CeloDailyStreak';
 import { UnichainDailyStreak } from './UnichainDailyStreak';
 import { EthereumDailyStreak } from './EthereumDailyStreak';
 import { OpDailyStreak } from './OpDailyStreak';
+import { MonadDailyStreak } from './MonadDailyStreak';
 import type { Theme } from '../hooks/useTheme';
 
 interface PortfolioHeaderProps {
