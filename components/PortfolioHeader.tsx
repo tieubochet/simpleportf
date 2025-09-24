@@ -71,6 +71,7 @@ const PortfolioHeader: React.FC<PortfolioHeaderProps> = ({ onAddWallet, onImport
         <UnichainDailyStreak />
         <EthereumDailyStreak />
         <OpDailyStreak />
+        <MonadDailyStreak />
       </div>
     </header>
   );
