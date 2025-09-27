@@ -10,7 +10,7 @@ import type { Chain } from 'viem';
 
 // 0. Get projectId from environment variables
 // IMPORTANT: User must set this in their environment (e.g., in a .env.local file).
-const projectId = (import.meta as any).env.VITE_WALLETCONNECT_PROJECT_ID;
+const projectId = process.env.VITE_WALLETCONNECT_PROJECT_ID;
 
 if (!projectId) {
     console.error("VITE_WALLETCONNECT_PROJECT_ID is not set. Please get a project ID from https://cloud.walletconnect.com and add it to your environment variables.");
