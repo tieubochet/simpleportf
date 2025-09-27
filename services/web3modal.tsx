@@ -1,6 +1,5 @@
 import React from 'react';
-import { createWeb3Modal } from '@web3modal/wagmi/react';
-import { defaultWagmiConfig } from '@web3modal/wagmi/react/config';
+import { createWeb3Modal, defaultWagmiConfig } from '@web3modal/wagmi/react';
 
 import { WagmiProvider } from 'wagmi';
 import { base, celo, mainnet, optimism } from 'viem/chains';
@@ -9,7 +8,7 @@ import type { Chain } from 'viem';
 import { BoltIcon } from '../components/icons';
 
 // 0. Get projectId from environment variables
-const projectId = process.env.VITE_WALLETCONNECT_PROJECT_ID;
+const projectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID as string | undefined;
 
 // 1. Define custom chains
 const unichain: Chain = {
