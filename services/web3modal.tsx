@@ -3,7 +3,8 @@ import { createWeb3Modal } from '@web3modal/wagmi/react';
 import { defaultWagmiConfig } from '@web3modal/wagmi/react/config';
 
 import { WagmiProvider } from 'wagmi';
-import { base, celo, mainnet, optimism } from 'wagmi/chains';
+// FIX: Chains should be imported from 'viem/chains' with recent wagmi versions.
+import { base, celo, mainnet, optimism } from 'viem/chains';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { Chain } from 'viem';
 
@@ -51,7 +52,7 @@ const config = defaultWagmiConfig({
 createWeb3Modal({
   wagmiConfig: config,
   projectId: projectId || "1",
-  chains,
+  // FIX: The 'chains' property is not valid here; it's already included in the wagmiConfig.
   enableAnalytics: true, 
 });
 
