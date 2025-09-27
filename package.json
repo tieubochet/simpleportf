@@ -4,20 +4,15 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "postinstall": "patch-package"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
-    "@web3modal/wagmi": "^4.1.10",
-    "@web3modal/wagmi-react": "^4.1.10",
-    "wagmi": "^2.13.0",
-    "viem": "^2.7.10",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "next": "14.2.3",
-    "patch-package": "^8.0.0"
+    "react": "^19.1.0",
+    "recharts": "^3.1.0",
+    "react-dom": "^19.1.0",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
