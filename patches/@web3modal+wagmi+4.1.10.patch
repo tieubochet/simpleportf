@@ -1,0 +1,13 @@
+diff --git a/node_modules/@web3modal/wagmi/package.json b/node_modules/@web3modal/wagmi/package.json
+--- a/node_modules/@web3modal/wagmi/package.json
++++ b/node_modules/@web3modal/wagmi/package.json
+@@ -5,6 +5,9 @@
+   "main": "dist/index.js",
+   "module": "dist/index.mjs",
+   "types": "dist/index.d.ts",
++  "exports": {
++    "./react/config": "./dist/react/config.js"
++  },
+   "scripts": {
+     "build": "tsup",
+     "test": "vitest"
