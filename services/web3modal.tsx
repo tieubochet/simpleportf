@@ -3,14 +3,13 @@ import { createWeb3Modal } from '@web3modal/wagmi/react';
 import { defaultWagmiConfig } from '@web3modal/wagmi/react/config';
 
 import { WagmiProvider } from 'wagmi';
-// FIX: Chains should be imported from 'viem/chains' with recent wagmi versions.
 import { base, celo, mainnet, optimism } from 'viem/chains';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { Chain } from 'viem';
+import { BoltIcon } from '../components/icons';
 
 // 0. Get projectId from environment variables
-// This variable is expected to be set by the execution environment.
-const projectId = process.env.VITE_WALLETCONNECT_PROJECT_ID!;
+const projectId = process.env.VITE_WALLETCONNECT_PROJECT_ID;
 
 // 1. Define custom chains
 const unichain: Chain = {
@@ -29,7 +28,9 @@ const monad: Chain = {
     blockExplorers: { default: { name: 'Monad Explorer', url: 'https://explorer.devnet.monad.xyz' } },
 } as const;
 
-// 2. Create wagmiConfig
+const chains = [mainnet, base, optimism, celo, unichain, monad] as const;
+
+// 2. Create metadata
 const metadata = {
   name: 'Crypto Portfolio Tracker',
   description: 'A personal cryptocurrency portfolio tracker.',
@@ -37,30 +38,52 @@ const metadata = {
   icons: ['/icons/icon-512x512.png']
 };
 
-const chains = [mainnet, base, optimism, celo, unichain, monad] as const;
-const config = defaultWagmiConfig({
-  chains,
-  projectId,
-  metadata,
-});
+// 3. Create wagmiConfig and modal conditionally
+let config: ReturnType<typeof defaultWagmiConfig> | undefined;
 
-// 3. Create modal
-createWeb3Modal({
-  wagmiConfig: config,
-  projectId,
-  enableAnalytics: true, 
-});
+if (projectId) {
+    config = defaultWagmiConfig({
+        chains,
+        projectId,
+        metadata,
+    });
+
+    createWeb3Modal({
+        wagmiConfig: config,
+        projectId,
+        enableAnalytics: true, 
+    });
+}
 
 // 4. Create QueryClient
 const queryClient = new QueryClient();
 
 // 5. Create AppProviders component
 export function AppProviders({ children }: { children: React.ReactNode }) {
-  return (
-    <WagmiProvider config={config}>
-      <QueryClientProvider client={queryClient}>
-        {children}
-      </QueryClientProvider>
-    </WagmiProvider>
-  );
+    if (!projectId || !config) {
+        return (
+            <div className="bg-slate-100 dark:bg-slate-900 min-h-screen flex items-center justify-center p-4">
+                <div className="bg-white dark:bg-slate-800 p-8 rounded-lg shadow-2xl text-center max-w-md w-full">
+                    <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/50">
+                        <BoltIcon className="h-6 w-6 text-red-600 dark:text-red-400" strokeWidth="2.5" />
+                    </div>
+                    <h2 className="mt-4 text-2xl font-bold text-slate-900 dark:text-white">Configuration Error</h2>
+                    <p className="mt-2 text-slate-600 dark:text-slate-400">
+                        The WalletConnect Project ID is missing, so wallet features cannot be initialized.
+                    </p>
+                    <p className="mt-4 text-xs text-slate-400 dark:text-slate-500">
+                        Please ensure the <code>VITE_WALLETCONNECT_PROJECT_ID</code> environment variable is set in the deployment configuration.
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <WagmiProvider config={config}>
+            <QueryClientProvider client={queryClient}>
+                {children}
+            </QueryClientProvider>
+        </WagmiProvider>
+    );
 }
