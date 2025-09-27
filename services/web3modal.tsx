@@ -9,12 +9,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { Chain } from 'viem';
 
 // 0. Get projectId from environment variables
-// IMPORTANT: User must set this in their environment (e.g., in a .env.local file).
-const projectId = process.env.VITE_WALLETCONNECT_PROJECT_ID;
-
-if (!projectId) {
-    console.error("VITE_WALLETCONNECT_PROJECT_ID is not set. Please get a project ID from https://cloud.walletconnect.com and add it to your environment variables.");
-}
+// This variable is expected to be set by the execution environment.
+const projectId = process.env.VITE_WALLETCONNECT_PROJECT_ID!;
 
 // 1. Define custom chains
 const unichain: Chain = {
@@ -44,15 +40,14 @@ const metadata = {
 const chains = [mainnet, base, optimism, celo, unichain, monad] as const;
 const config = defaultWagmiConfig({
   chains,
-  projectId: projectId || "1", // Fallback to avoid crashing if env var is missing
+  projectId,
   metadata,
 });
 
 // 3. Create modal
 createWeb3Modal({
   wagmiConfig: config,
-  projectId: projectId || "1",
-  // FIX: The 'chains' property is not valid here; it's already included in the wagmiConfig.
+  projectId,
   enableAnalytics: true, 
 });
 
