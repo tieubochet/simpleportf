@@ -44,8 +44,8 @@ export const OpDailyStreak: React.FC = () => {
     
     let title = isConnected 
         ? `Daily Streak (Optimism): ${streak}. Click to check in.` 
-        : "Connect Optimism wallet for daily streak";
-    if (isConnecting) title = "Connecting to Optimism...";
+        : "Connect wallet for Optimism daily streak";
+    if (isConnecting) title = "Switching to Optimism network...";
     if (isInteracting) title = "Submitting check-in on Optimism...";
     if (error) title = `Optimism Streak Error: ${error}`;
 
