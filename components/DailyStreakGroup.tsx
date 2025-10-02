@@ -6,6 +6,7 @@ import { EthereumDailyStreak } from './EthereumDailyStreak';
 import { OpDailyStreak } from './OpDailyStreak';
 import { MonadDailyStreak } from './MonadDailyStreak';
 import { ScrollDailyStreak } from './ScrollDailyStreak';
+import { HyperEvmDailyStreak } from './HyperEvmDailyStreak';
 
 export const DailyStreakGroup: React.FC = () => {
     return (
@@ -17,6 +18,7 @@ export const DailyStreakGroup: React.FC = () => {
             <OpDailyStreak />
             <MonadDailyStreak />
             <ScrollDailyStreak />
+            <HyperEvmDailyStreak />
         </div>
     );
 };

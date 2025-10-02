@@ -1,6 +1,6 @@
 
 
-const CACHE_NAME = 'crypto-portfolio-cache-v34'; // Cache version bump
+const CACHE_NAME = 'crypto-portfolio-cache-v35'; // Cache version bump
 const URLS_TO_CACHE = [
   '/',
   '/index.html',
@@ -15,6 +15,7 @@ const URLS_TO_CACHE = [
   '/hooks/useOpStreak.ts',
   '/hooks/useMonadStreak.ts',
   '/hooks/useScrollStreak.ts',
+  '/hooks/useHyperEvmStreak.ts',
   '/hooks/useTheme.ts',
   '/services/coingecko.ts',
   '/services/marketData.ts',
@@ -25,6 +26,7 @@ const URLS_TO_CACHE = [
   '/services/opStreakContract.ts',
   '/services/monadStreakContract.ts',
   '/services/scrollStreakContract.ts',
+  '/services/hyperEvmStreakContract.ts',
   '/utils/calculations.ts',
   '/components/icons.tsx',
   '/components/PortfolioHeader.tsx',
@@ -42,6 +44,7 @@ const URLS_TO_CACHE = [
   '/components/OpDailyStreak.tsx',
   '/components/MonadDailyStreak.tsx',
   '/components/ScrollDailyStreak.tsx',
+  '/components/HyperEvmDailyStreak.tsx',
   '/components/DailyStreakGroup.tsx',
   '/components/BackToTopButton.tsx',
   '/components/MarketIndices.tsx'
