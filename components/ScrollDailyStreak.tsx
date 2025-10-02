@@ -16,9 +16,23 @@ export const ScrollDailyStreak: React.FC = () => {
     
     const buttonContent = (
         <>
-            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="#E46124"/>
-                <path d="M12 14c-2.21 0-4-1.79-4-4s1.79-4 4-4v1.17c-1.55.5-2.83 1.78-3.33 3.33H12v-1c0-.55-.45-1-1-1s-1 .45-1 1v1c0 1.65 1.35 3 3 3h1c.55 0 1 .45 1-1s-.45-1-1-1h-1v-1.17c1.55-.5 2.83-1.78 3.33-3.33H12v1c0 .55.45 1 1 1s1-.45 1-1v-1c0-1.65-1.35-3-3-3H11c-.55 0-1-.45-1-1s.45-1 1-1h1v-2c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6h-2c0 2.21-1.79 4-4 4z" fill="#F8B83A"/>
+            <svg className="h-5 w-5" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M25 5H9C7.34315 5 6 6.34315 6 8V27C6 28.6569 7.34315 30 9 30H19C22.3137 30 25 27.3137 25 24C25 20.6863 22.3137 18 19 18C17.7404 18 16.597 18.386 15.6829 19" 
+                    stroke="#3D2B24" 
+                    strokeWidth="2.5" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                    fill="#FDF2E2"
+                />
+                <path d="M25 5C25 2.23858 22.7614 2 20 2C16.5 2 16.5 5 9 5" 
+                    stroke="#3D2B24" 
+                    strokeWidth="2.5" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                />
+                <path d="M11 11H21" stroke="#3D2B24" strokeWidth="2.5" strokeLinecap="round"/>
+                <path d="M11 16H21" stroke="#3D2B24" strokeWidth="2.5" strokeLinecap="round"/>
+                <path d="M11 21H17" stroke="#3D2B24" strokeWidth="2.5" strokeLinecap="round"/>
             </svg>
             {isConnected && streak > 0 && (
                  <span className="absolute -top-0.5 -right-0.5 bg-orange-500 text-white text-[10px] font-bold min-w-[16px] h-4 px-1 flex items-center justify-center rounded-full ring-2 ring-orange-100 dark:ring-orange-900/50">
