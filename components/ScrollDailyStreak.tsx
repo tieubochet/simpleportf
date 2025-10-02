@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useScrollStreak } from '../hooks/useScrollStreak';
 
@@ -16,23 +17,17 @@ export const ScrollDailyStreak: React.FC = () => {
     
     const buttonContent = (
         <>
-            <svg className="h-5 w-5" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M25 5H9C7.34315 5 6 6.34315 6 8V27C6 28.6569 7.34315 30 9 30H19C22.3137 30 25 27.3137 25 24C25 20.6863 22.3137 18 19 18C17.7404 18 16.597 18.386 15.6829 19" 
-                    stroke="#3D2B24" 
-                    strokeWidth="2.5" 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round"
-                    fill="#FDF2E2"
-                />
-                <path d="M25 5C25 2.23858 22.7614 2 20 2C16.5 2 16.5 5 9 5" 
-                    stroke="#3D2B24" 
-                    strokeWidth="2.5" 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round"
-                />
-                <path d="M11 11H21" stroke="#3D2B24" strokeWidth="2.5" strokeLinecap="round"/>
-                <path d="M11 16H21" stroke="#3D2B24" strokeWidth="2.5" strokeLinecap="round"/>
-                <path d="M11 21H17" stroke="#3D2B24" strokeWidth="2.5" strokeLinecap="round"/>
+            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 2.5C5.58172 2.5 4.5 3.58172 4.5 5V5.5C4.5 6.88071 5.58172 8 7 8H8.5V18H18.5V16.5L20 15L18.5 13.5V5C18.5 3.61929 17.3807 2.5 16 2.5H7Z" fill="#FDF2E2"/>
+                <path d="M4.5 5V5.5C4.5 6.88071 5.58172 8 7 8" fill="#E8D8BE"/>
+                <path d="M8.5 18H15C16.3807 18 17.5 19.1193 17.5 20.5V20.5C17.5 21.8807 16.3807 23 15 23H10C8.61929 23 7.5 21.8807 7.5 20.5V18H8.5Z" fill="#E8D8BE"/>
+                <path d="M7 2.5C5.58172 2.5 4.5 3.58172 4.5 5V5.5C4.5 6.88071 5.58172 8 7 8H8.5V18H18.5V16.5L20 15L18.5 13.5V5C18.5 3.61929 17.3807 2.5 16 2.5H7Z" stroke="#3D2B24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M8.5 18H15C16.3807 18 17.5 19.1193 17.5 20.5V20.5C17.5 21.8807 16.3807 23 15 23H10C8.61929 23 7.5 21.8807 7.5 20.5V18" stroke="#3D2B24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M9 7H16" stroke="#3D2B24" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M9 10H16" stroke="#3D2B24" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M9 13H16" stroke="#3D2B24" stroke-width="1.5" stroke-linecap="round"/>
+                <circle cx="6.5" cy="6" r="0.75" fill="#3D2B24"/>
+                <circle cx="15.5" cy="20.5" r="0.75" fill="#3D2B24"/>
             </svg>
             {isConnected && streak > 0 && (
                  <span className="absolute -top-0.5 -right-0.5 bg-orange-500 text-white text-[10px] font-bold min-w-[16px] h-4 px-1 flex items-center justify-center rounded-full ring-2 ring-orange-100 dark:ring-orange-900/50">
