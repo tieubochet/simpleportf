@@ -15,15 +15,15 @@ declare global {
 }
 
 // HyperEVM Testnet details
-const HYPEREVM_CHAIN_ID = '0x7550'; // 30032 in hex
-const HYPEREVM_CHAIN_ID_DECIMAL = 30032;
-const HYPEREVM_RPC_URL = 'https://testnet-rpc.hyper-evm.dev';
+const HYPEREVM_CHAIN_ID = '0x3e7'; // 30032 in hex
+const HYPEREVM_CHAIN_ID_DECIMAL = 999;
+const HYPEREVM_RPC_URL = 'https://rpc.hyperliquid.xyz/evm';
 const HYPEREVM_CHAIN_PARAMS = {
     chainId: HYPEREVM_CHAIN_ID,
-    chainName: 'HyperEVM Testnet',
-    nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+    chainName: 'HyperEVM',
+    nativeCurrency: { name: 'HYPE', symbol: 'HYPE', decimals: 18 },
     rpcUrls: [HYPEREVM_RPC_URL],
-    blockExplorerUrls: ['https://testnet-explorer.hyper-evm.dev'],
+    blockExplorerUrls: ['https://hyperevmscan.io'],
 };
 
 export function useHyperEvmStreak() {
