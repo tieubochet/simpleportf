@@ -41,8 +41,8 @@ export const UnichainDailyStreak: React.FC = () => {
 
     let title = isConnected 
         ? `Daily Streak (Unichain): ${streak}. Click to check in.` 
-        : "Connect wallet for Unichain daily streak";
-    if (isConnecting) title = "Switching to Unichain network...";
+        : "Connect Unichain wallet for daily streak";
+    if (isConnecting) title = "Connecting to Unichain...";
     if (isInteracting) title = "Submitting check-in on Unichain...";
     if (error) title = `Unichain Streak Error: ${error}`;
 

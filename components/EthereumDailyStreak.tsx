@@ -37,8 +37,8 @@ export const EthereumDailyStreak: React.FC = () => {
 
     let title = isConnected 
         ? `Daily Streak (Ethereum): ${streak}. Click to check in.` 
-        : "Connect wallet for Ethereum daily streak";
-    if (isConnecting) title = "Switching to Ethereum network...";
+        : "Connect Ethereum wallet for daily streak";
+    if (isConnecting) title = "Connecting to Ethereum...";
     if (isInteracting) title = "Submitting check-in on Ethereum...";
     if (error) title = `Ethereum Streak Error: ${error}`;
 

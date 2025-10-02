@@ -1,5 +1,5 @@
 import React from 'react';
-// FIX: Removed the import for the non-existent 'DailyStreak' component.
+import { DailyStreak } from './DailyStreak';
 import { CeloDailyStreak } from './CeloDailyStreak';
 import { UnichainDailyStreak } from './UnichainDailyStreak';
 import { EthereumDailyStreak } from './EthereumDailyStreak';
@@ -10,7 +10,7 @@ import { ScrollDailyStreak } from './ScrollDailyStreak';
 export const DailyStreakGroup: React.FC = () => {
     return (
         <div className="flex items-center space-x-2">
-            {/* FIX: Removed the non-existent 'DailyStreak' component from being rendered. */}
+            <DailyStreak />
             <CeloDailyStreak />
             <UnichainDailyStreak />
             <EthereumDailyStreak />

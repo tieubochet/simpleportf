@@ -34,8 +34,8 @@ export const CeloDailyStreak: React.FC = () => {
 
     let title = isConnected 
         ? `Daily Streak (Celo): ${streak}. Click to check in.` 
-        : "Connect wallet for Celo daily streak";
-    if (isConnecting) title = "Switching to Celo network...";
+        : "Connect Celo wallet for daily streak";
+    if (isConnecting) title = "Connecting to Celo...";
     if (isInteracting) title = "Submitting check-in on Celo...";
     if (error) title = `Celo Streak Error: ${error}`;
 

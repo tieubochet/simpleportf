@@ -1,68 +1,12 @@
-export const streakContractAddress = '0x7123f9398f765624a7C96f23ECE0881Dd29dF2E6' as const;
+// The address of the daily streak smart contract on the Scroll chain.
+export const streakContractAddress = '0x7123f9398f765624a7C96f23ECE0881Dd29dF2E6';
 
+// The Application Binary Interface (ABI) for the streak contract.
+// This defines the functions we can call on the contract.
 export const streakContractAbi = [
-  {
-    "inputs": [],
-    "name": "checkIn",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_user",
-        "type": "address"
-      }
-    ],
-    "name": "getStreak",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "lastCheckIn",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "streaks",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  }
-] as const;
+  // Read-only function to get a user's current streak
+  "function getStreak(address user) public view returns (uint256)",
+  
+  // A function that writes to the blockchain to check in for the day
+  "function checkIn() public"
+];

@@ -33,8 +33,8 @@ export const MonadDailyStreak: React.FC = () => {
     
     let title = isConnected 
         ? `Daily Streak (Monad): ${streak}. Click to check in.` 
-        : "Connect wallet for Monad daily streak";
-    if (isConnecting) title = "Switching to Monad network...";
+        : "Connect Monad wallet for daily streak";
+    if (isConnecting) title = "Connecting to Monad...";
     if (isInteracting) title = "Submitting check-in on Monad...";
     if (error) title = `Monad Streak Error: ${error}`;
 
