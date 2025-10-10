@@ -1,7 +1,6 @@
 import type { DayData, Project } from '../types';
-// FIX: Changed import for parse to fix module resolution issue.
-import { format } from 'date-fns';
-import parse from 'date-fns/parse';
+// FIX: Consolidated date-fns import to fix module resolution issue.
+import { format, parse } from 'date-fns';
 
 type CsvRow = {
     date: string;

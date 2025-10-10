@@ -5,9 +5,8 @@ import { Calendar } from './components/Calendar';
 import { DayDetailModal } from './components/DayDetailModal';
 import type { DayData, Project } from './types';
 import { exportToCsv, importFromCsv } from './services/csvService';
-// FIX: Changed import for startOfMonth to fix module resolution issue.
-import { format, getMonth, getYear } from 'date-fns';
-import startOfMonth from 'date-fns/startOfMonth';
+// FIX: Consolidated date-fns import to fix module resolution issue.
+import { format, getMonth, getYear, startOfMonth } from 'date-fns';
 
 const initialData: Record<string, DayData> = {
     '2025-10-01': { tradingFee: 2.00, alphaAirdrops: [], alphaEvents: [], points: 0 },
@@ -153,13 +152,13 @@ export default function App() {
                         title="Dự án đỉnh nhất" 
                         value={
                             stats.topProject.amount > 0 ? (
-                                <p className="text-lg font-bold text-[--color-text-primary] truncate" title={`${stats.topProject.name}: $${stats.topProject.amount.toFixed(2)}`}>
+                                <p className="text-2xl font-bold text-[--color-text-primary] truncate" title={`${stats.topProject.name}: $${stats.topProject.amount.toFixed(2)}`}>
                                     {stats.topProject.name}:
-                                    <span className="font-semibold text-[--color-text-positive]">
+                                    <span className="text-[--color-text-positive]">
                                         {' '}${stats.topProject.amount.toFixed(2)}
                                     </span>
                                 </p>
-                            ) : <span className="text-[--color-text-primary]">N/A</span>
+                            ) : <span className="text-2xl font-bold text-[--color-text-primary]">N/A</span>
                         } 
                     />
                 </div>

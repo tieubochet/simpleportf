@@ -1,10 +1,6 @@
-
-
 import { useMemo } from 'react';
-// FIX: Changed imports for startOfMonth and startOfWeek to fix module resolution issue.
-import { endOfMonth, endOfWeek, eachDayOfInterval, addDays, getDay } from 'date-fns';
-import startOfMonth from 'date-fns/startOfMonth';
-import startOfWeek from 'date-fns/startOfWeek';
+// FIX: Consolidated date-fns imports to fix module resolution issues.
+import { endOfMonth, endOfWeek, eachDayOfInterval, addDays, getDay, startOfMonth, startOfWeek } from 'date-fns';
 
 interface CalendarDay {
     date: Date | null;
