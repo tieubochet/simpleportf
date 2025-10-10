@@ -9,7 +9,7 @@ const ProjectInputList = ({ title, projects, setProjects }) => {
     };
 
     const updateProject = (id, field, value) => {
-        const processedValue = field === 'amount' ? parseFloat(value) || 0 : value;
+        const processedValue = field === 'amount' ? (parseFloat(value) || 0) : value;
         setProjects(projects.map(p => p.id === id ? { ...p, [field]: processedValue } : p));
     };
     
@@ -118,7 +118,7 @@ export const DayDetailModal = ({ isOpen, onClose, onSave, date, data }) => {
                             id="points"
                             type="number"
                             value={points}
-                            onChange={(e) => setPoints(parseInt(e.target.value) || 0)}
+                            onChange={(e) => setPoints(parseInt(e.target.value, 10) || 0)}
                              className="mt-1 block w-full p-2 border border-[--color-border-default] rounded-md shadow-sm focus:ring-[--color-accent-primary] focus:border-[--color-accent-primary] bg-[--color-input-bg] text-[--color-text-primary]"
                         />
                     </div>
