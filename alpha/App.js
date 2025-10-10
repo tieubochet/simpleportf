@@ -1,14 +1,12 @@
 import React, { useState, useMemo, useCallback, useRef } from 'react';
-import { Header } from './components/Header';
-import { StatCard } from './components/StatCard';
-import { Calendar } from './components/Calendar';
-import { DayDetailModal } from './components/DayDetailModal';
-import type { DayData, Project } from './types';
-import { exportToCsv, importFromCsv } from './services/csvService';
-// FIX: Consolidated date-fns import to fix module resolution issue.
+import { Header } from './components/Header.js';
+import { StatCard } from './components/StatCard.js';
+import { Calendar } from './components/Calendar.js';
+import { DayDetailModal } from './components/DayDetailModal.js';
+import { exportToCsv, importFromCsv } from './services/csvService.js';
 import { format, getMonth, getYear, startOfMonth } from 'date-fns';
 
-const initialData: Record<string, DayData> = {
+const initialData = {
     '2025-10-01': { tradingFee: 2.00, alphaAirdrops: [], alphaEvents: [], points: 0 },
     '2025-10-02': { tradingFee: 2.00, alphaAirdrops: [], alphaEvents: [], points: 0 },
     '2025-10-03': { tradingFee: 2.00, alphaAirdrops: [], alphaEvents: [], points: 0 },
@@ -21,20 +19,17 @@ const initialData: Record<string, DayData> = {
 
 export default function App() {
     const [currentDate, setCurrentDate] = useState(new Date(2025, 9, 1));
-    const [dailyData, setDailyData] = useState<Record<string, DayData>>(initialData);
-    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [dailyData, setDailyData] = useState(initialData);
+    const fileInputRef = useRef(null);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+    const [selectedDate, setSelectedDate] = useState(null);
 
     const stats = useMemo(() => {
         const currentMonthData = Object.entries(dailyData).filter(([date]) => {
             const d = new Date(date);
             return getYear(d) === getYear(currentDate) && getMonth(d) === getMonth(currentDate);
-        // FIX: Cast the data to DayData to resolve type inference issues where `Object.entries`
-        // was likely inferring the value type as `unknown`. This ensures `currentMonthData` is
-        // correctly typed as `DayData[]`, resolving subsequent property access errors.
-        }).map(([, data]) => data as DayData);
+        }).map(([, data]) => data);
 
         const totalIncome = currentMonthData.reduce((sum, day) => {
             const airdropTotal = day.alphaAirdrops.reduce((s, p) => s + p.amount, 0);
@@ -49,7 +44,7 @@ export default function App() {
         const alphaEventsCount = currentMonthData.reduce((sum, day) => sum + day.alphaEvents.length, 0);
         const totalScore = currentMonthData.reduce((sum, day) => sum + day.points, 0);
 
-        let topProject: Project = { id: '', name: '', amount: -1 };
+        let topProject = { id: '', name: '', amount: -1 };
 
         currentMonthData.forEach(day => {
             [...day.alphaAirdrops, ...day.alphaEvents].forEach(project => {
@@ -95,7 +90,7 @@ export default function App() {
         fileInputRef.current?.click();
     };
 
-    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (event) => {
         const file = event.target.files?.[0];
         if (!file) return;
 
@@ -118,7 +113,7 @@ export default function App() {
         }
     };
     
-    const handleDayClick = (date: Date) => {
+    const handleDayClick = (date) => {
         setSelectedDate(date);
         setIsModalOpen(true);
     };
@@ -128,7 +123,7 @@ export default function App() {
         setSelectedDate(null);
     };
 
-    const handleSaveData = (date: Date, data: DayData) => {
+    const handleSaveData = (date, data) => {
         const dateKey = format(date, 'yyyy-MM-dd');
         setDailyData(prev => ({
             ...prev,

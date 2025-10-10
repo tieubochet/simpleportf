@@ -1,22 +1,11 @@
 import React from 'react';
 import { format } from 'date-fns';
-import { useCalendarGrid } from '../hooks/useCalendarGrid';
-import { ChevronLeftIcon, ChevronRightIcon } from './Icons';
-import type { DayData } from '../types';
-
-interface CalendarProps {
-    currentDate: Date;
-    data: Record<string, DayData>;
-    onPrevMonth: () => void;
-    onNextMonth: () => void;
-    onExport: () => void;
-    onImport: () => void;
-    onDayClick: (date: Date) => void;
-}
+import { useCalendarGrid } from '../hooks/useCalendarGrid.js';
+import { ChevronLeftIcon, ChevronRightIcon } from './Icons.js';
 
 const WEEKDAY_NAMES = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
 
-const CalendarCell: React.FC<{ day: Date | null; isCurrentMonth: boolean; dayData?: DayData; onClick: (date: Date) => void }> = ({ day, isCurrentMonth, dayData, onClick }) => {
+const CalendarCell = ({ day, isCurrentMonth, dayData, onClick }) => {
     const totalAmount = dayData 
         ? dayData.alphaAirdrops.reduce((sum, p) => sum + p.amount, 0) +
           dayData.alphaEvents.reduce((sum, p) => sum + p.amount, 0) -
@@ -51,7 +40,7 @@ const CalendarCell: React.FC<{ day: Date | null; isCurrentMonth: boolean; dayDat
 };
 
 
-export const Calendar: React.FC<CalendarProps> = ({ currentDate, data, onPrevMonth, onNextMonth, onExport, onImport, onDayClick }) => {
+export const Calendar = ({ currentDate, data, onPrevMonth, onNextMonth, onExport, onImport, onDayClick }) => {
     const { days } = useCalendarGrid(currentDate);
     const monthYearString = `Tháng ${format(currentDate, 'M')} / ${format(currentDate, 'yyyy')}`;
 

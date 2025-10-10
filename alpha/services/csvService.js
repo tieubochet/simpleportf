@@ -1,17 +1,8 @@
-import type { DayData, Project } from '../types';
-// FIX: Consolidated date-fns import to fix module resolution issue.
 import { format, parse } from 'date-fns';
 
-type CsvRow = {
-    date: string;
-    type: 'TRADING_FEE' | 'AIRDROP' | 'EVENT' | 'POINTS';
-    name: string;
-    amount: number;
-};
-
-export const exportToCsv = (filename: string, data: Record<string, DayData>): void => {
+export const exportToCsv = (filename, data) => {
     const header = 'date,type,name,amount\n';
-    const rows: CsvRow[] = [];
+    const rows = [];
 
     for (const date in data) {
         const dayData = data[date];
@@ -45,12 +36,12 @@ export const exportToCsv = (filename: string, data: Record<string, DayData>): vo
     }
 };
 
-export const importFromCsv = (file: File): Promise<Record<string, DayData>> => {
+export const importFromCsv = (file) => {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = (event) => {
             try {
-                const text = event.target?.result as string;
+                const text = event.target?.result;
                 const lines = text.split('\n').filter(row => row.trim() !== '');
                 const header = lines.shift()?.trim().toLowerCase().split(',');
 
@@ -58,7 +49,7 @@ export const importFromCsv = (file: File): Promise<Record<string, DayData>> => {
                     throw new Error('Invalid CSV header. Expected "date,type,name,amount".');
                 }
 
-                const data: Record<string, DayData> = {};
+                const data = {};
 
                 lines.forEach((line, index) => {
                     // Basic CSV parsing for quoted names

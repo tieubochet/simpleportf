@@ -1,13 +1,7 @@
 import { useMemo } from 'react';
-// FIX: Consolidated date-fns imports to fix module resolution issues.
-import { endOfMonth, endOfWeek, eachDayOfInterval, addDays, getDay, startOfMonth, startOfWeek } from 'date-fns';
+import { endOfMonth, endOfWeek, addDays, startOfMonth, startOfWeek } from 'date-fns';
 
-interface CalendarDay {
-    date: Date | null;
-    isCurrentMonth: boolean;
-}
-
-export const useCalendarGrid = (currentDate: Date) => {
+export const useCalendarGrid = (currentDate) => {
     const days = useMemo(() => {
         const firstDayOfMonth = startOfMonth(currentDate);
         const lastDayOfMonth = endOfMonth(currentDate);
@@ -15,7 +9,7 @@ export const useCalendarGrid = (currentDate: Date) => {
         const startDate = startOfWeek(firstDayOfMonth, { weekStartsOn: 0 }); // Sunday
         const endDate = endOfWeek(lastDayOfMonth, { weekStartsOn: 0 });
 
-        const calendarDays: CalendarDay[] = [];
+        const calendarDays = [];
         let day = startDate;
 
         while (day <= endDate) {

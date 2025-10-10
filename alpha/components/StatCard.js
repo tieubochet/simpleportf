@@ -1,11 +1,6 @@
 import React from 'react';
 
-interface StatCardProps {
-    title: string;
-    value: string | React.ReactNode;
-}
-
-export const StatCard: React.FC<StatCardProps> = ({ title, value }) => {
+export const StatCard = ({ title, value }) => {
     return (
         <div className="bg-[--color-bg-card] p-5 rounded-xl shadow-sm border border-[--color-border-default]">
             <p className="text-sm text-[--color-text-secondary]">{title}</p>

@@ -1,31 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import type { DayData, Project } from '../types';
-import { CloseIcon, PlusIcon } from './Icons';
+import { CloseIcon, PlusIcon } from './Icons.js';
 import { format } from 'date-fns';
 
-interface DayDetailModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    onSave: (date: Date, data: DayData) => void;
-    date: Date;
-    data?: DayData;
-}
-
-const ProjectInputList: React.FC<{
-    title: string;
-    projects: Project[];
-    setProjects: React.Dispatch<React.SetStateAction<Project[]>>;
-}> = ({ title, projects, setProjects }) => {
+const ProjectInputList = ({ title, projects, setProjects }) => {
     
     const addProject = () => {
         setProjects([...projects, { id: crypto.randomUUID(), name: '', amount: 0 }]);
     };
 
-    const updateProject = (id: string, field: 'name' | 'amount', value: string | number) => {
-        setProjects(projects.map(p => p.id === id ? { ...p, [field]: value } : p));
+    const updateProject = (id, field, value) => {
+        const processedValue = field === 'amount' ? parseFloat(value) || 0 : value;
+        setProjects(projects.map(p => p.id === id ? { ...p, [field]: processedValue } : p));
     };
     
-    const removeProject = (id: string) => {
+    const removeProject = (id) => {
         setProjects(projects.filter(p => p.id !== id));
     };
 
@@ -42,7 +30,7 @@ const ProjectInputList: React.FC<{
                     <PlusIcon className="w-5 h-5" />
                 </button>
             </div>
-            {projects.map((project, index) => (
+            {projects.map((project) => (
                 <div key={project.id} className="grid grid-cols-12 gap-2 items-center">
                     <input
                         type="text"
@@ -55,7 +43,7 @@ const ProjectInputList: React.FC<{
                         type="number"
                         placeholder="Số tiền"
                         value={project.amount}
-                        onChange={(e) => updateProject(project.id, 'amount', parseFloat(e.target.value) || 0)}
+                        onChange={(e) => updateProject(project.id, 'amount', e.target.value)}
                         className="col-span-4 p-2 border border-[--color-border-default] rounded-md shadow-sm focus:ring-[--color-accent-primary] focus:border-[--color-accent-primary] bg-[--color-input-bg] text-[--color-text-primary]"
                     />
                     <button onClick={() => removeProject(project.id)} className="col-span-2 text-[--color-text-negative] hover:opacity-75 font-semibold">Xóa</button>
@@ -66,10 +54,10 @@ const ProjectInputList: React.FC<{
 };
 
 
-export const DayDetailModal: React.FC<DayDetailModalProps> = ({ isOpen, onClose, onSave, date, data }) => {
+export const DayDetailModal = ({ isOpen, onClose, onSave, date, data }) => {
     const [tradingFee, setTradingFee] = useState(0);
-    const [airdrops, setAirdrops] = useState<Project[]>([]);
-    const [events, setEvents] = useState<Project[]>([]);
+    const [airdrops, setAirdrops] = useState([]);
+    const [events, setEvents] = useState([]);
     const [points, setPoints] = useState(0);
 
     useEffect(() => {

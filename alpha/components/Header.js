@@ -1,11 +1,7 @@
 import React from 'react';
-import { ThemeSwitcher } from './ThemeSwitcher';
+import { ThemeSwitcher } from './ThemeSwitcher.js';
 
-interface HeaderProps {
-    title: string;
-}
-
-export const Header: React.FC<HeaderProps> = ({ title }) => {
+export const Header = ({ title }) => {
     return (
         <header className="bg-[--color-accent-primary] shadow-md">
             <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
