@@ -1,0 +1,5 @@
+{
+  "name": "Financial Calendar",
+  "description": "A web application to visualize financial data on a calendar, with features for monthly navigation and CSV import/export.",
+  "requestFramePermissions": []
+}
