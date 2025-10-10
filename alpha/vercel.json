@@ -1,13 +1,13 @@
 {
   "headers": [
     {
-      "source": "/(.*\\.ts)",
+      "source": "/alpha/(.*\\.ts)",
       "headers": [
         { "key": "Content-Type", "value": "text/plain; charset=utf-8" }
       ]
     },
     {
-      "source": "/(.*\\.tsx)",
+      "source": "/alpha/(.*\\.tsx)",
       "headers": [
         { "key": "Content-Type", "value": "text/plain; charset=utf-8" }
       ]
