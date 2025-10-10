@@ -1,65 +1,112 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Thống kê Alpha Binance</title>
+    <meta name="theme-color" content="#0f172a" />
+    <title>Crypto Portfolio Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script type="importmap">
+    <script>
+      // Configure Tailwind CSS to use the 'class' strategy for dark mode.
+      // This script runs after the CDN script, ensuring the 'tailwind' object is defined.
+      tailwind.config = {
+        darkMode: 'class',
+      };
+    </script>
+    <script>
+      // Prevents FOUC (Flash of Unstyled Content) for dark mode.
+      // This runs immediately to set the class before React mounts.
+      (function() {
+        try {
+          const theme = localStorage.getItem('theme');
+          if (theme === 'dim') {
+            document.documentElement.classList.add('dark', 'dim');
+            document.querySelector('meta[name="theme-color"]').setAttribute('content', '#1e293b');
+          } else if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0f172a');
+          } else {
+            document.documentElement.classList.remove('dark', 'dim');
+            document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f1f5f9');
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <style>
+      /* Custom scrollbar */
+      /* Light theme scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #e2e8f0; /* slate-200 */
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #94a3b8; /* slate-400 */
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #64748b; /* slate-500 */
+      }
+
+      /* Dark theme scrollbar */
+      html.dark ::-webkit-scrollbar-track {
+        background: #1e293b; /* slate-800 */
+      }
+      html.dark ::-webkit-scrollbar-thumb {
+        background: #475569; /* slate-600 */
+      }
+      html.dark ::-webkit-scrollbar-thumb:hover {
+        background: #64748b; /* slate-500 */
+      }
+
+      /* Dim theme scrollbar & color overrides */
+      html.dark.dim ::-webkit-scrollbar-track {
+        background: #334155; /* slate-700 */
+      }
+      html.dark.dim .dark\:bg-slate-900 {
+        background-color: #1e293b; /* slate-800 */
+      }
+      html.dark.dim .dark\:bg-slate-800 {
+        background-color: #334155; /* slate-700 */
+      }
+      html.dark.dim .dark\:bg-slate-800\/50 {
+        background-color: rgba(51, 65, 85, 0.5); /* slate-700/50 */
+      }
+       html.dark.dim .dark\:bg-slate-900\/50 {
+        background-color: rgba(30, 41, 59, 0.5); /* slate-800/50 */
+      }
+      html.dark.dim .dark\:text-slate-200 {
+        color: #cbd5e1; /* slate-300 */
+      }
+      html.dark.dim .dark\:text-white {
+        color: #f1f5f9; /* slate-100 */
+      }
+      html.dark.dim .dark\:border-slate-700 {
+        border-color: #475569; /* slate-600 */
+      }
+       html.dark.dim .dark\:divide-slate-700 > :not([hidden]) ~ :not([hidden]) {
+        border-color: #475569; /* slate-600 */
+      }
+    </style>
+  <script type="importmap">
 {
   "imports": {
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "date-fns": "https://aistudiocdn.com/date-fns@^4.1.0",
-    "date-fns/": "https://aistudiocdn.com/date-fns@^4.1.0/"
+    "react": "https://esm.sh/react@18.2.0",
+    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+    "recharts": "https://esm.sh/recharts@2.12.7",
+    "uuid": "https://esm.sh/uuid@9.0.1",
+    "@google/genai": "https://esm.sh/@google/genai",
+    "ethers": "https://esm.sh/ethers@6.13.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/",
+    "react/": "https://aistudiocdn.com/react@^19.1.1/"
   }
 }
 </script>
-    <style>
-      :root {
-        --color-bg-default: #f9fafb; /* gray-50 */
-        --color-bg-card: #ffffff;
-        --color-bg-card-alt: #f9fafb;
-        --color-bg-overlay: rgba(0, 0, 0, 0.5);
-        --color-text-primary: #1f2937; /* gray-800 */
-        --color-text-secondary: #6b7280; /* gray-500 */
-        --color-text-accent: #ffffff;
-        --color-text-positive: #16a34a; /* green-600 */
-        --color-text-negative: #dc2626; /* red-600 */
-        --color-border-default: #e5e7eb; /* gray-200 */
-        --color-accent-primary: #4f46e5; /* indigo-600 */
-        --color-accent-primary-hover: #4338ca; /* indigo-700 */
-        --color-input-bg: #ffffff;
-        --color-button-secondary-bg: #ffffff;
-        --color-button-secondary-bg-hover: #f9fafb; /* gray-50 */
-        --color-button-secondary-text: #374151; /* gray-700 */
-        --color-button-secondary-border: #d1d5db; /* gray-300 */
-      }
-      html.dark {
-        --color-bg-default: #111827; /* gray-900 */
-        --color-bg-card: #1f2937; /* gray-800 */
-        --color-bg-card-alt: #111827;
-        --color-bg-overlay: rgba(0, 0, 0, 0.7);
-        --color-text-primary: #f9fafb; /* gray-50 */
-        --color-text-secondary: #9ca3af; /* gray-400 */
-        --color-text-accent: #ffffff;
-        --color-text-positive: #4ade80; /* green-400 */
-        --color-text-negative: #f87171; /* red-400 */
-        --color-border-default: #374151; /* gray-700 */
-        --color-accent-primary: #6366f1; /* indigo-500 */
-        --color-accent-primary-hover: #818cf8; /* indigo-400 */
-        --color-input-bg: #374151; /* gray-700 */
-        --color-button-secondary-bg: #374151;
-        --color-button-secondary-bg-hover: #4b5563; /* gray-600 */
-        --color-button-secondary-text: #f9fafb;
-        --color-button-secondary-border: #4b5563;
-      }
-    </style>
 </head>
-<body class="bg-[--color-bg-default] transition-colors duration-300">
+  <body>
     <div id="root"></div>
-    <script type="text/babel" data-type="module" data-presets="react,typescript" src="./index.tsx"></script>
-</body>
+    <script type="module" src="/index.tsx"></script>
+  </body>
 </html>
