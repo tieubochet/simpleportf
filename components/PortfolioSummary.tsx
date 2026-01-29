@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { PerformerData } from '../types';
-import { TrophyIcon, TrendingDownIcon, EyeIcon, EyeOffIcon, ClockIcon, ReceiptIcon } from './icons';
+import { TrophyIcon, TrendingDownIcon, EyeIcon, EyeOffIcon, ClockIcon, ReceiptIcon, DownloadIcon } from './icons';
 
 interface PortfolioSummaryProps {
   totalValue: number;
@@ -13,6 +13,7 @@ interface PortfolioSummaryProps {
     plValue: number;
     plPercentage: number;
   };
+  realizedPL: number;
   performer: PerformerData | null;
   loser: PerformerData | null;
   isLoading: boolean;
@@ -56,7 +57,7 @@ const LoadingSkeletonBlock = () => (
     </>
 );
 
-const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ totalValue, changeData, plData, performer, loser, isLoading, isPrivacyMode }) => {
+const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ totalValue, changeData, plData, realizedPL, performer, loser, isLoading, isPrivacyMode }) => {
   const [isLocalValueHidden, setIsLocalValueHidden] = useState(true);
   
   const toggleLocalVisibility = () => {
@@ -71,22 +72,30 @@ const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ totalValue, changeD
     currency: 'USD',
   }).format(totalValue);
 
+  const formattedRealizedPL = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    signDisplay: 'exceptZero'
+  }).format(realizedPL);
+  
+  const realizedColorClass = realizedPL >= 0 ? 'text-green-500' : 'text-red-500';
+
   const showLoadingSkeleton = isLoading && totalValue === 0;
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md">
-      <div className="grid grid-cols-1 md:grid-cols-5 divide-y md:divide-y-0 md:divide-x divide-slate-200 dark:divide-slate-700">
+      {/* Sửa grid-cols-1 md:grid-cols-5 thành lg:grid-cols-3 xl:grid-cols-6 để chứa 6 item */}
+      <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 divide-y md:divide-y-0 md:divide-x divide-slate-200 dark:divide-slate-700">
         
-        {/* Stat Block 1: Total Value */}
+        {/* Stat Block 1: Total Value (Giữ nguyên) */}
         <div className="p-4 text-center md:text-left">
-          <h2 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2 flex items-center justify-center md:justify-start gap-2">
+           {/* ... code cũ ... */}
+           <h2 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2 flex items-center justify-center md:justify-start gap-2">
             <span>Total Portfolio Value</span>
             <button
                 onClick={toggleLocalVisibility}
                 disabled={isPrivacyMode}
                 className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                title={isPrivacyMode ? "Global privacy mode is ON" : (isTotalValueHidden ? "Show value" : "Hide value")}
-                aria-label={isTotalValueHidden ? "Show total portfolio value" : "Hide total portfolio value"}
               >
                 {isTotalValueHidden ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
               </button>
@@ -98,85 +107,79 @@ const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ totalValue, changeD
           )}
         </div>
         
-        {/* Stat Block 2: 24h Change */}
+        {/* Stat Block 2: 24h Change (Giữ nguyên) */}
         <div className="p-4 text-center md:text-left">
-          <h2 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2 flex items-center justify-center md:justify-start gap-2">
+           {/* ... code cũ ... */}
+           <h2 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2 flex items-center justify-center md:justify-start gap-2">
             <ClockIcon className="h-4 w-4 text-cyan-500" />
             <span>24h Change</span>
           </h2>
            {showLoadingSkeleton ? <LoadingSkeletonBlock /> : <ChangeDisplay value={changeData.changeValue} percentage={changeData.changePercentage} isPrivacyMode={isPrivacyMode} />}
         </div>
 
-        {/* Stat Block 3: Total P/L */}
+        {/* Stat Block 3: Total P/L (Giữ nguyên - đây là Unrealized + Realized) */}
         <div className="p-4 text-center md:text-left">
-          <h2 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2 flex items-center justify-center md:justify-start gap-2">
+           {/* ... code cũ ... */}
+           <h2 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2 flex items-center justify-center md:justify-start gap-2">
             <ReceiptIcon className="h-4 w-4 text-emerald-500" />
             <span>Total P/L</span>
           </h2>
            {showLoadingSkeleton ? <LoadingSkeletonBlock /> : <ChangeDisplay value={plData.plValue} percentage={plData.plPercentage} isPrivacyMode={isPrivacyMode} />}
         </div>
         
-        {/* Stat Block 4: Top Gainer */}
+        {/* Stat Block 4: Realized P/L (MỚI) */}
         <div className="p-4 text-center md:text-left">
-          <h2 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2 flex items-center space-x-2 justify-center md:justify-start">
+          <h2 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2 flex items-center justify-center md:justify-start gap-2">
+            {/* Sử dụng DownloadIcon tạm hoặc import icon Cash/Dollar */}
+            <DownloadIcon className="h-4 w-4 text-blue-500 rotate-180" /> 
+            <span>Realized P/L</span>
+          </h2>
+          {showLoadingSkeleton ? (
+            <LoadingSkeletonBlock />
+          ) : (
+            <div className={realizedColorClass}>
+                <p className="text-base font-semibold">{isPrivacyMode ? '$ ****' : formattedRealizedPL}</p>
+                <p className="text-sm font-mono text-slate-500 dark:text-slate-400">(Cash Flow)</p>
+            </div>
+          )}
+        </div>
+        
+        {/* Stat Block 5: Top Gainer (Giữ nguyên) */}
+        <div className="p-4 text-center md:text-left">
+           {/* ... code cũ ... */}
+           <h2 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2 flex items-center space-x-2 justify-center md:justify-start">
             <TrophyIcon className="h-4 w-4 text-amber-500" />
             <span>Top Gainer (24h)</span>
           </h2>
-          {showLoadingSkeleton ? (
-            <LoadingSkeletonBlock />
-          ) : performer ? (
-            <a 
-              href={`https://www.coingecko.com/en/coins/${performer.id}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group"
-              title={`View ${performer.name} on CoinGecko`}
-            >
+          {/* ... giữ nguyên phần render ... */}
+          {showLoadingSkeleton ? <LoadingSkeletonBlock /> : performer ? (
+            <a href={`https://www.coingecko.com/en/coins/${performer.id}`} target="_blank" rel="noopener noreferrer" className="group">
               <div>
-                <p className="text-base font-semibold text-slate-900 dark:text-white truncate group-hover:text-cyan-400 transition-colors" title={performer.name}>{performer.name}</p>
-                <p className={`text-sm font-mono ${performer.change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                  {performer.change >= 0 ? '+' : ''}{performer.change.toFixed(2)}%
-                </p>
+                <p className="text-base font-semibold text-slate-900 dark:text-white truncate group-hover:text-cyan-400 transition-colors">{performer.name}</p>
+                <p className={`text-sm font-mono ${performer.change >= 0 ? 'text-green-500' : 'text-red-500'}`}>{performer.change >= 0 ? '+' : ''}{performer.change.toFixed(2)}%</p>
               </div>
             </a>
-          ) : (
-            <div>
-              <p className="text-base font-semibold text-slate-600 dark:text-slate-300">-</p>
-              <p className="text-sm font-mono invisible">0%</p>
-            </div>
-          )}
+          ) : (<div><p className="text-base font-semibold text-slate-600 dark:text-slate-300">-</p></div>)}
         </div>
 
-        {/* Stat Block 5: Top Loser */}
+        {/* Stat Block 6: Top Loser (Giữ nguyên) */}
         <div className="p-4 text-center md:text-left">
-          <h2 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2 flex items-center space-x-2 justify-center md:justify-start">
+           {/* ... code cũ ... */}
+           <h2 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2 flex items-center space-x-2 justify-center md:justify-start">
             <TrendingDownIcon className="h-4 w-4 text-red-500" />
             <span>Top Loser (24h)</span>
           </h2>
-          {showLoadingSkeleton ? (
-            <LoadingSkeletonBlock />
-          ) : loser ? (
-            <a 
-              href={`https://www.coingecko.com/en/coins/${loser.id}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group"
-              title={`View ${loser.name} on CoinGecko`}
-            >
+          {/* ... giữ nguyên phần render ... */}
+          {showLoadingSkeleton ? <LoadingSkeletonBlock /> : loser ? (
+            <a href={`https://www.coingecko.com/en/coins/${loser.id}`} target="_blank" rel="noopener noreferrer" className="group">
               <div>
-                <p className="text-base font-semibold text-slate-900 dark:text-white truncate group-hover:text-cyan-400 transition-colors" title={loser.name}>{loser.name}</p>
-                <p className="text-sm font-mono text-red-500">
-                  {loser.change.toFixed(2)}%
-                </p>
+                <p className="text-base font-semibold text-slate-900 dark:text-white truncate group-hover:text-cyan-400 transition-colors">{loser.name}</p>
+                <p className="text-sm font-mono text-red-500">{loser.change.toFixed(2)}%</p>
               </div>
             </a>
-          ) : (
-            <div>
-              <p className="text-base font-semibold text-slate-600 dark:text-slate-300">-</p>
-              <p className="text-sm font-mono invisible">0%</p>
-            </div>
-          )}
+          ) : (<div><p className="text-base font-semibold text-slate-600 dark:text-slate-300">-</p></div>)}
         </div>
+
       </div>
     </div>
   );

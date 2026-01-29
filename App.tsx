@@ -5,7 +5,7 @@ import { usePortfolio } from './hooks/usePortfolio';
 import { useTheme } from './hooks/useTheme';
 import { fetchPrices } from './services/coingecko';
 import { fetchGlobalMarketStats } from './services/marketData';
-import { calculateTotalValue, calculatePortfolio24hChange, calculateTotalPL, getAssetIds, findTopPerformer, findTopLoser, getAssetMetrics } from './utils/calculations';
+import { calculateTotalValue, calculatePortfolio24hChange, calculateTotalPL, calculatePortfolioRealizedPL, getAssetIds, findTopPerformer, findTopLoser, getAssetMetrics } from './utils/calculations';
 
 import PortfolioHeader from './components/PortfolioHeader';
 import PortfolioSummary from './components/PortfolioSummary';
@@ -106,6 +106,8 @@ export default function App() {
     setIsAddTxModalOpen(true);
   };
 
+  const totalRealizedPL = useMemo(() => calculatePortfolioRealizedPL(wallets), [wallets]);
+
   const handleAddTransaction = (transaction: Transaction) => {
     if (selectedAsset) {
       addTransactionToAsset(selectedAsset.walletId, selectedAsset.asset.id, transaction);
@@ -134,6 +136,7 @@ export default function App() {
             totalValue={totalValue}
             changeData={portfolioChange}
             plData={totalPL}
+            realizedPL={totalRealizedPL}
             performer={topPerformer}
             loser={topLoser}
             isLoading={isLoading}

@@ -289,3 +289,85 @@ export const findTopLoser = (wallets: Wallet[], prices: PriceData): PerformerDat
 
   return topLoser;
 };
+
+export const calculateRealizedPL = (transactions: Transaction[]): number => {
+    let currentQuantity = 0;
+    let totalCostBasis = 0; 
+    let totalRealizedPL = 0;
+
+
+    const sortedTx = [...transactions].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    for (const tx of sortedTx) {
+        const fee = tx.fee || 0;
+        
+        switch (tx.type) {
+            case 'buy': {
+                const txCost = (tx.quantity * tx.pricePerUnit) + fee;
+                currentQuantity += tx.quantity;
+                totalCostBasis += txCost;
+                break;
+            }
+            case 'sell': {
+                if (currentQuantity > 0) {
+                    const avgCostPerUnit = totalCostBasis / currentQuantity;
+                    
+                    const costOfSoldQty = avgCostPerUnit * tx.quantity;
+                    
+ 
+                    const proceeds = (tx.quantity * tx.pricePerUnit);
+                    
+
+                    const tradePL = proceeds - costOfSoldQty - fee;
+                    totalRealizedPL += tradePL;
+
+
+                    currentQuantity -= tx.quantity;
+                    totalCostBasis -= costOfSoldQty; 
+                    
+
+                    if (currentQuantity <= 0) {
+                        currentQuantity = 0;
+                        totalCostBasis = 0;
+                    }
+                } else {
+
+                    totalRealizedPL -= fee; 
+                }
+                break;
+            }
+            case 'transfer_in': {
+
+                currentQuantity += tx.quantity;
+                totalCostBasis += fee; 
+                break;
+            }
+            case 'transfer_out': {
+
+                if (currentQuantity > 0) {
+                    const avgCostPerUnit = totalCostBasis / currentQuantity;
+                    const costOfTransferQty = avgCostPerUnit * tx.quantity;
+                    
+                    currentQuantity -= tx.quantity;
+                    totalCostBasis -= costOfTransferQty;
+                }
+                // Phí chuyển là Realized Loss
+                totalRealizedPL -= fee;
+                break;
+            }
+        }
+    }
+    
+    return totalRealizedPL;
+};
+
+
+export const calculatePortfolioRealizedPL = (wallets: Wallet[]): number => {
+    let total = 0;
+    wallets.forEach(wallet => {
+        wallet.assets.forEach(asset => {
+            total += calculateRealizedPL(asset.transactions);
+        });
+    });
+    return total;
+};
