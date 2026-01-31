@@ -33,7 +33,7 @@ const PortfolioHeader: React.FC<PortfolioHeaderProps> = ({
   // 3. Hàm xử lý đăng nhập/đăng xuất
   const handleLogin = async () => {
     await supabase.auth.signInWithOAuth({
-      provider: 'google',
+      provider: 'github',
       options: {
         redirectTo: window.location.origin
       }
