@@ -1,6 +1,6 @@
-
+// App.tsx
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Wallet, PriceData, PortfolioAsset, Transaction, Coin, GlobalStatsData } from './types';
+import { Wallet, PriceData, PortfolioAsset, Transaction, GlobalStatsData } from './types';
 import { usePortfolio } from './hooks/usePortfolio';
 import { useTheme } from './hooks/useTheme';
 import { fetchPrices } from './services/coingecko';
@@ -19,7 +19,9 @@ import MarketIndices from './components/MarketIndices';
 
 export default function App() {
   const { theme, toggleTheme } = useTheme();
-  const { wallets, addWallet, removeWallet, addAssetToWallet, addTransactionToAsset, removeAssetFromWallet, importWallets, exportWallets } = usePortfolio();
+  
+  // 1. Lấy thêm biến 'user' từ hook usePortfolio
+  const { wallets, user, addWallet, removeWallet, addAssetToWallet, addTransactionToAsset, removeAssetFromWallet, importWallets, exportWallets } = usePortfolio();
   
   const [prices, setPrices] = useState<PriceData>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -72,13 +74,13 @@ export default function App() {
 
   useEffect(() => {
     updatePrices();
-    const priceInterval = setInterval(updatePrices, 300000); // 5 minutes
+    const priceInterval = setInterval(updatePrices, 300000); 
     return () => clearInterval(priceInterval);
   }, [updatePrices]);
   
   useEffect(() => {
       updateGlobalStats();
-      const interval = setInterval(updateGlobalStats, 300000); // Update every 5 minutes
+      const interval = setInterval(updateGlobalStats, 300000); 
       return () => clearInterval(interval);
   }, [updateGlobalStats]);
 
@@ -129,6 +131,8 @@ export default function App() {
           onToggleTheme={toggleTheme}
           onRefresh={() => { updatePrices(true); updateGlobalStats(); }}
           isRefreshing={isRefreshing}
+          // 2. Truyền prop user xuống Header
+          user={user}
         />
 
         <div className="space-y-8 mt-8">
@@ -175,6 +179,7 @@ export default function App() {
         </div>
       </main>
 
+      {/* Các Modal giữ nguyên */}
       {isAddWalletModalOpen && (
         <AddWalletModal
           onClose={() => setIsAddWalletModalOpen(false)}

@@ -1,9 +1,10 @@
+// components/PortfolioHeader.tsx
 import React from 'react';
 import { UploadIcon, DownloadIcon, WalletIcon, EyeIcon, EyeOffIcon, SunIcon, MoonIcon, RefreshCwIcon, ContrastIcon } from './icons';
 import { DailyStreakGroup } from './DailyStreakGroup';
 import type { Theme } from '../hooks/useTheme';
-import { supabase } from '@/services/supabase';
-
+// 1. Import Supabase
+import { supabase } from '../services/supabase';
 
 interface PortfolioHeaderProps {
   onAddWallet: () => void;
@@ -15,14 +16,34 @@ interface PortfolioHeaderProps {
   onToggleTheme: () => void;
   onRefresh: () => void;
   isRefreshing: boolean;
+  // 2. Thêm prop user
+  user: any; 
 }
 
-const PortfolioHeader: React.FC<PortfolioHeaderProps> = ({ onAddWallet, onImport, onExport, isPrivacyMode, onTogglePrivacyMode, theme, onToggleTheme, onRefresh, isRefreshing }) => {
+const PortfolioHeader: React.FC<PortfolioHeaderProps> = ({ 
+  onAddWallet, onImport, onExport, isPrivacyMode, onTogglePrivacyMode, 
+  theme, onToggleTheme, onRefresh, isRefreshing, user 
+}) => {
 
   const commonButtonStyles = "bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-white font-semibold rounded-lg transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed";
-  const handleLogin = () => supabase.auth.signInWithOAuth({ provider: 'google' });
+
   const ThemeIcon = theme === 'light' ? MoonIcon : theme === 'dim' ? ContrastIcon : SunIcon;
   const nextTheme = theme === 'light' ? 'dim' : theme === 'dim' ? 'dark' : 'light';
+
+  // 3. Hàm xử lý đăng nhập/đăng xuất
+  const handleLogin = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin
+      }
+    });
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    window.location.reload();
+  };
 
   return (
     <header className="flex flex-col md:flex-row items-center justify-between mb-8">
@@ -30,6 +51,28 @@ const PortfolioHeader: React.FC<PortfolioHeaderProps> = ({ onAddWallet, onImport
         Crypto Portfolios
       </h1>
       <div className="flex items-center space-x-2 flex-wrap justify-center gap-y-2">
+        {/* Nút Login/Logout mới */}
+        {user ? (
+          <div className="flex items-center mr-2 bg-green-100 dark:bg-green-900/30 px-3 py-1 rounded-lg border border-green-200 dark:border-green-800">
+            <span className="text-xs mr-2 text-green-800 dark:text-green-300 hidden sm:inline">
+              {user.email}
+            </span>
+            <button
+              onClick={handleLogout}
+              className="text-xs bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-2 py-1 rounded border border-slate-300 dark:border-slate-600 transition-colors"
+            >
+              Logout
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={handleLogin}
+            className="flex items-center justify-center h-10 px-4 mr-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg transition-colors duration-300"
+          >
+            <span>Login / Sync</span>
+          </button>
+        )}
+
         <button
           onClick={onToggleTheme}
           className={`flex items-center justify-center p-2 h-10 w-10 ${commonButtonStyles}`}
